@@ -1,4 +1,4 @@
-package com.cultureroyal.quiz_dungeon;
+package com.cultureroyale.quizdungeon;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
