@@ -8,7 +8,7 @@
 		<version>3.5.8</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.cultureroyal</groupId>
+	<groupId>com.cultureroyale</groupId>
 	<artifactId>quiz-dungeon</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>QuizDungeon</name>

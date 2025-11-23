@@ -1,4 +1,4 @@
-package com.cultureroyal.quiz_dungeon;
+package com.cultureroyale.quizdungeon;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
