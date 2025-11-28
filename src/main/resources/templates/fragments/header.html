@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+    <header th:fragment="header" class="bg-gray-900 text-white font-sans select-none">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-end">
+
+            <a th:href="@{/}" class="flex items-center gap-2 group hover:opacity-90 transition-opacity pb-1">
+                <img th:src="@{/images/logo_horizontal.svg}" alt="Quiz Dungeon Logo"
+                    class="h-10 md:h-12 w-auto object-contain" />
+            </a>
+
+            <nav class="hidden md:flex space-x-32 items-center mb-1">
+
+                <div class="relative group cursor-pointer">
+                    <button
+                        class="flex items-center gap-2 text-xl font-black uppercase tracking-widest pb-2 border-b-4 border-gray-700 hover:border-white hover:text-gray-100 transition-all duration-200">
+                        <span>Jouer</span>
+
+                    </button>
+                </div>
+
+                <div class="relative group cursor-pointer">
+                    <button
+                        class="flex items-center gap-2 text-xl font-black uppercase tracking-widest pb-2 border-b-4 border-gray-700 hover:border-white hover:text-gray-100 transition-all duration-200">
+                        <span>Boutique</span>
+
+                    </button>
+                </div>
+            </nav>
+
+            <div class="flex items-center mb-1">
+                <div class="relative group cursor-pointer">
+                    <button
+                        class="flex items-center gap-2 text-xl font-black uppercase tracking-widest pb-2 border-b-4 border-gray-700 hover:border-white hover:text-gray-100 transition-all duration-200">
+                        <span>Mon profil</span>
+
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </header>
+
+</body>
+
+</html>
