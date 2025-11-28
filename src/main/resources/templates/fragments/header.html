@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <body>
 
@@ -30,13 +30,32 @@
                 </div>
             </nav>
 
-            <div class="flex items-center mb-1">
-                <div class="relative group cursor-pointer">
+            <div class="flex items-center mb-1 gap-4">
+                <div sec:authorize="isAuthenticated()" class="relative group cursor-pointer">
                     <button
                         class="flex items-center gap-2 text-xl font-black uppercase tracking-widest pb-2 border-b-4 border-gray-700 hover:border-white hover:text-gray-100 transition-all duration-200">
                         <span>Mon profil</span>
-
                     </button>
+                </div>
+                <div sec:authorize="isAuthenticated()" class="relative group cursor-pointer">
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit"
+                            class="flex items-center gap-2 text-xl font-black uppercase tracking-widest pb-2 border-b-4 border-gray-700 hover:border-white hover:text-gray-100 transition-all duration-200">
+                            <span>Déconnexion</span>
+                        </button>
+                    </form>
+                </div>
+                <div sec:authorize="!isAuthenticated()" class="relative group cursor-pointer">
+                    <a th:href="@{/login}"
+                        class="flex items-center gap-2 text-xl font-black uppercase tracking-widest pb-2 border-b-4 border-gray-700 hover:border-white hover:text-gray-100 transition-all duration-200">
+                        <span>Se connecter</span>
+                    </a>
+                </div>
+                <div sec:authorize="!isAuthenticated()" class="relative group cursor-pointer">
+                    <a th:href="@{/register}"
+                        class="flex items-center gap-2 text-xl font-black uppercase tracking-widest pb-2 border-b-4 border-gray-700 hover:border-white hover:text-gray-100 transition-all duration-200">
+                        <span>S'inscrire</span>
+                    </a>
                 </div>
             </div>
 

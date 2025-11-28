@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Inscription - Quiz Dungeon</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @font-face {
+            font-family: 'Super Crawler';
+            src: url('/fonts/SuperCrawler.ttf') format('truetype');
+        }
+
+        .font-dungeon {
+            font-family: 'Super Crawler';
+        }
+    </style>
+</head>
+
+<body class="bg-gray-800 text-white min-h-screen flex flex-col">
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="flex-grow flex items-center justify-center p-4">
+        <div class="w-full max-w-md p-8 border border-gray-600 bg-gray-900 shadow-2xl relative">
+
+            <h2 class="text-3xl text-center mb-4 font-dungeon tracking-wider">S'inscrire</h2>
+
+            <div class="border-b-2 border-white mb-8"></div>
+
+            <form th:action="@{/register}" method="post" class="space-y-6">
+                <div>
+                    <label for="username" class="block text-lg font-dungeon mb-2 tracking-wide">Identifiant</label>
+                    <input type="text" id="username" name="username"
+                        class="w-full bg-gray-800 border border-gray-600 rounded p-3 text-white focus:outline-none focus:border-orange-500 transition-colors"
+                        required>
+                </div>
+
+                <div>
+                    <label for="password" class="block text-lg font-dungeon mb-2 tracking-wide">Mot de passe</label>
+                    <input type="password" id="password" name="password"
+                        class="w-full bg-gray-800 border border-gray-600 rounded p-3 text-white focus:outline-none focus:border-orange-500 transition-colors"
+                        required>
+                </div>
+
+                <div>
+                    <label for="confirmPassword" class="block text-lg font-dungeon mb-2 tracking-wide">Confirmer le
+                        mot de passe</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword"
+                        class="w-full bg-gray-800 border border-gray-600 rounded p-3 text-white focus:outline-none focus:border-orange-500 transition-colors"
+                        required>
+                </div>
+
+                <div th:replace="~{fragments/button :: submitButton('S\'inscrire')}"></div>
+            </form>
+
+            <div class="mt-6 text-center">
+                <a th:href="@{/login}" class="text-gray-400 hover:text-white transition-colors text-sm">Déjà un compte ?
+                    Se connecter</a>
+            </div>
+        </div>
+    </main>
+
+</body>
+
+</html>
