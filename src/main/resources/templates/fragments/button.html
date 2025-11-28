@@ -3,8 +3,8 @@
 
 <body>
     <button th:fragment="submitButton(text)" type="submit"
-        class="w-full bg-orange-400 hover:bg-orange-500 text-white font-dungeon text-2xl py-3 rounded border-2 border-white transition-all transform hover:scale-[1.02] mt-8 shadow-[0_0_10px_rgba(251,146,60,0.5)]">
-        <span th:text="${text}">Button Text</span>
+        class="w-full bg-gradient-to-b from-yellow-400 to-orange-500 hover:from-yellow-300 hover:to-orange-400 text-white font-dungeon text-2xl py-3 rounded-lg border-2 border-yellow-200 shadow-[0_4px_0_rgb(194,65,12)] active:shadow-none active:translate-y-1 transition-all uppercase tracking-wider drop-shadow-md mt-8">
+        <span th:text="${text}" class="drop-shadow-[0_2px_2px_rgba(0,0,0,0.2)]">Button Text</span>
     </button>
 </body>
 

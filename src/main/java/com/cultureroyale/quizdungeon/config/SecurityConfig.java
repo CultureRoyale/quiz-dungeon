@@ -14,11 +14,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((requests) -> requests
-                        // 1. On autorise l'accès public à l'accueil ("/") et aux ressources statiques
-                        .requestMatchers("/", "/css/**", "/images/**", "/js/**", "/login", "/register", "/fonts/**")
-                        .permitAll()
-                        // 2. Tout le reste nécessite d'être connecté
-                        .anyRequest().authenticated())
+                // 1. On autorise l'accès public à l'accueil ("/") et aux ressources statiques
+                .requestMatchers("/", "/css/**", "/images/**", "/js/**", "/login", "/register", "/fonts/**")
+                .permitAll()
+                // 2. Tout le reste nécessite d'être connecté
+                .anyRequest().authenticated())
                 // 3. On active le formulaire de login par défaut pour les pages protégées
                 .formLogin((form) -> form
                         .loginPage("/login")

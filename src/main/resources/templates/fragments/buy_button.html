@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+    <button th:fragment="buyButton(text, gold)" type="submit"
+        class="w-full bg-gradient-to-b from-purple-400 to-indigo-600 hover:from-purple-300 hover:to-indigo-500 text-white font-dungeon text-2xl py-3 rounded-lg border-2 border-purple-200 shadow-[0_4px_0_rgb(76,29,149)] active:shadow-none active:translate-y-1 transition-all uppercase tracking-wider mt-8 flex items-center justify-between px-6">
+        <span th:text="${text}" class="leading-none pt-1 drop-shadow-[0_2px_2px_rgba(0,0,0,0.2)]">Buy</span>
+        <div class="flex items-center gap-2">
+            <span th:text="${gold}"
+                class="text-[#F1B32B] leading-none pt-1 drop-shadow-[0_2px_2px_rgba(0,0,0,0.2)]">500</span>
+            <img th:src="@{/images/gold.svg}" alt="Gold" class="w-6 h-6">
+        </div>
+    </button>
+</body>
+
+</html>
