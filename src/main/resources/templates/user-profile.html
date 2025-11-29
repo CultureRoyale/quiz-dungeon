@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Mon Profil - Quiz Dungeon</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/svg+xml" th:href="@{/images/favicon.svg}">
+    <style>
+        @font-face {
+            font-family: 'Super Crawler';
+            src: url('/fonts/SuperCrawler.ttf') format('truetype');
+        }
+
+        .font-dungeon {
+            font-family: 'Super Crawler';
+        }
+    </style>
+</head>
+
+<body class="bg-gray-800 text-white min-h-screen flex flex-col">
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="flex-grow flex items-center justify-center p-4">
+        <div class="w-full max-w-2xl p-8 border border-gray-600 bg-gray-900 shadow-2xl relative">
+
+            <h1 class="text-3xl text-center mb-4 font-dungeon tracking-wider">Mon Profil</h1>
+
+            <div class="border-b-2 border-white mb-8"></div>
+
+            <!-- User HP Bar Fragment -->
+            <div class="w-full mb-8">
+                <div th:replace="~{fragments/user_hp_bar :: userHpBar(${user})}"></div>
+            </div>
+
+            <!-- Back Button -->
+            <div class="text-center">
+                <a th:href="@{/roadmap}"
+                    class="bg-gray-700 hover:bg-gray-600 text-white font-dungeon text-xl py-2 px-6 rounded border-2 border-gray-500 transition-all hover:scale-105 inline-block">
+                    Retour à la carte
+                </a>
+            </div>
+        </div>
+    </main>
+
+</body>
+
+</html>
