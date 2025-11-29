@@ -3,7 +3,7 @@
 
 <body>
     <div th:fragment="userHpBar(user)"
-        class="bg-gray-800 border-2 border-gray-600 rounded-lg p-3 font-dungeon text-white shadow-lg select-none w-full max-w-2xl mx-auto">
+        class="bg-gray-800 border-2 border-gray-600 rounded-lg p-3 font-dungeon text-white shadow-lg select-none w-full max-w-3xl mx-auto">
         <!-- Top Row -->
         <div class="flex justify-between items-end mb-1 px-1">
             <!-- Username & Level -->
@@ -19,21 +19,29 @@
         </div>
 
         <!-- HP Bar Container -->
-        <div class="relative w-full h-10 bg-gray-900 rounded border-2 border-gray-700 overflow-hidden">
+        <div class="relative w-full mt-4 mb-2">
             <!-- HP Text (Overlay) -->
-            <div class="absolute inset-0 flex items-center justify-between px-3 z-10 pointer-events-none">
-                <span class="text-xl leading-none drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] stroke-black"
-                    style="-webkit-text-stroke: 1px black;"
-                    th:text="'Hp: ' + ${user.currentHp} + '/' + ${user.maxHp}">Hp: 50/80</span>
-
-                <!-- XP Display (Optional addition based on prompt mentioning XP) -->
-                <span class="text-sm text-gray-300 drop-shadow-md" th:if="${user.xp > 0}"
-                    th:text="'XP: ' + ${user.xp}">XP: 100</span>
+            <div class="absolute left-0 right-0 bottom-6 flex justify-center z-20 pointer-events-none">
+                <span
+                    class="text-xl leading-none drop-shadow-[0_2px_0_rgba(0,0,0,1)] stroke-black text-white font-dungeon tracking-wider"
+                    style="-webkit-text-stroke: 1.5px black; paint-order: stroke fill;"
+                    th:text="'Hp : ' + ${user.currentHp} + '/' + ${user.maxHp}">Hp : 50/80</span>
             </div>
 
-            <!-- Progress Bar -->
-            <div class="h-full bg-[#4ade80] transition-all duration-500 ease-out"
-                th:style="'width: ' + (${user.maxHp} > 0 ? (${user.currentHp} * 100.0 / ${user.maxHp}) : 0) + '%'">
+            <!-- Bar -->
+            <div class="relative w-full h-8 bg-gray-900 rounded border-2 border-black overflow-hidden z-10">
+                <!-- Progress Bar -->
+                <div class="h-full transition-all duration-500 ease-out"
+                    th:style="'width: ' + (${user.maxHp} > 0 ? (${user.currentHp} * 100.0 / ${user.maxHp}) : 0) + '%; background: linear-gradient(to bottom, #4ade80 50%, #166534 50%);'">
+                </div>
+
+                <!-- Atk Display (Inside right) -->
+                <div class="absolute right-2 top-1/2 -translate-y-1/2 z-20 pointer-events-none">
+                    <span
+                        class="text-xl leading-none drop-shadow-[0_2px_0_rgba(0,0,0,1)] stroke-black text-white font-dungeon tracking-wider"
+                        style="-webkit-text-stroke: 1.5px black; paint-order: stroke fill;" th:text="'Atk: 5'">Atk:
+                        5</span>
+                </div>
             </div>
         </div>
     </div>
