@@ -30,6 +30,16 @@
 
             <div class="border-b-2 border-white mb-8"></div>
 
+            <!-- Message de succès -->
+            <div th:if="${message}" class="mb-4 p-3 bg-green-900 border border-green-600 rounded text-green-200 text-sm">
+                <span th:text="${message}"></span>
+            </div>
+
+            <!-- Message d'erreur -->
+            <div th:if="${error}" class="mb-4 p-3 bg-red-900 border border-red-600 rounded text-red-200 text-sm">
+                <span th:text="${error}"></span>
+            </div>
+
             <form th:action="@{/login}" method="post" class="space-y-6">
                 <div>
                     <label for="username" class="block text-lg font-dungeon mb-2 tracking-wide">Identifiant</label>
