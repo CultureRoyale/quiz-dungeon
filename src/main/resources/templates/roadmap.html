@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,17 +12,240 @@
             font-family: 'Super Crawler';
             src: url('/fonts/SuperCrawler.ttf') format('truetype');
         }
+
         .font-dungeon {
             font-family: 'Super Crawler', sans-serif;
         }
+
+        .roadmap-container {
+            position: relative;
+            padding: 3rem 0;
+        }
+
+        .progress-line {
+            position: absolute;
+            top: calc(19rem + 130px);
+            left: 0;
+            right: 0;
+            height: 25px;
+            background: #ffffff;
+            transform: translateY(-50%);
+            z-index: 0;
+        }
+
+        .boss-roadmap {
+            display: flex;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            gap: 3rem;
+            padding: 2rem 1rem;
+            position: relative;
+            z-index: 1;
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE/Edge */
+            scroll-behavior: smooth;
+        }
+
+        .boss-roadmap::-webkit-scrollbar {
+            display: none;
+        }
+
+        .boss-card {
+            flex: 0 0 auto;
+            width: 320px;
+            scroll-snap-align: center;
+            position: relative;
+        }
+
+        .boss-image-wrapper {
+            width: aut;
+            height: auto;
+            margin: 0 auto 1rem;
+            position: relative;
+            z-index: 2;
+            transition: transform 0.3s ease;
+        }
+
+        .boss-image-wrapper:hover {
+            transform: scale(1.05);
+        }
+
+        .boss-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+
+        }
+
+        .boss-image.locked {
+            filter: grayscale(100%) brightness(0.7);
+        }
     </style>
 </head>
+
 <body class="bg-gray-800 text-white min-h-screen">
     <div th:replace="~{fragments/header :: header}"></div>
 
     <main class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-dungeon text-center mb-8">Roadmap</h1>
-        <!-- Dashboard : stats user (niveau, XP, HP, gold) + grille 9 boss avec statuts (débloqué/vaincu) -->
+        <h1 class="text-4xl font-dungeon text-center mb-8 text-amber-400">Roadmap des Boss</h1>
+
+        <!-- Stats utilisateur -->
+        <div class="bg-gray-900 rounded-lg p-6 border-2 border-gray-700">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center">
+                    <p class="text-gray-400 text-sm">Niveau</p>
+                    <p class="text-2xl font-dungeon text-amber-400" th:text="${user.level}">1</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-gray-400 text-sm">XP</p>
+                    <p class="text-2xl font-dungeon text-blue-400" th:text="${user.xp}">0</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-gray-400 text-sm">HP</p>
+                    <p class="text-2xl font-dungeon text-red-400" th:text="${user.currentHp} + '/' + ${user.maxHp}">
+                        100/100</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-gray-400 text-sm">Gold</p>
+                    <p class="text-2xl font-dungeon text-yellow-400" th:text="${user.gold}">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Roadmap des boss avec progress bar -->
+        <div class="roadmap-container group">
+            <!-- Boutons de navigation -->
+            <button id="scrollLeft"
+                class="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 bg-gray-900/80 hover:bg-amber-500/80 text-white p-3 rounded-full border-2 border-amber-500 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 -ml-12 md:-ml-20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
+
+            <button id="scrollRight"
+                class="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 bg-gray-900/80 hover:bg-amber-500/80 text-white p-3 rounded-full border-2 border-amber-500 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 -mr-12 md:-mr-20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+
+            <!-- Ligne de progression -->
+            <div class="progress-line"></div>
+
+            <!-- Conteneur scrollable des boss -->
+            <div class="boss-roadmap" id="bossRoadmap">
+                <div th:each="boss : ${bosses}"
+                    class="boss-card bg-gray-900 rounded-lg border-2 py-4 px-5 flex flex-col"
+                    th:classappend="${unlockStatus.get(boss.id)} ? 'border-amber-500 hover:shadow-lg hover:shadow-amber-500/50 transition-shadow' : 'border-gray-700'">
+
+                    <!-- Image du boss avec badge position -->
+                    <div class="boss-image-wrapper">
+                        <img th:src="${unlockStatus.get(boss.id)} ? @{${boss.imagePath}} : @{/images/lock.png}"
+                            th:alt="${unlockStatus.get(boss.id)} ? ${boss.name} : 'Locked'" class="boss-image"
+                            th:classappend="${defeatedStatus.get(boss.id)} ? 'defeated' : (${unlockStatus.get(boss.id)} ? 'unlocked' : 'locked')">
+
+                        <!-- Badge position -->
+                        <div
+                            class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-gray-900 border-2 border-amber-500 rounded-full w-8 h-8 flex items-center justify-center shadow-lg z-10">
+                            <span class="font-dungeon text-amber-400 text-sm" th:text="${boss.position}">1</span>
+                        </div>
+
+                        <!-- Badge vaincu -->
+                        <div th:if="${defeatedStatus.get(boss.id)}"
+                            class="absolute -top-2 -right-2 bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg z-10">
+                            <span class="text-lg">✓</span>
+                        </div>
+                    </div>
+
+                    <!-- Informations du boss -->
+                    <div class="p-4 flex flex-col flex-grow">
+                        <h3 class="font-dungeon text-xl mb-4 text-amber-400"
+                            th:text="${unlockStatus.get(boss.id)} ? ${boss.name} : '?'">Boss Name</h3>
+
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Difficulté:</span>
+                                <span class="font-bold" th:if="${unlockStatus.get(boss.id)}"
+                                    th:classappend="${boss.difficulty.name()} == 'FACILE' ? 'text-green-400' : (${boss.difficulty.name()} == 'MOYEN' ? 'text-yellow-400' : 'text-red-400')"
+                                    th:text="${boss.difficulty.name()}">FACILE</span>
+                                <span class="font-bold text-gray-500" th:unless="${unlockStatus.get(boss.id)}">?</span>
+                            </div>
+
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">HP:</span>
+                                <span class="text-red-400 font-bold" th:if="${unlockStatus.get(boss.id)}"
+                                    th:text="${boss.maxHp}">100</span>
+                                <span class="text-gray-500 font-bold" th:unless="${unlockStatus.get(boss.id)}">?</span>
+                            </div>
+
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Récompense:</span>
+                                <span class="text-yellow-400 font-bold" th:if="${unlockStatus.get(boss.id)}"
+                                    th:text="${boss.goldReward} + ' gold'">50 gold</span>
+                                <span class="text-gray-500 font-bold" th:unless="${unlockStatus.get(boss.id)}">?</span>
+                            </div>
+                        </div>
+
+                        <!-- Bouton combat (si unlocked) - utilise le fragment button -->
+                        <!-- Bouton combat -->
+                        <div class="mt-auto pt-4">
+                            <th:block th:if="${unlockStatus.get(boss.id)}">
+                                <a th:href="@{/boss/{id}(id=${boss.id})}" th:if="${!defeatedStatus.get(boss.id)}">
+                                    <button type="button"
+                                        th:replace="~{fragments/button :: submitButton('Combattre')}"></button>
+                                </a>
+                                <a th:href="@{/boss/{id}(id=${boss.id})}" th:if="${defeatedStatus.get(boss.id)}">
+                                    <button type="button"
+                                        th:replace="~{fragments/button :: submitButton('Recombattre')}"></button>
+                                </a>
+                            </th:block>
+
+                            <!-- Cas Locked -->
+                            <button th:unless="${unlockStatus.get(boss.id)}" type="button" disabled
+                                class="w-full bg-gray-700 text-gray-500 font-dungeon text-2xl py-3 rounded-lg border-2 border-gray-600 shadow-none opacity-70 uppercase tracking-wider mt-8 cursor-not-allowed">
+                                Combattre
+                            </button>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Script pour scroll boutons -->
+        <script>
+            window.addEventListener('DOMContentLoaded', () => {
+                const roadmap = document.getElementById('bossRoadmap');
+                const leftBtn = document.getElementById('scrollLeft');
+                const rightBtn = document.getElementById('scrollRight');
+
+                if (!roadmap || !leftBtn || !rightBtn) return;
+
+                const scrollAmount = 320 + 48; // 320px width + 3rem gap (approx 48px)
+
+                leftBtn.addEventListener('click', () => {
+                    roadmap.scrollBy({
+                        left: -scrollAmount,
+                        behavior: 'smooth'
+                    });
+                });
+
+                rightBtn.addEventListener('click', () => {
+                    roadmap.scrollBy({
+                        left: scrollAmount,
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        </script>
     </main>
 </body>
+
 </html>
