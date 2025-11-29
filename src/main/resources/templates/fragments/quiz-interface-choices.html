@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+    <!-- 
+        Fragment: choices
+        Parameters:
+        - question: The question string
+        - choices: List of choice objects (must have .id and .text)
+        - selectedChoiceId: (Optional) ID of the pre-selected choice
+    -->
+    <div th:fragment="choices(question, choices, selectedChoiceId)" class="w-full max-w-4xl mx-auto"
+        id="quiz-interface">
+
+        <!-- Question -->
+        <div class="mb-8">
+            <h2 class="text-2xl md:text-3xl text-white font-dungeon mb-4 leading-relaxed" th:text="${question}">
+                Question Placeholder
+            </h2>
+            <div class="w-full h-1 bg-white rounded-full"></div>
+        </div>
+
+        <!-- Step 1: Input & Mode Selection -->
+        <div id="step-1-input" class="flex flex-col gap-6">
+
+            <!-- Text Input -->
+            <div class="flex flex-col gap-2">
+                <label class="text-gray-400 text-lg uppercase tracking-widest font-bold">Votre réponse</label>
+                <div class="flex gap-2">
+                    <input type="text" placeholder="Entrez votre réponse..." autofocus
+                        class="w-full bg-gray-900 border-2 border-gray-700 rounded-lg p-4 text-white text-xl focus:border-amber-500 focus:outline-none transition-colors"
+                        onkeypress="if(event.key === 'Enter') submitAnswer('text')">
+                    <button onclick="submitAnswer('text')"
+                        class="bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold px-6 rounded-lg uppercase tracking-wider transition-colors">
+                        OK
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 my-4">
+                <div class="h-px bg-gray-700 flex-grow"></div>
+                <span class="text-gray-500 uppercase font-bold text-sm">OU</span>
+                <div class="h-px bg-gray-700 flex-grow"></div>
+            </div>
+
+            <!-- Choice Modes -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button onclick="showChoices(4)"
+                    class="group flex items-center justify-center gap-3 p-6 bg-gray-800 border-2 border-gray-600 rounded-xl hover:border-amber-500 hover:bg-gray-700 transition-all">
+                    <div class="flex gap-1">
+                        <div class="w-2 h-2 rounded-full bg-gray-500 group-hover:bg-amber-500"></div>
+                        <div class="w-2 h-2 rounded-full bg-gray-500 group-hover:bg-amber-500"></div>
+                        <div class="w-2 h-2 rounded-full bg-gray-500 group-hover:bg-amber-500"></div>
+                        <div class="w-2 h-2 rounded-full bg-gray-500 group-hover:bg-amber-500"></div>
+                    </div>
+                    <span class="text-xl font-dungeon text-white uppercase tracking-wider">4 Choix</span>
+                </button>
+
+                <button onclick="showChoices(2)"
+                    class="group flex items-center justify-center gap-3 p-6 bg-gray-800 border-2 border-gray-600 rounded-xl hover:border-amber-500 hover:bg-gray-700 transition-all">
+                    <div class="flex gap-1">
+                        <div class="w-2 h-2 rounded-full bg-gray-500 group-hover:bg-amber-500"></div>
+                        <div class="w-2 h-2 rounded-full bg-gray-500 group-hover:bg-amber-500"></div>
+                    </div>
+                    <span class="text-xl font-dungeon text-white uppercase tracking-wider">2 Choix</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 2: Choices List -->
+        <div id="step-2-choices" class="hidden flex-col gap-4">
+            <!-- Content will be loaded via AJAX -->
+            <div id="choices-container" class="flex flex-col gap-4"></div>
+
+
+        </div>
+
+        <script>
+            function showChoices(count) {
+                const inputSection = document.getElementById('step-1-input');
+                const choicesSection = document.getElementById('step-2-choices');
+                const choicesContainer = document.getElementById('choices-container');
+
+                // Show loading state or just the container
+                inputSection.classList.add('hidden');
+                choicesSection.classList.remove('hidden');
+                choicesSection.classList.add('flex');
+
+                // Fetch choices from server
+                fetch('/test-quiz/choices?count=' + count)
+                    .then(response => response.text())
+                    .then(html => {
+                        choicesContainer.innerHTML = html;
+                    })
+                    .catch(error => console.error('Error loading choices:', error));
+            }
+
+            function resetInterface() {
+                const inputSection = document.getElementById('step-1-input');
+                const choicesSection = document.getElementById('step-2-choices');
+                const choicesContainer = document.getElementById('choices-container');
+
+                inputSection.classList.remove('hidden');
+                choicesSection.classList.add('hidden');
+                choicesSection.classList.remove('flex');
+                choicesContainer.innerHTML = ''; // Clear choices
+            }
+
+            function submitAnswer(type) {
+                let formData = new FormData();
+
+                if (type === 'text') {
+                    const input = document.querySelector('#step-1-input input[type="text"]');
+                    if (!input.value.trim()) return;
+                    formData.append('answer', input.value);
+                } else {
+                    const selected = document.querySelector('input[name="choiceId"]:checked');
+                    if (!selected) return;
+                    formData.append('choiceId', selected.value);
+                }
+
+                // Get the container to replace
+                const container = document.getElementById('choices-container');
+
+                // Get CSRF token
+                const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+                // Fetch the result
+                fetch('/test-quiz/submit', {
+                    method: 'POST',
+                    headers: {
+                        [csrfHeader]: csrfToken
+                    },
+                    body: formData
+                })
+                    .then(response => response.text())
+                    .then(html => {
+                        container.innerHTML = html;
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        </script>
+    </div>
+
+</body>
+
+</html>
