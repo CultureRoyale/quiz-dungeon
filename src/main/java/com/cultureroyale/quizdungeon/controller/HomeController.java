@@ -40,10 +40,6 @@ public class HomeController {
         return "login";
     }
 
-    @GetMapping("/roadmap")
-    public String roadmap(Model model) {
-        return "roadmap";
-    }
 
     @GetMapping("/profile")
     public String profile(Model model, Principal principal) {

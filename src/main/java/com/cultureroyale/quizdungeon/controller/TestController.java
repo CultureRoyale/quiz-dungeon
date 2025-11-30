@@ -54,7 +54,7 @@ public class TestController {
         model.addAttribute("bossHp", 50);
         model.addAttribute("bossMaxHp", 80);
         model.addAttribute("bossAtk", 2.5);
-        model.addAttribute("bossImage", "/images/boss/baby_dragon.png");
+        model.addAttribute("bossImage", "/images/boss/bebe_dragon.png");
 
         // Quiz Data
         model.addAttribute("question",

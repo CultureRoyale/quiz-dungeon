@@ -66,7 +66,7 @@
             <div class="w-full h-0.5 bg-gray-700 rounded-full"></div>
 
             <!-- User HP Bar -->
-            <div th:replace="~{fragments/user_hp_bar :: userHpBar(user=${user})}"></div>
+            <div th:replace="~{fragments/user_hp_bar :: userHpBar(user=${user}, compact=false)}"></div>
 
         </div>
     </div>
