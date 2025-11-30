@@ -19,16 +19,16 @@
 
         .roadmap-container {
             position: relative;
-            padding: 3rem 0;
+            padding: 1rem 0;
         }
 
         .progress-line {
             position: absolute;
-            top: calc(19rem + 130px);
+            top: calc(3rem + 135px);
             left: 0;
             right: 0;
-            height: 25px;
-            background: #ffffff;
+            height: 12px;
+            background: #111827;
             transform: translateY(-50%);
             z-index: 0;
         }
@@ -38,8 +38,8 @@
             overflow-x: auto;
             overflow-y: hidden;
             scroll-snap-type: x mandatory;
-            gap: 3rem;
-            padding: 2rem 1rem;
+            gap: 1.5rem;
+            padding: 1rem 0.5rem;
             position: relative;
             z-index: 1;
             scrollbar-width: none;
@@ -55,7 +55,7 @@
 
         .boss-card {
             flex: 0 0 auto;
-            width: 320px;
+            width: 224px;
             scroll-snap-align: center;
             position: relative;
         }
@@ -90,31 +90,11 @@
 <body class="bg-gray-800 text-white min-h-screen">
     <div th:replace="~{fragments/header :: header}"></div>
 
-    <main class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-dungeon text-center mb-8 text-amber-400">Roadmap des Boss</h1>
+    <main class="container mx-auto px-4 py-4">
+        <h1 class="text-4xl font-dungeon text-center mb-2 text-amber-400">Roadmap des Boss</h1>
 
         <!-- Stats utilisateur -->
-        <div class="bg-gray-900 rounded-lg p-6 border-2 border-gray-700">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="text-center">
-                    <p class="text-gray-400 text-sm">Niveau</p>
-                    <p class="text-2xl font-dungeon text-amber-400" th:text="${user.level}">1</p>
-                </div>
-                <div class="text-center">
-                    <p class="text-gray-400 text-sm">XP</p>
-                    <p class="text-2xl font-dungeon text-blue-400" th:text="${user.xp}">0</p>
-                </div>
-                <div class="text-center">
-                    <p class="text-gray-400 text-sm">HP</p>
-                    <p class="text-2xl font-dungeon text-red-400" th:text="${user.currentHp} + '/' + ${user.maxHp}">
-                        100/100</p>
-                </div>
-                <div class="text-center">
-                    <p class="text-gray-400 text-sm">Gold</p>
-                    <p class="text-2xl font-dungeon text-yellow-400" th:text="${user.gold}">0</p>
-                </div>
-            </div>
-        </div>
+
 
         <!-- Roadmap des boss avec progress bar -->
         <div class="roadmap-container group">
@@ -198,25 +178,30 @@
                             <th:block th:if="${unlockStatus.get(boss.id)}">
                                 <a th:href="@{/boss/{id}(id=${boss.id})}" th:if="${!defeatedStatus.get(boss.id)}">
                                     <button type="button"
-                                        th:replace="~{fragments/button :: submitButton('Combattre')}"></button>
+                                        th:replace="~{fragments/button :: smallButton('Combattre')}"></button>
                                 </a>
                                 <a th:href="@{/boss/{id}(id=${boss.id})}" th:if="${defeatedStatus.get(boss.id)}">
                                     <button type="button"
-                                        th:replace="~{fragments/button :: submitButton('Recombattre')}"></button>
+                                        th:replace="~{fragments/button :: smallButton('Recombattre')}"></button>
                                 </a>
                             </th:block>
 
                             <!-- Cas Locked -->
-                            <button th:unless="${unlockStatus.get(boss.id)}" type="button" disabled
-                                class="w-full bg-gray-700 text-gray-500 font-dungeon text-2xl py-3 rounded-lg border-2 border-gray-600 shadow-none opacity-70 uppercase tracking-wider mt-8 cursor-not-allowed">
-                                Combattre
-                            </button>
+                            <div th:unless="${unlockStatus.get(boss.id)}">
+                                <button type="button"
+                                    th:replace="~{fragments/button :: smallButtonDisabled('Combattre')}"></button>
+                            </div>
                         </div>
 
 
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Stats utilisateur -->
+        <div class="mt-4">
+            <div th:replace="~{fragments/user_hp_bar :: userHpBar(user=${user}, compact=false)}"></div>
         </div>
 
         <!-- Script pour scroll boutons -->
@@ -228,7 +213,7 @@
 
                 if (!roadmap || !leftBtn || !rightBtn) return;
 
-                const scrollAmount = 320 + 48; // 320px width + 3rem gap (approx 48px)
+                const scrollAmount = 224 + 24; // 224px width + 1.5rem gap (approx 24px)
 
                 leftBtn.addEventListener('click', () => {
                     roadmap.scrollBy({

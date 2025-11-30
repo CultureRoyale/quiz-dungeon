@@ -31,7 +31,7 @@
 
             <!-- User HP Bar Fragment -->
             <div class="w-full mb-8">
-                <div th:replace="~{fragments/user_hp_bar :: userHpBar(${user})}"></div>
+                <div th:replace="~{fragments/user_hp_bar :: userHpBar(user=${user}, compact=false)}"></div>
             </div>
 
             <!-- Back Button -->
