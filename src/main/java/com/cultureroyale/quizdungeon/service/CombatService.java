@@ -5,6 +5,8 @@ import com.cultureroyale.quizdungeon.model.User;
 import com.cultureroyale.quizdungeon.model.enums.HelpLevel;
 import com.cultureroyale.quizdungeon.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
+import com.cultureroyale.quizdungeon.model.Combat;
+import com.cultureroyale.quizdungeon.repository.CombatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,9 @@ public class CombatService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private CombatRepository combatRepository;
 
     @Autowired
     private QuestionService questionService;
@@ -70,7 +75,19 @@ public class CombatService {
 
         if (isCorrect) {
             // User attacks
-            double baseDamage = (double) boss.getMaxHp() / 20.0;
+            double difficultyMultiplier = 1.0;
+            switch (boss.getDifficulty()) {
+                case FACILE:
+                    difficultyMultiplier = 2.0;
+                    break;
+                case MOYEN:
+                    difficultyMultiplier = 1.0;
+                    break;
+                case DIFFICILE:
+                    difficultyMultiplier = 0.5;
+                    break;
+            }
+            double baseDamage = (boss.getMaxHp() / 20.0) * difficultyMultiplier;
             int damageDealt = (int) (baseDamage * helpLevel.getDamageMultiplier());
             bossHp -= damageDealt;
             message = "Bonne réponse ! Vous infligez " + damageDealt + " dégâts.";
@@ -102,12 +119,30 @@ public class CombatService {
     public void handleVictory(User user, Boss boss) {
         user.setGold(user.getGold() + boss.getGoldReward());
         userRepository.save(user);
+
+        Combat combat = new Combat();
+        combat.setUser(user);
+        combat.setBoss(boss);
+        combat.setType(com.cultureroyale.quizdungeon.model.enums.CombatType.BOSS);
+        combat.setResult(com.cultureroyale.quizdungeon.model.enums.CombatResult.VICTOIRE);
+        combat.setGoldEarned(boss.getGoldReward());
+        combat.setXpEarned(100); // Valeur arbitraire d'XP
+        combatRepository.save(combat);
     }
 
-    public void handleDefeat(User user) {
+    public void handleDefeat(User user, Boss boss) {
         user.setGold(user.getGold() / 2);
         user.setCurrentHp(user.getMaxHp());
         userRepository.save(user);
+
+        Combat combat = new Combat();
+        combat.setUser(user);
+        combat.setBoss(boss); // Peut être null si pas de boss, mais ici on est dans le contexte boss
+        combat.setType(com.cultureroyale.quizdungeon.model.enums.CombatType.BOSS);
+        combat.setResult(com.cultureroyale.quizdungeon.model.enums.CombatResult.DEFAITE);
+        combat.setGoldEarned(0);
+        combat.setXpEarned(10);
+        combatRepository.save(combat);
     }
 
     // Helper classes

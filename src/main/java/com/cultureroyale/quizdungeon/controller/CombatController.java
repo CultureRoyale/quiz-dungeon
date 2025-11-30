@@ -66,7 +66,19 @@ public class CombatController {
 
         // Calculate user attack based on boss max HP (logic from CombatService)
         // baseDamage = boss.getMaxHp() / 20.0
-        int userAttack = (int) (boss.getMaxHp() / 20.0);
+        double difficultyMultiplier = 1.0;
+        switch (boss.getDifficulty()) {
+            case FACILE:
+                difficultyMultiplier = 2.0;
+                break;
+            case MOYEN:
+                difficultyMultiplier = 1.0;
+                break;
+            case DIFFICILE:
+                difficultyMultiplier = 0.5;
+                break;
+        }
+        int userAttack = (int) ((boss.getMaxHp() / 20.0) * difficultyMultiplier);
         user.setAttack(userAttack);
 
         // Check if combat is already over (from previous turn)
@@ -156,7 +168,7 @@ public class CombatController {
                     combatService.handleVictory(user, boss);
                 } else if (result.status == CombatService.CombatStatus.DEFEAT) {
                     session.setAttribute("combat_status", "DEFEAT");
-                    combatService.handleDefeat(user);
+                    combatService.handleDefeat(user, boss);
                 }
 
                 model.addAttribute("userAnswer", answer);
@@ -176,7 +188,7 @@ public class CombatController {
                 combatService.handleVictory(user, boss);
             } else if (result.status == CombatService.CombatStatus.DEFEAT) {
                 session.setAttribute("combat_status", "DEFEAT");
-                combatService.handleDefeat(user);
+                combatService.handleDefeat(user, boss);
             }
 
             model.addAttribute("choices", choices);
