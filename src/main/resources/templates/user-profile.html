@@ -1,28 +1,19 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/layout}">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Mon Profil - Quiz Dungeon</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" type="image/svg+xml" th:href="@{/images/favicon.svg}">
+    <title>Mon Profil</title>
     <style>
-        @font-face {
-            font-family: 'Super Crawler';
-            src: url('/fonts/SuperCrawler.ttf') format('truetype');
-        }
-
         .font-dungeon {
             font-family: 'Super Crawler';
         }
     </style>
 </head>
 
-<body class="bg-gray-800 text-white min-h-screen flex flex-col">
+<body>
 
-    <div th:replace="~{fragments/header :: header}"></div>
-
-    <main class="flex-grow flex items-center justify-center p-4">
+    <main layout:fragment="content" class="flex-grow flex items-center justify-center p-4">
         <div class="w-full max-w-2xl p-8 border border-gray-600 bg-gray-900 shadow-2xl relative">
 
             <h1 class="text-3xl text-center mb-4 font-dungeon tracking-wider">Mon Profil</h1>

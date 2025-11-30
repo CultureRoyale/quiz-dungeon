@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title layout:title-pattern="$CONTENT_TITLE - $LAYOUT_TITLE">Quiz Dungeon</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/svg+xml" th:href="@{/images/favicon.svg}">
+    <style>
+        @font-face {
+            font-family: 'Super Crawler';
+            src: url('/fonts/SuperCrawler.ttf') format('truetype');
+        }
+
+        .font-dungeon {
+            font-family: 'Super Crawler', sans-serif;
+        }
+    </style>
+    <th:block layout:fragment="css"></th:block>
+</head>
+
+<body class="bg-gray-800 text-white min-h-screen flex flex-col">
+
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main layout:fragment="content" class="flex-grow">
+        <!-- Content will be injected here -->
+    </main>
+
+    <th:block layout:fragment="scripts"></th:block>
+</body>
+
+</html>
