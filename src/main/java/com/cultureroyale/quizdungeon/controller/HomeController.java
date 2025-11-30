@@ -1,6 +1,9 @@
 package com.cultureroyale.quizdungeon.controller;
 
+import com.cultureroyale.quizdungeon.model.Dungeon;
 import com.cultureroyale.quizdungeon.model.User;
+import com.cultureroyale.quizdungeon.repository.DungeonRepository;
+import com.cultureroyale.quizdungeon.service.DungeonService;
 import com.cultureroyale.quizdungeon.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -15,6 +18,8 @@ import java.security.Principal;
 public class HomeController {
 
     private final UserService userService;
+    private final DungeonRepository dungeonRepository;
+    private final DungeonService dungeonService;
 
     @GetMapping("/")
     public String index(Model model) {
@@ -40,12 +45,18 @@ public class HomeController {
         return "login";
     }
 
-
     @GetMapping("/profile")
     public String profile(Model model, Principal principal) {
         String username = principal.getName();
         User user = userService.findByUsername(username);
+        Dungeon dungeon = dungeonRepository.findByUserId(user.getId()).orElse(null);
+
+        if (dungeon == null) {
+            dungeon = dungeonService.createDungeon(user);
+        }
+
         model.addAttribute("user", user);
+        model.addAttribute("dungeon", dungeon);
         return "user-profile";
     }
 }
