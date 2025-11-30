@@ -22,7 +22,7 @@ public class User {
     private String username;
 
     @Column(nullable = false, length = 60)
-    private String password;  // BCrypt hash
+    private String password; // BCrypt hash
 
     private int level;
     private int xp;
@@ -32,6 +32,9 @@ public class User {
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Transient
+    private int attack;
 
     @PrePersist
     protected void onCreate() {

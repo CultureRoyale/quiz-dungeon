@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+    <div th:fragment="result" class="flex flex-col gap-6 animate-fade-in w-full max-w-2xl mx-auto">
+
+        <!-- Result Status -->
+        <div class="text-center mb-4">
+            <h3 th:if="${correct}" class="text-4xl font-dungeon text-green-500 drop-shadow-md animate-bounce">
+                Correct !
+            </h3>
+            <h3 th:unless="${correct}" class="text-4xl font-dungeon text-red-500 drop-shadow-md animate-shake">
+                Incorrect !
+            </h3>
+        </div>
+
+        <!-- Answers Comparison -->
+        <div class="bg-gray-900 border-2 border-gray-700 rounded-xl p-6 flex flex-col gap-4">
+
+            <!-- User Answer -->
+            <div class="flex flex-col gap-1">
+                <span class="text-gray-400 text-sm uppercase tracking-wider font-bold">Votre réponse</span>
+                <div
+                    th:class="'text-2xl font-bold p-3 rounded-lg border-2 ' + 
+                    (${correct} ? 'bg-green-900/30 border-green-500 text-green-400' : 'bg-red-900/30 border-red-500 text-red-400')">
+                    <span th:text="${userAnswer}">User Answer</span>
+                    <span th:if="${correct}" class="float-right">✓</span>
+                    <span th:unless="${correct}" class="float-right">✗</span>
+                </div>
+            </div>
+
+            <!-- Correct Answer (Show if wrong) -->
+            <div th:unless="${correct}" class="flex flex-col gap-1 animate-fade-in-up">
+                <span class="text-gray-400 text-sm uppercase tracking-wider font-bold">Réponse attendue</span>
+                <div class="text-2xl font-bold p-3 rounded-lg border-2 bg-gray-800 border-green-500 text-green-400">
+                    <span th:text="${correctAnswer}">Correct Answer</span>
+                    <span class="float-right">✓</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Continue Button -->
+        <div class="mt-4">
+            <button type="button" onclick="location.reload()"
+                class="w-full bg-gradient-to-b from-yellow-400 to-orange-500 hover:from-yellow-300 hover:to-orange-400 text-white font-dungeon text-2xl py-3 rounded-lg border-2 border-yellow-200 shadow-[0_4px_0_rgb(194,65,12)] active:shadow-none active:translate-y-1 transition-all uppercase tracking-wider drop-shadow-md">
+                <span class="drop-shadow-[0_2px_2px_rgba(0,0,0,0.2)]">Continuer</span>
+            </button>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
