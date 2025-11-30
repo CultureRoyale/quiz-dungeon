@@ -31,8 +31,7 @@ public class ShopController {
         User user = userService.findByUsername(username);
         Dungeon dungeon = dungeonRepository.findByUserId(user.getId()).orElse(null);
 
-        // Handle case where dungeon might not exist for old users (optional, but good
-        // practice)
+        
         if (dungeon == null) {
             dungeon = dungeonService.createDungeon(user);
         }
@@ -79,14 +78,17 @@ public class ShopController {
                 break;
             case "chili":
                 if (user.getGold() >= 200) {
-                    user.setGold(user.getGold() - 200);
-                    user.setMaxHp(user.getMaxHp() - 50);
-                    if (user.getCurrentHp() > user.getMaxHp()) {
-                        user.setCurrentHp(user.getMaxHp());
+                    if (user.getCurrentHp() > 50) {
+
+                        user.setGold(user.getGold() - 200);
+                        user.setCurrentHp(user.getCurrentHp() - 50);
+
+                        dungeon.setDamageBoost(dungeon.getDamageBoost() + 50);
+                        success = true;
+                        message = "Piment acheté ! (-50 PV, +50% Dégâts Donjon)";
+                    } else {
+                        message = "Pas assez de PV !";
                     }
-                    dungeon.setDamageBoost(dungeon.getDamageBoost() + 50);
-                    success = true;
-                    message = "Piment acheté ! (-50 PV, +50% Dégâts Donjon)";
                 } else {
                     message = "Pas assez d'or !";
                 }
@@ -94,15 +96,6 @@ public class ShopController {
             case "theme_tiki":
             case "theme_lava":
             case "theme_gold":
-                // Assuming cosmetic price is 0 or nullable as per prompt "cest juste le
-                // cosmectif par défaut qui est nullable et qui permet dacheter le cosmetic
-                // theme"
-                // Wait, prompt says "dacheter le cosmetic theme".
-                // Let's assume a price of 1000 for now as per plan, or maybe free if
-                // "nullable"?
-                // "pour les autres cest juste le cosmectif par défaut qui est nullable et qui
-                // permet dacheter le cosmetic theme"
-                // I'll stick to 1000 gold for now to make it a "shop".
                 if (user.getGold() >= 1000) {
                     user.setGold(user.getGold() - 1000);
                     dungeon.setCosmeticTheme(item.replace("theme_", ""));

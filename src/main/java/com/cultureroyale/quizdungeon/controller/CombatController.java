@@ -156,7 +156,7 @@ public class CombatController {
                     combatService.handleVictory(user, boss);
                 } else if (result.status == CombatService.CombatStatus.DEFEAT) {
                     session.setAttribute("combat_status", "DEFEAT");
-                    combatService.handleDefeat(user);
+                    combatService.handleDefeat(user, boss);
                 }
 
                 model.addAttribute("userAnswer", answer);
@@ -176,7 +176,7 @@ public class CombatController {
                 combatService.handleVictory(user, boss);
             } else if (result.status == CombatService.CombatStatus.DEFEAT) {
                 session.setAttribute("combat_status", "DEFEAT");
-                combatService.handleDefeat(user);
+                combatService.handleDefeat(user, boss);
             }
 
             model.addAttribute("choices", choices);

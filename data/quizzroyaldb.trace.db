@@ -564,3 +564,9 @@ select b1_0.id,b1_0.attack,b1_0.categories,b1_0.difficulty,b1_0.gold_reward,b1_0
 	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(Unknown Source)
 	at java.base/java.lang.reflect.Method.invoke(Unknown Source)
 	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50)
+2025-12-01 00:22:20.105639+01:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "INSERT INTO users (MAX_HP) VALUES (100) [*]where username=""paul"""; SQL statement:
+INSERT INTO users (MAX_HP) VALUES (100) where username="paul" [42000-232]
+2025-12-01 00:22:33.466356+01:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "INSERT INTO users (MAX_HP) VALUES (100) [*]where username=""paul"""; SQL statement:
+INSERT INTO users (MAX_HP) VALUES (100) where username="paul" [42000-232]
