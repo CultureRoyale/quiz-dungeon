@@ -75,7 +75,19 @@ public class CombatService {
 
         if (isCorrect) {
             // User attacks
-            double baseDamage = (double) boss.getMaxHp() / 20.0;
+            double difficultyMultiplier = 1.0;
+            switch (boss.getDifficulty()) {
+                case FACILE:
+                    difficultyMultiplier = 2.0;
+                    break;
+                case MOYEN:
+                    difficultyMultiplier = 1.0;
+                    break;
+                case DIFFICILE:
+                    difficultyMultiplier = 0.5;
+                    break;
+            }
+            double baseDamage = (boss.getMaxHp() / 20.0) * difficultyMultiplier;
             int damageDealt = (int) (baseDamage * helpLevel.getDamageMultiplier());
             bossHp -= damageDealt;
             message = "Bonne réponse ! Vous infligez " + damageDealt + " dégâts.";
