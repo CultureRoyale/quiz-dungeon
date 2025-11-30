@@ -45,7 +45,6 @@ public class TestController {
         user.setCurrentHp(50);
         user.setMaxHp(80);
         user.setXp(100);
-        // TODO: Add atk to User model
 
         model.addAttribute("user", user);
 

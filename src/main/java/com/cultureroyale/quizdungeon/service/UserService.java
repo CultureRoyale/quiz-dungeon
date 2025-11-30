@@ -12,6 +12,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final DungeonService dungeonService;
 
     public User registerUser(String username, String password) {
         if (userRepository.existsByUsername(username)) {
@@ -28,7 +29,9 @@ public class UserService {
                 .gold(0)
                 .build();
 
-        return userRepository.save(user);
+        user = userRepository.save(user);
+        dungeonService.createDungeon(user);
+        return user;
     }
 
     public User findByUsername(String username) {

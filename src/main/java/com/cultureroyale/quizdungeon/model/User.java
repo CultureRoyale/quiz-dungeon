@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = "password")
 public class User {
 
     @Id
@@ -35,6 +34,9 @@ public class User {
 
     @Transient
     private int attack;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Dungeon dungeon;
 
     @PrePersist
     protected void onCreate() {
