@@ -1,3 +1,14 @@
 package com.cultureroyale.quizdungeon.model.enums;
 
-// Niveaux d'aide pendant combat : SANS_INDICE (10 dmg/2.5 HP), DEUX_SUR_QUATRE (5/5), TOUTES_REPONSES (2.5/10)
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
+public enum HelpLevel {
+    NO_HELP(3.0), // Max dégâts (x3)
+    FOUR_CHOICES(1.0), // Normal (x1)
+    TWO_CHOICES(0.5); // Min dégâts (x0.5)
+
+    private final double damageMultiplier;
+}

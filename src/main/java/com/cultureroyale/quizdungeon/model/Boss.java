@@ -39,4 +39,7 @@ public class Boss {
 
     @Column(nullable = false)
     private String imagePath;
+
+    @Column(nullable = false)
+    private int attack;
 }

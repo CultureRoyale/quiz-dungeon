@@ -176,11 +176,13 @@
                         <!-- Bouton combat -->
                         <div class="mt-auto pt-4">
                             <th:block th:if="${unlockStatus.get(boss.id)}">
-                                <a th:href="@{/boss/{id}(id=${boss.id})}" th:if="${!defeatedStatus.get(boss.id)}">
+                                <a th:href="@{/combat/start/{id}(id=${boss.id})}"
+                                    th:if="${!defeatedStatus.get(boss.id)}">
                                     <button type="button"
                                         th:replace="~{fragments/button :: smallButton('Combattre')}"></button>
                                 </a>
-                                <a th:href="@{/boss/{id}(id=${boss.id})}" th:if="${defeatedStatus.get(boss.id)}">
+                                <a th:href="@{/combat/start/{id}(id=${boss.id})}"
+                                    th:if="${defeatedStatus.get(boss.id)}">
                                     <button type="button"
                                         th:replace="~{fragments/button :: smallButton('Recombattre')}"></button>
                                 </a>

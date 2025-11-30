@@ -3,8 +3,7 @@
 
 <body>
 
-    <div th:fragment="list(choices, selectedChoiceId, submittedChoiceId, correctChoiceId, correct)"
-        class="flex flex-col gap-4 animate-fade-in">
+    <div th:fragment="list" class="flex flex-col gap-4 animate-fade-in">
         <div th:each="choice, iterStat : ${choices}" th:data-choice-index="${iterStat.index}"
             class="choice-item relative transition-all duration-500">
 

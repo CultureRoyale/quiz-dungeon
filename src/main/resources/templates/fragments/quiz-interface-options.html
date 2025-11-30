@@ -32,8 +32,9 @@
                         class="w-full bg-gray-900 border-2 border-gray-700 rounded-lg p-4 text-white text-xl focus:border-amber-500 focus:outline-none transition-colors"
                         onkeypress="if(event.key === 'Enter') submitAnswer('text')">
                     <button onclick="submitAnswer('text')"
-                        class="bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold px-6 rounded-lg uppercase tracking-wider transition-colors">
-                        OK
+                        class="bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold px-8 py-2 rounded-lg uppercase tracking-wider transition-colors flex flex-col items-center justify-center min-w-[160px]">
+                        <span class="text-xl">OK</span>
+                        <span class="text-xs font-bold opacity-75">Dégats x3</span>
                     </button>
                 </div>
             </div>
@@ -54,7 +55,10 @@
                         <div class="w-2 h-2 rounded-full bg-gray-500 group-hover:bg-amber-500"></div>
                         <div class="w-2 h-2 rounded-full bg-gray-500 group-hover:bg-amber-500"></div>
                     </div>
-                    <span class="text-xl font-dungeon text-white uppercase tracking-wider">4 Choix</span>
+                    <div class="flex flex-col items-start">
+                        <span class="text-xl font-dungeon text-white uppercase tracking-wider">4 Choix</span>
+                        <span class="text-xs text-gray-400">Dégâts x1</span>
+                    </div>
                 </button>
 
                 <button onclick="showChoices(2)"
@@ -63,7 +67,10 @@
                         <div class="w-2 h-2 rounded-full bg-gray-500 group-hover:bg-amber-500"></div>
                         <div class="w-2 h-2 rounded-full bg-gray-500 group-hover:bg-amber-500"></div>
                     </div>
-                    <span class="text-xl font-dungeon text-white uppercase tracking-wider">2 Choix</span>
+                    <div class="flex flex-col items-start">
+                        <span class="text-xl font-dungeon text-white uppercase tracking-wider">2 Choix</span>
+                        <span class="text-xs text-gray-400">Dégâts x0.5</span>
+                    </div>
                 </button>
             </div>
         </div>
@@ -72,8 +79,6 @@
         <div id="step-2-choices" class="hidden flex-col gap-4">
             <!-- Content will be loaded via AJAX -->
             <div id="choices-container" class="flex flex-col gap-4"></div>
-
-
         </div>
 
         <script>
@@ -88,7 +93,7 @@
                 choicesSection.classList.add('flex');
 
                 // Fetch choices from server
-                fetch('/test-quiz/choices?count=' + count)
+                fetch('/combat/choices?count=' + count)
                     .then(response => response.text())
                     .then(html => {
                         choicesContainer.innerHTML = html;
@@ -114,10 +119,25 @@
                     const input = document.querySelector('#step-1-input input[type="text"]');
                     if (!input.value.trim()) return;
                     formData.append('answer', input.value);
+                    formData.append('helpLevel', 'NO_HELP'); // For text input, no help is used
                 } else {
-                    const selected = document.querySelector('input[name="choiceId"]:checked');
-                    if (!selected) return;
-                    formData.append('choiceId', selected.value);
+                    // This part assumes choices are rendered with radio buttons or similar
+                    // and that the choice ID is available.
+                    // The current implementation of choices-container uses buttons that submit directly.
+                    // If choices are loaded via AJAX, they should be rendered with a form or event listeners.
+                    // For now, let's assume the AJAX-loaded choices will have a way to get choiceId and helpLevel.
+                    // This function will need to be adapted based on how the AJAX-loaded choices are structured.
+                    // For example, if the choices are radio buttons within a form:
+                    const selectedChoice = document.querySelector('#choices-container input[name="choiceId"]:checked');
+                    if (!selectedChoice) return;
+                    formData.append('choiceId', selectedChoice.value);
+                    const helpLevelInput = document.querySelector('#choices-container input[name="helpLevel"]');
+                    if (helpLevelInput) {
+                        formData.append('helpLevel', helpLevelInput.value);
+                    } else {
+                        // Default or error handling if helpLevel is not found
+                        formData.append('helpLevel', 'FOUR_CHOICES'); // Or appropriate default
+                    }
                 }
 
                 // Get the container to replace
@@ -128,16 +148,39 @@
                 const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
 
                 // Fetch the result
-                fetch('/test-quiz/submit', {
+                // Fetch the result
+                fetch('/combat/submit', {
                     method: 'POST',
                     headers: {
                         [csrfHeader]: csrfToken
                     },
                     body: formData
                 })
-                    .then(response => response.text())
+                    .then(response => {
+                        // Check if redirect
+                        if (response.redirected) {
+                            window.location.href = response.url;
+                            return null; // Prevent further processing
+                        }
+                        return response.text();
+                    })
                     .then(html => {
-                        container.innerHTML = html;
+                        if (html === null) return; // Already redirected
+
+                        // If full page returned (e.g., redirect to battle/victory/defeat), reload or navigate
+                        if (html.includes('<!DOCTYPE html>')) {
+                            location.reload(); // Reload to navigate to the new full page
+                        } else {
+                            // Switch to choices view to show result
+                            const inputSection = document.getElementById('step-1-input');
+                            const choicesSection = document.getElementById('step-2-choices');
+
+                            inputSection.classList.add('hidden');
+                            choicesSection.classList.remove('hidden');
+                            choicesSection.classList.add('flex');
+
+                            container.innerHTML = html; // Replace with fragment
+                        }
                     })
                     .catch(error => console.error('Error:', error));
             }
