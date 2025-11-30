@@ -1,22 +1,10 @@
 <!DOCTYPE html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/layout}">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roadmap - Quiz Dungeon</title>
-    <link rel="icon" type="image/svg+xml" th:href="@{/images/favicon.svg}">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Roadmap</title>
     <style>
-        @font-face {
-            font-family: 'Super Crawler';
-            src: url('/fonts/SuperCrawler.ttf') format('truetype');
-        }
-
-        .font-dungeon {
-            font-family: 'Super Crawler', sans-serif;
-        }
-
         .roadmap-container {
             position: relative;
             padding: 1rem 0;
@@ -87,10 +75,9 @@
     </style>
 </head>
 
-<body class="bg-gray-800 text-white min-h-screen">
-    <div th:replace="~{fragments/header :: header}"></div>
+<body>
 
-    <main class="container mx-auto px-4 py-4">
+    <main layout:fragment="content" class="container mx-auto px-4 py-4">
         <h1 class="text-4xl font-dungeon text-center mb-2 text-amber-400">Roadmap des Boss</h1>
 
         <!-- Stats utilisateur -->

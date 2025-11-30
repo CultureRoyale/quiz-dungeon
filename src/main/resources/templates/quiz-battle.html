@@ -1,18 +1,12 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/layout}">
 
 <head>
-    <meta charset="UTF-8">
     <meta name="_csrf" th:content="${_csrf.token}" />
     <meta name="_csrf_header" th:content="${_csrf.headerName}" />
     <title>Quiz Battle</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @font-face {
-            font-family: 'Super Crawler';
-            src: url('/fonts/SuperCrawler.ttf') format('truetype');
-        }
-
         .font-dungeon {
             font-family: 'Super Crawler';
         }
@@ -39,11 +33,9 @@
 
 <body class="bg-gray-800 text-white min-h-screen font-sans selection:bg-amber-500 selection:text-black">
 
-    <!-- Header -->
-    <div th:replace="~{fragments/header :: header}"></div>
-
     <!-- Main Battle Container -->
-    <div class="container mx-auto px-4 py-8 flex flex-col lg:flex-row justify-center items-start gap-8">
+    <div layout:fragment="content"
+        class="container mx-auto px-4 py-8 flex flex-col lg:flex-row justify-center items-start gap-8">
 
         <!-- Left Column: Boss -->
         <div class="flex-shrink-0 sticky top-4">

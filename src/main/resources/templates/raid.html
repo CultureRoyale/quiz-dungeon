@@ -1,27 +1,18 @@
 <!DOCTYPE html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Raid - Quiz Dungeon</title>
-    <link rel="icon" type="image/svg+xml" th:href="@{/images/favicon.svg}">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @font-face {
-            font-family: 'Super Crawler';
-            src: url('/fonts/SuperCrawler.ttf') format('truetype');
-        }
-        .font-dungeon {
-            font-family: 'Super Crawler', sans-serif;
-        }
-    </style>
-</head>
-<body class="bg-gray-800 text-white min-h-screen">
-    <div th:replace="~{fragments/header :: header}"></div>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/layout}">
 
-    <main class="container mx-auto px-4 py-8">
+<head>
+    <title>Raid</title>
+</head>
+
+<body>
+
+    <main layout:fragment="content" class="container mx-auto px-4 py-8">
         <h1 class="text-4xl font-dungeon text-center mb-8">Raid</h1>
         <!-- Écran combat PvP : barres HP attaquant/défenseur, question du donjon adverse, choix HelpLevel -->
     </main>
+
 </body>
+
 </html>

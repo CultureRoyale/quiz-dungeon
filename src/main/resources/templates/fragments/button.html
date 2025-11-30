@@ -4,12 +4,12 @@
 <body>
     <button th:fragment="submitButton(text)" type="submit"
         class="w-full bg-gradient-to-b from-yellow-400 to-orange-500 hover:from-yellow-300 hover:to-orange-400 text-white font-dungeon text-2xl py-3 rounded-lg border-2 border-yellow-200 shadow-[0_4px_0_rgb(194,65,12)] active:shadow-none active:translate-y-1 transition-all uppercase tracking-wider drop-shadow-md mt-8">
-        <span th:text="${text}" class="drop-shadow-[0_2px_2px_rgba(0,0,0,0.2)]">Button Text</span>
+        <span th:text="${text}" class="drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]">Button Text</span>
     </button>
 
     <button th:fragment="smallButton(text)" type="submit"
         class="w-full bg-gradient-to-b from-yellow-400 to-orange-500 hover:from-yellow-300 hover:to-orange-400 text-white font-dungeon text-lg py-2 rounded-lg border-2 border-yellow-200 shadow-[0_3px_0_rgb(194,65,12)] active:shadow-none active:translate-y-1 transition-all uppercase tracking-wider drop-shadow-md">
-        <span th:text="${text}" class="drop-shadow-[0_1px_1px_rgba(0,0,0,0.2)]">Button Text</span>
+        <span th:text="${text}" class="drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">Button Text</span>
     </button>
 
     <button th:fragment="smallButtonDisabled(text)" type="button" disabled

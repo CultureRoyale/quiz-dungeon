@@ -3,7 +3,7 @@
 
 <body>
 
-    <header th:fragment="header" class="bg-gray-900 text-white font-dungeon select-none">
+    <header th:fragment="header" class="bg-gray-900 w-full text-white font-dungeon select-none">
         <div class="container mx-auto px-6 py-4 flex justify-between items-end">
 
             <a th:href="@{/}" class="flex items-center gap-2 group hover:opacity-90 transition-opacity pb-1">
@@ -14,8 +14,8 @@
             <nav class="hidden md:flex gap-4 items-center mb-1">
 
                 <div class="relative group cursor-pointer z-50"> <button
-                        class="flex items-center gap-2 text-xl font-black uppercase tracking-widest pb-2 border-b-4 border-gray-700 hover:border-white hover:text-gray-100 transition-all duration-200">
-                        <span>Jouer</span>
+                        class="flex items-center gap-2 text-2xl font-black uppercase tracking-widest pb-2 border-b-4 border-gray-700 hover:border-white hover:text-gray-100 transition-all duration-200">
+                        <span class="drop-shadow-[0_4px_0_rgba(0,0,0,1)] " >Jouer</span>
                         <svg class="w-5 h-5 transition-transform duration-200 group-hover:rotate-180" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M19 9l-7 7-7-7">
@@ -30,8 +30,16 @@
 
                             <a th:href="@{/roadmap}"
                                 class="flex items-center gap-2 px-4 py-3 text-white hover:bg-gray-700 hover:text-amber-500 transition-colors border-b border-gray-700 last:border-0">
-                                <svg width="17" height="17" viewBox="0 0 19 30" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
+                                <svg fill="currentColor" width="17" height="17" viewBox="0 0 256 256" id="Flat" xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M221.65723,34.34326A8.00246,8.00246,0,0,0,216,32h-.02539l-63.79883.20117A8.00073,8.00073,0,0,0,146.0332,35.106L75.637,120.32275,67.31348,111.999A16.02162,16.02162,0,0,0,44.68555,112L32.001,124.68555A15.99888,15.99888,0,0,0,32,147.31348l20.88672,20.88769L22.94531,198.14258a16.01777,16.01777,0,0,0,.001,22.62695l12.28418,12.28418a16.00007,16.00007,0,0,0,22.62793,0L87.79883,203.1123,108.68652,224.001A16.02251,16.02251,0,0,0,131.31445,224L143.999,211.31445A15.99888,15.99888,0,0,0,144,188.68652l-8.32324-8.32324,85.21679-70.39648a8.00125,8.00125,0,0,0,2.90528-6.14258L224,40.02539A8.001,8.001,0,0,0,221.65723,34.34326Zm-13.84668,65.67822-83.49829,68.97706L111.314,156l54.34327-54.34277a8.00053,8.00053,0,0,0-11.31446-11.31446L100,144.686,87.00195,131.6875,155.97852,48.189l51.99609-.16357Z" />
+                                </svg>
+                                Défier un Boss
+                            </a>
+
+                            <a th:href="@{/}"
+                                class="flex items-center gap-2 px-4 py-3 text-white hover:bg-gray-700 hover:text-amber-500 transition-colors border-b border-gray-700 last:border-0">
+                                <svg width="17" height="17" viewBox="0 0 19 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path
                                         d="M12.3187 21.4989V12.3266H10.4396L6.68132 14.1611V21.4989H12.3187ZM2.92308 25.1678V8.65772H6.68132V10.4922L10.4396 8.65772H14.1978C14.7067 8.65772 15.1472 8.83925 15.5191 9.20232C15.891 9.56539 16.0769 9.99534 16.0769 10.4922V25.1678H2.92308Z"
                                         fill="currentColor" />
@@ -40,23 +48,6 @@
                                         fill="currentColor" />
                                     <path
                                         d="M12.3956 0V3.66412H15.5654L15.5654 0H19V6.87023H0.309114V0H3.74367L3.74367 3.66412H7.1776L7.1776 0H12.3956Z"
-                                        fill="currentColor" />
-                                </svg>
-                                Défier un Boss
-                            </a>
-
-                            <a th:href="@{/}"
-                                class="flex items-center gap-2 px-4 py-3 text-white hover:bg-gray-700 hover:text-amber-500 transition-colors border-b border-gray-700 last:border-0">
-                                <svg width="17" height="17" viewBox="0 0 43 43" fill="none"
-                                    xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M33.5226 36.0882C33.8108 35.558 34.1747 35.0648 34.6136 34.626C35.0737 34.1664 35.5953 33.7914 36.1544 33.4955C36.8226 33.1418 36.2944 32.3843 36.2944 32.3843C35.6105 31.3438 34.9869 30.2984 34.4713 29.3876L37.9328 25.929H41.2932C41.9395 25.929 42.4634 25.4046 42.4634 24.7582C42.4634 24.1121 41.9395 23.5877 41.2932 23.5877H37.4489C37.1378 23.5877 36.8404 23.711 36.621 23.9303L23.9712 36.567C23.7515 36.7867 23.6282 37.0848 23.6282 37.3951V41.2581C23.6282 41.9048 24.1522 42.4281 24.7987 42.4281C25.4457 42.4281 25.9697 41.9049 25.9697 41.2581V37.8803L29.4174 34.4371C30.348 34.9863 31.4297 35.6597 32.5015 36.4002C32.5017 36.3999 33.1156 36.837 33.5226 36.0882Z"
-                                        fill="currentColor" />
-                                    <path
-                                        d="M39.0549 35.1291C40.1078 35.1291 41.0972 35.5386 41.8421 36.2824C42.5858 37.0254 42.9951 38.0138 42.9951 39.0646C42.9951 40.1161 42.5856 41.1035 41.8421 41.8464C41.0973 42.5896 40.1078 42.9995 39.0549 42.9998C38.0027 42.9998 37.0131 42.5894 36.2689 41.8464C35.5247 41.1034 35.1148 40.1156 35.1148 39.0646C35.1148 38.0137 35.5249 37.0253 36.2689 36.2824C37.013 35.5386 38.0027 35.1291 39.0549 35.1291Z"
-                                        fill="currentColor" />
-                                    <path
-                                        d="M28.0356 27.0123C28.5545 27.5307 29.4034 27.5307 29.9223 27.0124L31.2276 25.7085C31.7464 25.1902 31.7464 24.342 31.2276 23.8237L8.94557 1.56516C8.42671 1.0469 7.40455 0.568485 6.67427 0.50211L1.21278 0.00547598C0.482353 -0.0608999 -0.0608044 0.482256 0.00557137 1.21269L0.501318 6.66366C0.567694 7.39409 1.04655 8.41565 1.5654 8.93407L23.8487 31.1953C24.3676 31.7136 25.2165 31.7136 25.7354 31.1953L27.0425 29.8896C27.5613 29.3713 27.5613 28.5231 27.0425 28.0047L8.38612 9.36566C8.11143 9.09186 8.11113 8.64678 8.38567 8.37269C8.65947 8.09815 9.1047 8.09814 9.37968 8.37239L28.0356 27.0123Z"
                                         fill="currentColor" />
                                 </svg>
                                 Attaquer un Donjon
@@ -69,8 +60,8 @@
 
                 <div class="relative group cursor-pointer">
                     <button
-                        class="flex items-center gap-2 text-xl font-black uppercase tracking-widest pb-2 border-b-4 border-gray-700 hover:border-white hover:text-gray-100 transition-all duration-200">
-                        <span>Boutique</span>
+                        class="flex items-center gap-2 text-2xl  font-black uppercase tracking-widest pb-2 border-b-4 border-gray-700 hover:border-white hover:text-gray-100 transition-all duration-200">
+                        <span class="drop-shadow-[0_4px_0_rgba(0,0,0,1)]">Boutique</span>
 
                     </button>
                 </div>
@@ -79,28 +70,28 @@
             <div class="flex items-center mb-1 gap-4">
                 <div sec:authorize="isAuthenticated()" class="relative group cursor-pointer">
                     <a th:href="@{/profile}"
-                        class="flex items-center gap-2 text-xl font-black uppercase tracking-widest pb-2 border-b-4 border-gray-700 hover:border-white hover:text-gray-100 transition-all duration-200">
-                        <span>Mon profil</span>
+                        class="flex items-center gap-2 text-2xl  font-black uppercase tracking-widest pb-2 border-b-4 border-gray-700 hover:border-white hover:text-gray-100 transition-all duration-200">
+                        <span class="drop-shadow-[0_4px_0_rgba(0,0,0,1)]">Mon profil</span>
                     </a>
                 </div>
                 <div sec:authorize="isAuthenticated()" class="relative group cursor-pointer">
                     <form th:action="@{/logout}" method="post">
                         <button type="submit"
-                            class="flex items-center gap-2 text-xl font-black uppercase tracking-widest pb-2 border-b-4 border-gray-700 hover:border-white hover:text-gray-100 transition-all duration-200">
-                            <span>Déconnexion</span>
+                            class="flex items-center gap-2 text-2xl  font-black uppercase tracking-widest pb-2 border-b-4 border-gray-700 hover:border-white hover:text-gray-100 transition-all duration-200">
+                            <span class="drop-shadow-[0_4px_0_rgba(0,0,0,1)]">Déconnexion</span>
                         </button>
                     </form>
                 </div>
                 <div sec:authorize="!isAuthenticated()" class="relative group cursor-pointer">
                     <a th:href="@{/login}"
-                        class="flex items-center gap-2 text-xl font-black uppercase tracking-widest pb-2 border-b-4 border-gray-700 hover:border-white hover:text-gray-100 transition-all duration-200">
-                        <span>Se connecter</span>
+                        class="flex items-center gap-2 text-2xl  font-black uppercase tracking-widest pb-2 border-b-4 border-gray-700 hover:border-white hover:text-gray-100 transition-all duration-200">
+                        <span class="drop-shadow-[0_4px_0_rgba(0,0,0,1)]">Se connecter</span>
                     </a>
                 </div>
                 <div sec:authorize="!isAuthenticated()" class="relative group cursor-pointer">
                     <a th:href="@{/register}"
-                        class="flex items-center gap-2 text-xl font-black uppercase tracking-widest pb-2 border-b-4 border-gray-700 hover:border-white hover:text-gray-100 transition-all duration-200">
-                        <span>S'inscrire</span>
+                        class="flex items-center gap-2 text-2xl  font-black uppercase tracking-widest pb-2 border-b-4 border-gray-700 hover:border-white hover:text-gray-100 transition-all duration-200">
+                        <span class="drop-shadow-[0_4px_0_rgba(0,0,0,1)]">S'inscrire</span>
                     </a>
                 </div>
             </div>
