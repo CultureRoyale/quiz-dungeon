@@ -28,6 +28,57 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #6b7280;
         }
+
+        @keyframes shake {
+            0% {
+                transform: translate(1px, 1px) rotate(0deg);
+            }
+
+            10% {
+                transform: translate(-1px, -2px) rotate(-1deg);
+            }
+
+            20% {
+                transform: translate(-3px, 0px) rotate(1deg);
+            }
+
+            30% {
+                transform: translate(3px, 2px) rotate(0deg);
+            }
+
+            40% {
+                transform: translate(1px, -1px) rotate(1deg);
+            }
+
+            50% {
+                transform: translate(-1px, 2px) rotate(-1deg);
+            }
+
+            60% {
+                transform: translate(-3px, 1px) rotate(0deg);
+            }
+
+            70% {
+                transform: translate(3px, 1px) rotate(-1deg);
+            }
+
+            80% {
+                transform: translate(-1px, -1px) rotate(1deg);
+            }
+
+            90% {
+                transform: translate(1px, 2px) rotate(0deg);
+            }
+
+            100% {
+                transform: translate(1px, -2px) rotate(-1deg);
+            }
+        }
+
+        .shake {
+            animation: shake 0.5s;
+            animation-iteration-count: 1;
+        }
     </style>
 </head>
 
@@ -42,8 +93,7 @@
 
         <!-- Left Column: Boss -->
         <div class="flex-shrink-0 sticky top-4">
-            <div
-                th:replace="~{fragments/boss_hp_bar :: bossHpBar(name=${bossName}, currentHp=${bossHp}, maxHp=${bossMaxHp}, atk=${bossAtk}, imageUrl=${bossImage})}">
+            <div th:replace="~{fragments/boss_hp_bar :: bossHpBar}">
             </div>
         </div>
 
@@ -52,8 +102,7 @@
 
             <!-- Quiz Interface -->
             <div>
-                <div
-                    th:replace="~{fragments/quiz-interface-options :: choices(question=${question}, choices=${choices}, selectedChoiceId=${selectedChoiceId})}">
+                <div th:replace="~{fragments/quiz-interface-options :: choices}">
                 </div>
             </div>
 
@@ -61,10 +110,182 @@
             <div class="w-full h-0.5 bg-gray-700 rounded-full"></div>
 
             <!-- User HP Bar -->
-            <div th:replace="~{fragments/user_hp_bar :: userHpBar(user=${user}, compact=false)}"></div>
+            <div th:with="compact=false" th:replace="~{fragments/user_hp_bar :: userHpBar}"></div>
 
         </div>
     </div>
+
+    <th:block layout:fragment="scripts">
+        <script>
+            let nextQuestionHtmlContent = '';
+
+            function showChoices(count) {
+                const inputSection = document.getElementById('step-1-input');
+                const choicesSection = document.getElementById('step-2-choices');
+                const choicesContainer = document.getElementById('choices-container');
+
+                // Show loading state or just the container
+                inputSection.classList.add('hidden');
+                choicesSection.classList.remove('hidden');
+                choicesSection.classList.add('flex');
+
+                // Fetch choices from server
+                fetch('/combat/choices?count=' + count)
+                    .then(response => response.text())
+                    .then(html => {
+                        choicesContainer.innerHTML = html;
+                    })
+                    .catch(error => console.error('Error loading choices:', error));
+            }
+
+            function resetInterface() {
+                const inputSection = document.getElementById('step-1-input');
+                const choicesSection = document.getElementById('step-2-choices');
+                const choicesContainer = document.getElementById('choices-container');
+
+                inputSection.classList.remove('hidden');
+                choicesSection.classList.add('hidden');
+                choicesSection.classList.remove('flex');
+                choicesContainer.innerHTML = ''; // Clear choices
+            }
+
+            function submitAnswer(type) {
+                let formData = new FormData();
+
+                if (type === 'text') {
+                    const input = document.querySelector('#step-1-input input[type="text"]');
+                    if (!input.value.trim()) return;
+                    formData.append('answer', input.value);
+                    formData.append('helpLevel', 'NO_HELP'); // For text input, no help is used
+                } else {
+                    const selectedChoice = document.querySelector('#choices-container input[name="choiceId"]:checked');
+                    if (!selectedChoice) return;
+                    formData.append('choiceId', selectedChoice.value);
+                    const helpLevelInput = document.querySelector('#choices-container input[name="helpLevel"]');
+
+                    const choicesCount = document.querySelectorAll('#choices-container input[name="choiceId"]').length;
+                    if (choicesCount <= 2) {
+                        formData.append('helpLevel', 'TWO_CHOICES');
+                    } else {
+                        formData.append('helpLevel', 'FOUR_CHOICES');
+                    }
+                }
+
+                // Get CSRF token
+                const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+                fetch('/combat/submit', {
+                    method: 'POST',
+                    headers: {
+                        [csrfHeader]: csrfToken
+                    },
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.redirectUrl) {
+                            window.location.href = data.redirectUrl;
+                            return;
+                        }
+
+                        // Update HP Bars with Animation
+                        if (data.bossHpBarHtml) {
+                            const bossContainer = document.getElementById('boss-hp-container');
+                            const oldBossProgress = document.getElementById('boss-hp-progress');
+                            const oldBossWidth = oldBossProgress ? oldBossProgress.style.width : '100%';
+
+                            // Extract new width from response HTML
+                            const widthMatch = data.bossHpBarHtml.match(/width:\s*([\d.]+)%/);
+                            const newBossWidth = widthMatch ? widthMatch[1] + '%' : '0%';
+
+                            if (bossContainer) {
+                                bossContainer.outerHTML = data.bossHpBarHtml;
+
+                                // Animate
+                                const newBossProgress = document.getElementById('boss-hp-progress');
+                                const newBossContainer = document.getElementById('boss-hp-container');
+                                if (newBossProgress) {
+                                    newBossProgress.style.transition = 'none';
+                                    newBossProgress.style.width = oldBossWidth;
+                                    newBossProgress.offsetHeight; // Force reflow
+                                    newBossProgress.style.transition = 'all 0.5s ease-out';
+                                    newBossProgress.style.width = newBossWidth;
+                                }
+
+                                // Shake if damage taken (width decreased)
+                                if (parseFloat(newBossWidth) < parseFloat(oldBossWidth)) {
+                                    if (newBossContainer) newBossContainer.classList.add('shake');
+                                }
+                            }
+                        }
+
+                        if (data.userHpBarHtml) {
+                            const userContainer = document.getElementById('user-hp-container');
+                            const oldUserProgress = document.getElementById('user-hp-progress');
+                            const oldUserWidth = oldUserProgress ? oldUserProgress.style.width : '100%';
+
+                            // Extract new width from response HTML
+                            const widthMatch = data.userHpBarHtml.match(/width:\s*([\d.]+)%/);
+                            const newUserWidth = widthMatch ? widthMatch[1] + '%' : '0%';
+
+                            if (userContainer) {
+                                userContainer.outerHTML = data.userHpBarHtml;
+
+                                // Animate
+                                const newUserProgress = document.getElementById('user-hp-progress');
+                                const newUserContainer = document.getElementById('user-hp-container');
+                                if (newUserProgress) {
+                                    newUserProgress.style.transition = 'none';
+                                    newUserProgress.style.width = oldUserWidth;
+                                    newUserProgress.offsetHeight; // Force reflow
+                                    newUserProgress.style.transition = 'all 0.5s ease-out';
+                                    newUserProgress.style.width = newUserWidth;
+                                }
+
+                                // Shake if damage taken
+                                if (parseFloat(newUserWidth) < parseFloat(oldUserWidth)) {
+                                    if (newUserContainer) newUserContainer.classList.add('shake');
+                                }
+                            }
+                        }
+
+                        // Update Result
+                        if (data.resultHtml) {
+                            const inputSection = document.getElementById('step-1-input');
+                            const choicesSection = document.getElementById('step-2-choices');
+                            const choicesContainer = document.getElementById('choices-container');
+
+                            inputSection.classList.add('hidden');
+                            choicesSection.classList.remove('hidden');
+                            choicesSection.classList.add('flex');
+
+                            choicesContainer.innerHTML = data.resultHtml;
+                        }
+
+                        // Store next question
+                        if (data.nextQuestionHtml) {
+                            nextQuestionHtmlContent = data.nextQuestionHtml;
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
+            function nextQuestion() {
+                if (nextQuestionHtmlContent) {
+                    const quizInterface = document.getElementById('quiz-interface');
+                    if (quizInterface) {
+                        quizInterface.outerHTML = nextQuestionHtmlContent;
+                        // Reset variable
+                        nextQuestionHtmlContent = '';
+                    }
+                } else {
+                    // Fallback if no next question content (shouldn't happen if flow is correct)
+                    location.reload();
+                }
+            }
+        </script>
+    </th:block>
 
 </body>
 

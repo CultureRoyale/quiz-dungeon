@@ -12,18 +12,18 @@
         - atk: Attack value
         - imageUrl: URL of the boss image
     -->
-    <div th:fragment="bossHpBar(name, currentHp, maxHp, atk, imageUrl)" class="flex flex-col items-center w-64">
+    <div th:fragment="bossHpBar" id="boss-hp-container" class="flex flex-col items-center w-64">
 
         <!-- Image Container -->
         <div class="relative mb-1 w-56">
             <div class="relative w-full aspect-[285/420] flex items-center justify-center">
-                <img th:src="${imageUrl}" alt="Boss" class="w-full h-full object-contain rounded-xl">
+                <img th:src="${bossImage}" alt="Boss" class="w-full h-full object-contain rounded-xl">
             </div>
         </div>
 
         <!-- Name -->
         <h2 class="text-2xl text-white font-dungeon tracking-wide mb-2 text-center drop-shadow-[0_2px_0_rgba(0,0,0,1)]"
-            style="-webkit-text-stroke: 1.5px black; paint-order: stroke fill;" th:text="${name}">
+            style="-webkit-text-stroke: 1.5px black; paint-order: stroke fill;" th:text="${bossName}">
             Bebe dragon
         </h2>
 
@@ -37,14 +37,14 @@
                     <span
                         class="text-xl leading-none drop-shadow-[0_2px_0_rgba(0,0,0,1)] stroke-black text-white font-dungeon tracking-wider"
                         style="-webkit-text-stroke: 1.5px black; paint-order: stroke fill;"
-                        th:text="'Hp : ' + ${currentHp} + '/' + ${maxHp}">Hp : 50/80</span>
+                        th:text="'Hp : ' + ${bossHp} + '/' + ${bossMaxHp}">Hp : 50/80</span>
                 </div>
 
                 <!-- Bar Container -->
                 <div class="w-full h-6 bg-gray-900 rounded border-2 border-black overflow-hidden relative z-10">
                     <!-- Progress Bar -->
-                    <div class="h-full transition-all duration-500 ease-out"
-                        th:style="'width: ' + (${maxHp} > 0 ? (${currentHp} * 100.0 / ${maxHp}) : 0) + '%; background: linear-gradient(to bottom, #ef4444 50%, #991b1b 50%);'">
+                    <div id="boss-hp-progress" class="h-full transition-all duration-500 ease-out"
+                        th:style="'width: ' + (${bossMaxHp} > 0 ? (${bossHp} * 100.0 / ${bossMaxHp}) : 0) + '%; background: linear-gradient(to bottom, #ef4444 50%, #991b1b 50%);'">
                     </div>
                 </div>
             </div>
@@ -54,7 +54,7 @@
                 style="-webkit-text-stroke: 1.5px black; paint-order: stroke fill;">
                 <img th:src="@{/images/sword.svg}" alt="Attack" class="w-8 h-8 inline-block align-middle pb-1">
                 <span class="text-lg align-middle">Atk :</span>
-                <span class="text-lg align-middle mr-1" th:text="${atk}">2.5</span>
+                <span class="text-lg align-middle mr-1" th:text="${bossAtk}">2.5</span>
 
             </div>
         </div>

@@ -7,10 +7,10 @@
 
         <!-- Result Status -->
         <div class="text-center mb-4">
-            <h3 th:if="${correct}" class="text-4xl font-dungeon text-green-500 drop-shadow-md animate-bounce">
+            <h3 th:if="${correct}" class="text-4xl font-dungeon text-green-500 drop-shadow-md">
                 Correct !
             </h3>
-            <h3 th:unless="${correct}" class="text-4xl font-dungeon text-red-500 drop-shadow-md animate-shake">
+            <h3 th:unless="${correct}" class="text-4xl font-dungeon text-red-500 drop-shadow-md">
                 Incorrect !
             </h3>
         </div>
@@ -44,7 +44,7 @@
 
         <!-- Continue Button -->
         <div class="mt-4">
-            <button type="button" onclick="location.reload()"
+            <button type="button" onclick="nextQuestion()" id="continue-btn" autofocus
                 class="w-full bg-gradient-to-b from-yellow-400 to-orange-500 hover:from-yellow-300 hover:to-orange-400 text-white font-dungeon text-2xl py-3 rounded-lg border-2 border-yellow-200 shadow-[0_4px_0_rgb(194,65,12)] active:shadow-none active:translate-y-1 transition-all uppercase tracking-wider drop-shadow-md">
                 <span class="drop-shadow-[0_2px_2px_rgba(0,0,0,0.2)]">Continuer</span>
             </button>
