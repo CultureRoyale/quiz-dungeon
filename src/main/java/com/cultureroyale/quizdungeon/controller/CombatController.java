@@ -13,6 +13,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import java.text.Normalizer;
+import java.util.regex.Pattern;
 
 @Controller
 @RequestMapping("/combat")
@@ -39,10 +41,6 @@ public class CombatController {
 
         combatService.startCombat(user, boss, session);
 
-        // Redirect to the battle page (using existing quiz-battle template for now, or
-        // modified one)
-        // We need to make sure the view has the data it needs.
-        // For now, let's redirect to a method that populates the view.
         return "redirect:/combat/battle";
     }
 
@@ -65,7 +63,7 @@ public class CombatController {
         User user = userRepository.findByUsername(username).orElseThrow();
 
         // Calculate user attack based on boss max HP (logic from CombatService)
-        // baseDamage = boss.getMaxHp() / 20.0
+        // baseDamage = boss.getMaxHp() / 20.0 * difficultyMultiplier
         double difficultyMultiplier = 1.0;
         switch (boss.getDifficulty()) {
             case FACILE:
@@ -80,16 +78,6 @@ public class CombatController {
         }
         int userAttack = (int) ((boss.getMaxHp() / 20.0) * difficultyMultiplier);
         user.setAttack(userAttack);
-
-        // Check if combat is already over (from previous turn)
-        // We can check HP in session
-        // Integer bossHp = (Integer) session.getAttribute("combat_boss_current_hp");
-        // if (bossHp != null && bossHp <= 0) {
-        // return "redirect:/combat/victory";
-        // }
-        // if (user.getCurrentHp() <= 0) {
-        // return "redirect:/combat/defeat";
-        // }
 
         model.addAttribute("user", user);
 
@@ -153,11 +141,46 @@ public class CombatController {
             // Text submission
             com.cultureroyale.quizdungeon.model.Question question = combatService.getCurrentQuestion(session);
             if (question != null) {
-                // Compare answer (case insensitive)
-                if (question.getCorrectAnswer().equalsIgnoreCase(answer.trim())) {
+                // Compare answer (case insensitive and accent insensitive)
+                String correctAnswer = normalize(question.getCorrectAnswer().trim());
+                String userAnswer = normalize(answer.trim());
+
+                // direct comparison (case insensitive and accent insensitive)
+                if (correctAnswer.equalsIgnoreCase(userAnswer)) {
                     isCorrect = true;
                 } else {
-                    isCorrect = false;
+                    // forgiveness: Levenshtein distance check if length > 3
+                    if (userAnswer.length() > 3) {
+                        int distance = calculateLevenshteinDistance(userAnswer, correctAnswer);
+                        if (distance <= 3) {
+                            isCorrect = true;
+                        }
+                    }
+
+                    // VERY VERY forgiving
+                    if (!isCorrect) {
+                        String[] userWords = userAnswer.split("\\s+");
+                        String[] correctWords = correctAnswer.split("\\s+");
+
+                        for (String uWord : userWords) {
+                            for (String cWord : correctWords) {
+                                if (uWord.equalsIgnoreCase(cWord)) {
+                                    isCorrect = true;
+                                    break;
+                                }
+                                // SUPER forgiving
+                                if (uWord.length() > 3) {
+                                    int dist = calculateLevenshteinDistance(uWord, cWord);
+                                    if (dist <= 3) {
+                                        isCorrect = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (isCorrect)
+                                break;
+                        }
+                    }
                 }
 
                 CombatService.CombatResult result = combatService.processTurn(user, boss, isCorrect, helpLevel,
@@ -244,4 +267,43 @@ public class CombatController {
     public String defeat() {
         return "boss-fail";
     }
+
+    // Levenshtein distance
+    // https://fr.wikipedia.org/wiki/Distance_de_Levenshtein
+    private int calculateLevenshteinDistance(String x, String y) {
+        int[][] dp = new int[x.length() + 1][y.length() + 1];
+
+        for (int i = 0; i <= x.length(); i++) {
+            for (int j = 0; j <= y.length(); j++) {
+                if (i == 0) {
+                    dp[i][j] = j;
+                } else if (j == 0) {
+                    dp[i][j] = i;
+                } else {
+                    dp[i][j] = min(dp[i - 1][j - 1] + costOfSubstitution(x.charAt(i - 1), y.charAt(j - 1)),
+                            dp[i - 1][j] + 1,
+                            dp[i][j - 1] + 1);
+                }
+            }
+        }
+
+        return dp[x.length()][y.length()];
+    }
+
+    private int costOfSubstitution(char a, char b) {
+        return a == b ? 0 : 1;
+    }
+
+    private int min(int... numbers) {
+        return java.util.Arrays.stream(numbers).min().orElse(Integer.MAX_VALUE);
+    }
+
+    private String normalize(String input) {
+        if (input == null)
+            return null;
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        return pattern.matcher(normalized).replaceAll("").toLowerCase();
+    }
+
 }
