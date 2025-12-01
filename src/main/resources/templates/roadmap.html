@@ -217,6 +217,17 @@
                         behavior: 'smooth'
                     });
                 });
+
+                // Startup Sound Logic
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('login') === 'success') {
+                    const audio = new Audio('/audios/Startup.mp3');
+                    audio.play().catch(e => console.log("Audio play failed:", e));
+
+                    // Clean URL
+                    const newUrl = window.location.pathname;
+                    window.history.replaceState({}, document.title, newUrl);
+                }
             });
         </script>
     </main>
