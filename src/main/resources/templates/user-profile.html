@@ -40,13 +40,19 @@
                 <div
                     class="col-span-1 bg-gray-800 p-4 rounded border border-gray-700 flex flex-col items-center justify-center">
                     <h3 class="text-gray-400 text-sm uppercase mb-1">Boost Donjon</h3>
-                    <p class="font-dungeon text-xl text-red-500" th:text="'+' + ${dungeon.damageBoost} + '%'">+0%</p>
+                    <div class="flex items-center gap-1 font-dungeon text-xl text-red-500">
+                        <span th:text="'+' + ${dungeon.damageBoost} + '%'">+0%</span>
+                        <img th:src="@{/images/dungeon_icon.svg}" alt="Dungeon" class="w-5 h-5">
+                    </div>
                 </div>
 
                 <div
                     class="col-span-1 bg-gray-800 p-4 rounded border border-gray-700 flex flex-col items-center justify-center">
                     <h3 class="text-gray-400 text-sm uppercase mb-1">Or</h3>
-                    <p class="font-dungeon text-xl text-yellow-400" th:text="${user.gold} + ' 🪙'">0 🪙</p>
+                    <div class="flex items-center gap-1 font-dungeon text-xl text-yellow-400">
+                        <span th:text="${user.gold}">0</span>
+                        <img th:src="@{/images/gold.svg}" alt="Gold" class="w-5 h-5">
+                    </div>
                 </div>
 
                 <div class="col-span-2 flex items-center justify-center">

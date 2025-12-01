@@ -19,16 +19,24 @@
             #unlockedList .delete-btn {
                 display: none;
             }
+
+            .disabled-question {
+                opacity: 0.5;
+                cursor: not-allowed;
+                background-color: #374151;
+                /* gray-700 */
+            }
         </style>
 
         <div class="w-full max-w-7xl p-8 border border-gray-600 bg-gray-900 shadow-2xl relative">
-            <h1 class="text-3xl text-center mb-4 font-dungeon tracking-wider">Édition du Donjon</h1>
+            <h1 class="text-3xl text-center mb-4 font-dungeon tracking-wider text-white">Édition du Donjon</h1>
             <div class="border-b-2 border-white mb-8"></div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Stats Column -->
-                <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-                    <h2 class="text-2xl font-bold mb-4 text-yellow-500 text-center font-dungeon tracking-wider">Stats du
+                <div class="bg-gray-800 p-4 rounded-lg shadow-lg">
+                    <h2 class="text-gray-400 text-sm uppercase mb-4 text-center font-dungeon font-bold tracking-wider">
+                        Stats du
                         Donjon</h2>
 
                     <div class="grid grid-cols-2 gap-4 mb-6">
@@ -46,17 +54,20 @@
                         <div
                             class="col-span-1 bg-gray-900 p-2 rounded border border-gray-700 flex flex-col items-center justify-center">
                             <h3 class="text-gray-400 text-xs uppercase mb-1">Boost</h3>
-                            <p class="font-dungeon text-lg text-red-500" th:text="'+' + ${dungeon.damageBoost} + '%'">
-                                +0%
-                            </p>
+                            <div class="flex items-center gap-1 font-dungeon text-lg text-red-500">
+                                <span th:text="'+' + ${dungeon.damageBoost} + '%'">+0%</span>
+                                <img th:src="@{/images/dungeon_icon.svg}" alt="Dungeon" class="w-4 h-4">
+                            </div>
                         </div>
 
                         <!-- Gold -->
                         <div
                             class="col-span-1 bg-gray-900 p-2 rounded border border-gray-700 flex flex-col items-center justify-center">
                             <h3 class="text-gray-400 text-xs uppercase mb-1">Or</h3>
-                            <p class="font-dungeon text-lg text-yellow-400" th:text="${dungeon.user.gold} + ' 🪙'">0 🪙
-                            </p>
+                            <div class="flex items-center gap-1 font-dungeon text-lg text-yellow-400">
+                                <span th:text="${dungeon.user.gold}">0</span>
+                                <img th:src="@{/images/gold.svg}" alt="Gold" class="w-4 h-4">
+                            </div>
                         </div>
                     </div>
 
@@ -65,9 +76,9 @@
                         <span class="drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">Sauvegarder</span>
                     </button>
 
-                    <div class="mt-4 text-center">
+                    <div class="text-center mt-4">
                         <a th:href="@{/roadmap}"
-                            class="text-gray-400 hover:text-white underline text-sm transition-colors">
+                            class="bg-gray-700 hover:bg-gray-600 text-white font-dungeon text-xl py-2 px-6 rounded border-2 border-gray-500 transition-all hover:scale-105 inline-block">
                             Retour à la carte
                         </a>
                     </div>
@@ -75,7 +86,8 @@
 
                 <!-- Unlocked Questions (Source) -->
                 <div class="bg-gray-800 p-4 rounded border border-gray-700 shadow-lg">
-                    <h2 class="text-gray-400 text-sm uppercase mb-4 text-center font-bold tracking-wider">Questions
+                    <h2 class="text-gray-400 text-sm uppercase mb-4 text-center font-dungeon font-bold tracking-wider">
+                        Questions
                         Débloquées</h2>
 
                     <div class="mb-4">
@@ -91,7 +103,8 @@
                             <p class="font-bold text-sm"
                                 th:text="${#strings.capitalizeWords(#strings.toLowerCase(uq.question.category.replace('_', ' ')))} + ' - ' + ${#strings.capitalizeWords(#strings.toLowerCase(uq.question.difficulty.name().replace('_', ' ')))}">
                             </p>
-                            <p class="text-xs mt-1 truncate" th:text="${uq.question.questionText}"></p>
+                            <p class="text-xs mt-1 truncate" th:text="${uq.question.questionText}"
+                                th:title="${uq.question.questionText}"></p>
                             <button type="button" onclick="removeQuestion(this)"
                                 class="delete-btn absolute top-1 right-1 text-red-500 hover:text-red-400 p-1 rounded hover:bg-gray-800 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
@@ -106,7 +119,8 @@
 
                 <!-- Dungeon Questions (Target) -->
                 <div class="bg-gray-800 p-4 rounded border border-gray-700 shadow-lg">
-                    <h2 class="text-gray-400 text-sm uppercase mb-4 text-center font-bold tracking-wider">Questions du
+                    <h2 class="text-gray-400 text-sm uppercase mb-4 text-center font-dungeon font-bold tracking-wider">
+                        Questions du
                         Donjon</h2>
                     <p class="text-xs text-gray-400 mb-4 text-center">Glissez les questions ici</p>
 
@@ -117,7 +131,8 @@
                             <p class="font-bold text-sm"
                                 th:text="${#strings.capitalizeWords(#strings.toLowerCase(dq.question.category.replace('_', ' ')))} + ' - ' + ${#strings.capitalizeWords(#strings.toLowerCase(dq.question.difficulty.name().replace('_', ' ')))}">
                             </p>
-                            <p class="text-xs mt-1 truncate" th:text="${dq.question.questionText}"></p>
+                            <p class="text-xs mt-1 truncate" th:text="${dq.question.questionText}"
+                                th:title="${dq.question.questionText}"></p>
                             <button type="button" onclick="removeQuestion(this)"
                                 class="delete-btn absolute top-1 right-1 text-red-500 hover:text-red-400 p-1 rounded hover:bg-gray-800 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
@@ -140,14 +155,24 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
         <script>
             // Initialize Sortable
+            // Initialize Sortable
             new Sortable(document.getElementById('unlockedList'), {
                 group: {
                     name: 'shared',
-                    pull: 'clone', // Clone items from this list
-                    put: false // Do not allow items to be put back into this list
+                    pull: function (to, from, dragEl) {
+                        return !dragEl.classList.contains('disabled-question') ? 'clone' : false;
+                    },
+                    put: true
                 },
                 animation: 150,
-                sort: false // Disable sorting in the source list
+                sort: false,
+                filter: '.disabled-question', // Disable dragging for these items
+                onAdd: function (evt) {
+                    // When an item is dropped back here, remove it (it's a clone/move from dungeon)
+                    // and update the state to re-enable the original item
+                    evt.item.remove();
+                    updateUnlockedListState();
+                }
             });
 
             new Sortable(document.getElementById('dungeonList'), {
@@ -160,7 +185,10 @@
                         return existing.length === 0;
                     }
                 },
-                animation: 150
+                animation: 150,
+                onSort: function (evt) {
+                    updateUnlockedListState();
+                }
             });
 
             // Filter Logic
@@ -187,8 +215,31 @@
                 const item = btn.closest('.question-item');
                 if (item) {
                     item.remove();
+                    updateUnlockedListState();
                 }
             }
+
+            // Update Unlocked List State
+            function updateUnlockedListState() {
+                const dungeonList = document.getElementById('dungeonList');
+                const dungeonItems = dungeonList.querySelectorAll('.question-item');
+                const dungeonIds = Array.from(dungeonItems).map(item => item.getAttribute('data-id'));
+
+                const unlockedList = document.getElementById('unlockedList');
+                const unlockedItems = unlockedList.querySelectorAll('.question-item');
+
+                unlockedItems.forEach(item => {
+                    const id = item.getAttribute('data-id');
+                    if (dungeonIds.includes(id)) {
+                        item.classList.add('disabled-question');
+                    } else {
+                        item.classList.remove('disabled-question');
+                    }
+                });
+            }
+
+            // Initial update
+            updateUnlockedListState();
 
             // Save Logic
             function saveDungeon() {
