@@ -38,4 +38,8 @@ public class UserService {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
     }
+
+    public void save(User user) {
+        userRepository.save(user);
+    }
 }
