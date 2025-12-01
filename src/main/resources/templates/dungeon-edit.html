@@ -4,36 +4,61 @@
 
 <head>
     <title>Édition Donjon</title>
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 </head>
 
 <body>
 
     <main layout:fragment="content" class="container mx-auto px-4 py-8">
+        <style>
+            #dungeonList .delete-btn {
+                display: block;
+            }
+
+            #unlockedList .delete-btn {
+                display: none;
+            }
+        </style>
+
         <h1 class="text-4xl font-dungeon text-center mb-8">Édition du Donjon</h1>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- Stats Column -->
             <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
-                <h2 class="text-2xl font-bold mb-4 text-yellow-500">Stats du Donjon</h2>
-                <div class="mb-4">
-                    <p class="text-lg">Thème: <span class="font-bold" th:text="${dungeon.cosmeticTheme}">Défaut</span>
-                    </p>
-                    <!-- Image placeholder based on theme -->
-                    <div class="w-full h-32 bg-gray-700 mt-2 rounded flex items-center justify-center">
-                        <span class="text-gray-400">Image du Thème</span>
+                <h2 class="text-2xl font-bold mb-4 text-yellow-500 text-center font-dungeon tracking-wider">Stats du
+                    Donjon</h2>
+
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <!-- Theme Image -->
+                    <div
+                        class="col-span-2 bg-gray-900 p-4 rounded border border-gray-700 flex flex-col items-center justify-center">
+                        <div class="w-32 h-32 relative group">
+                            <img th:src="@{'/images/shop/theme_' + ${dungeon.cosmeticTheme} + '.png'}"
+                                th:alt="${dungeon.cosmeticTheme}"
+                                class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-transform group-hover:scale-110">
+                        </div>
+                    </div>
+
+                    <!-- Boost -->
+                    <div
+                        class="col-span-1 bg-gray-900 p-2 rounded border border-gray-700 flex flex-col items-center justify-center">
+                        <h3 class="text-gray-400 text-xs uppercase mb-1">Boost</h3>
+                        <p class="font-dungeon text-lg text-red-500" th:text="'+' + ${dungeon.damageBoost} + '%'">+0%
+                        </p>
+                    </div>
+
+                    <!-- Gold -->
+                    <div
+                        class="col-span-1 bg-gray-900 p-2 rounded border border-gray-700 flex flex-col items-center justify-center">
+                        <h3 class="text-gray-400 text-xs uppercase mb-1">Or</h3>
+                        <p class="font-dungeon text-lg text-yellow-400" th:text="${dungeon.user.gold} + ' 🪙'">0 🪙</p>
                     </div>
                 </div>
-                <div class="mb-4">
-                    <p class="text-lg">Or stocké: <span class="font-bold text-yellow-400"
-                            th:text="${dungeon.user.gold}">0</span> <i class="fas fa-coins"></i></p>
-                </div>
-                <div class="mb-4">
-                    <p class="text-lg">Boost d'attaque: <span class="font-bold text-red-400"
-                            th:text="${dungeon.damageBoost}">0</span>%</p>
-                </div>
-                <button onclick="saveDungeon()"
-                    class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-300">
-                    Sauvegarder
+
+                <button onclick="saveDungeon()" type="button"
+                    class="w-full bg-gradient-to-b from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white font-dungeon text-lg py-2 rounded-lg border-2 border-green-400 shadow-[0_3px_0_rgb(6,95,70)] active:shadow-none active:translate-y-1 transition-all uppercase tracking-wider drop-shadow-md">
+                    <span class="drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">Sauvegarder</span>
                 </button>
             </div>
 
@@ -50,10 +75,19 @@
                     class="space-y-2 min-h-[200px] max-h-[600px] overflow-y-auto p-2 bg-gray-900 rounded border border-gray-700">
                     <div th:each="uq : ${unlockedQuestions}" th:data-id="${uq.question.id}"
                         th:data-category="${uq.question.category}" th:data-difficulty="${uq.question.difficulty}"
-                        class="question-item bg-gray-700 p-3 rounded cursor-move hover:bg-gray-600 transition duration-200 border-l-4 border-blue-500">
+                        class="question-item bg-gray-700 p-3 rounded cursor-move hover:bg-gray-600 transition duration-200 border-l-4 border-blue-500 relative group">
                         <p class="font-bold text-sm"
-                            th:text="${uq.question.category} + ' - ' + ${uq.question.difficulty}"></p>
+                            th:text="${#strings.capitalizeWords(#strings.toLowerCase(uq.question.category.replace('_', ' ')))} + ' - ' + ${#strings.capitalizeWords(#strings.toLowerCase(uq.question.difficulty.name().replace('_', ' ')))}">
+                        </p>
                         <p class="text-xs mt-1 truncate" th:text="${uq.question.questionText}"></p>
+                        <button type="button" onclick="removeQuestion(this)"
+                            class="delete-btn absolute top-1 right-1 text-red-500 hover:text-red-400 p-1 rounded hover:bg-gray-800 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -66,10 +100,19 @@
                 <div id="dungeonList"
                     class="space-y-2 min-h-[200px] max-h-[600px] overflow-y-auto p-2 bg-gray-900 rounded border border-gray-700">
                     <div th:each="dq : ${dungeonQuestions}" th:data-id="${dq.question.id}"
-                        class="question-item bg-gray-700 p-3 rounded cursor-move hover:bg-gray-600 transition duration-200 border-l-4 border-red-500">
+                        class="question-item bg-gray-700 p-3 rounded cursor-move hover:bg-gray-600 transition duration-200 border-l-4 border-red-500 relative group">
                         <p class="font-bold text-sm"
-                            th:text="${dq.question.category} + ' - ' + ${dq.question.difficulty}"></p>
+                            th:text="${#strings.capitalizeWords(#strings.toLowerCase(dq.question.category.replace('_', ' ')))} + ' - ' + ${#strings.capitalizeWords(#strings.toLowerCase(dq.question.difficulty.name().replace('_', ' ')))}">
+                        </p>
                         <p class="text-xs mt-1 truncate" th:text="${dq.question.questionText}"></p>
+                        <button type="button" onclick="removeQuestion(this)"
+                            class="delete-btn absolute top-1 right-1 text-red-500 hover:text-red-400 p-1 rounded hover:bg-gray-800 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -90,7 +133,15 @@
             });
 
             new Sortable(document.getElementById('dungeonList'), {
-                group: 'shared',
+                group: {
+                    name: 'shared',
+                    put: function (to, from, item) {
+                        // Prevent duplicates
+                        const id = item.getAttribute('data-id');
+                        const existing = to.el.querySelectorAll(`.question-item[data-id="${id}"]`);
+                        return existing.length === 0;
+                    }
+                },
                 animation: 150
             });
 
@@ -112,17 +163,29 @@
                 });
             });
 
+            // Remove Question Logic
+            function removeQuestion(btn) {
+                // Find the closest parent with class 'question-item' and remove it
+                const item = btn.closest('.question-item');
+                if (item) {
+                    item.remove();
+                }
+            }
+
             // Save Logic
             function saveDungeon() {
                 const dungeonList = document.getElementById('dungeonList');
                 const items = dungeonList.querySelectorAll('.question-item');
                 const ids = Array.from(items).map(item => item.getAttribute('data-id'));
 
+                const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
+                const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
                 fetch('/dungeon/save', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        // Add CSRF token if Spring Security is enabled
+                        [csrfHeader]: csrfToken
                     },
                     body: JSON.stringify(ids)
                 })

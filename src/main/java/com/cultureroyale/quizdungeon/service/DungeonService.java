@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 public class DungeonService {
 
     private final com.cultureroyale.quizdungeon.repository.DungeonRepository dungeonRepository;
-    private final com.cultureroyale.quizdungeon.repository.DungeonQuestionRepository dungeonQuestionRepository;
+
     private final com.cultureroyale.quizdungeon.repository.QuestionRepository questionRepository;
 
     public Dungeon createDungeon(User user) {
@@ -31,14 +31,20 @@ public class DungeonService {
 
     @org.springframework.transaction.annotation.Transactional
     public void updateDungeonQuestions(Dungeon dungeon, java.util.List<Long> questionIds) {
-        // Clear existing questions
-        dungeonQuestionRepository.deleteByDungeonId(dungeon.getId());
+        // Clear existing questions (triggers orphanRemoval)
         dungeon.getDungeonQuestions().clear();
-        dungeonRepository.save(dungeon);
+        dungeonRepository.saveAndFlush(dungeon); // Force delete to happen before insert
 
         // Add new questions
         int position = 1;
+        java.util.Set<Long> addedQuestionIds = new java.util.HashSet<>();
+
         for (Long qId : questionIds) {
+            // Prevent duplicates
+            if (addedQuestionIds.contains(qId)) {
+                continue;
+            }
+
             com.cultureroyale.quizdungeon.model.Question q = questionRepository.findById(qId).orElse(null);
             if (q != null) {
                 com.cultureroyale.quizdungeon.model.DungeonQuestion dq = com.cultureroyale.quizdungeon.model.DungeonQuestion
@@ -47,8 +53,11 @@ public class DungeonService {
                         .question(q)
                         .position(position++)
                         .build();
-                dungeonQuestionRepository.save(dq);
+                dungeon.getDungeonQuestions().add(dq);
+                addedQuestionIds.add(qId);
             }
         }
+
+        dungeonRepository.save(dungeon);
     }
 }
