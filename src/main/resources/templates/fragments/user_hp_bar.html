@@ -12,9 +12,18 @@
                 <span th:text="'Lvl ' + ${user.level}" class="text-gray-400 text-lg">Lvl 1</span>
             </div>
             <!-- Gold -->
-            <div class="flex items-center gap-1 mb-1">
-                <span th:text="${user.gold}" class="text-[#F1B32B] text-2xl drop-shadow-md">500</span>
-                <img th:src="@{/images/gold.svg}" alt="Gold" class="w-6 h-6">
+            <div class="flex items-center gap-4 mb-1">
+                <!-- Dungeon Boost (if applicable, assuming user has a dungeon) -->
+                <div class="flex items-center gap-1" th:if="${user.dungeon != null}">
+                    <span th:text="'+' + ${user.dungeon.damageBoost} + '%'"
+                        class="text-red-500 text-xl drop-shadow-md"></span>
+                    <img th:src="@{/images/dungeon_icon.svg}" alt="Dungeon" class="w-5 h-5">
+                </div>
+                <!-- Gold -->
+                <div class="flex items-center gap-1">
+                    <span th:text="${user.gold}" class="text-[#F1B32B] text-2xl drop-shadow-md">500</span>
+                    <img th:src="@{/images/gold.svg}" alt="Gold" class="w-6 h-6">
+                </div>
             </div>
         </div>
 

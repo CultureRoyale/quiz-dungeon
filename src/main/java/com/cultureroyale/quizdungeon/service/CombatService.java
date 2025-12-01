@@ -22,6 +22,9 @@ public class CombatService {
     @Autowired
     private QuestionService questionService;
 
+    @Autowired
+    private com.cultureroyale.quizdungeon.repository.UserQuestionRepository userQuestionRepository;
+
     public void startCombat(User user, Boss boss, HttpSession session) {
         session.setAttribute("combat_boss", boss);
         session.setAttribute("combat_boss_current_hp", boss.getMaxHp());
@@ -67,6 +70,17 @@ public class CombatService {
         return (com.cultureroyale.quizdungeon.model.Question) session.getAttribute("combat_current_question");
     }
 
+    public void unlockQuestion(User user, com.cultureroyale.quizdungeon.model.Question question) {
+        if (!userQuestionRepository.existsByUserIdAndQuestionId(user.getId(), question.getId())) {
+            com.cultureroyale.quizdungeon.model.UserQuestion uq = com.cultureroyale.quizdungeon.model.UserQuestion
+                    .builder()
+                    .user(user)
+                    .question(question)
+                    .build();
+            userQuestionRepository.save(uq);
+        }
+    }
+
     public CombatResult processTurn(User user, Boss boss, boolean isCorrect, HelpLevel helpLevel, HttpSession session) {
         int bossHp = (int) session.getAttribute("combat_boss_current_hp");
         int userHp = user.getCurrentHp();
@@ -74,6 +88,12 @@ public class CombatService {
         String message;
 
         if (isCorrect) {
+            // Unlock question
+            com.cultureroyale.quizdungeon.model.Question currentQuestion = getCurrentQuestion(session);
+            if (currentQuestion != null) {
+                unlockQuestion(user, currentQuestion);
+            }
+
             // User attacks
             double difficultyMultiplier = 1.0;
             switch (boss.getDifficulty()) {
