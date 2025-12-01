@@ -20,9 +20,15 @@
 
             <div class="border-b-2 border-white mb-8"></div>
 
+
+
             <!-- User HP Bar Fragment -->
             <div class="w-full mb-8">
                 <div th:replace="~{fragments/user_hp_bar :: userHpBar(user=${user}, compact=false)}"></div>
+            </div>
+            <!-- XP Bar Fragment -->
+            <div class="w-full mb-8 mt-4">
+                <div th:replace="~{fragments/user_xp_bar :: userXpBar}"></div>
             </div>
 
             <!-- Dungeon Stats Grid -->

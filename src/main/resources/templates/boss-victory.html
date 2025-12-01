@@ -24,9 +24,16 @@
         <div class="bg-gray-800 p-8 rounded-xl border-4 border-yellow-500 shadow-2xl max-w-md w-full text-center">
             <p class="text-2xl mb-6 font-dungeon">Boss vaincu !</p>
 
-            <div class="flex justify-center items-center gap-2 mb-8">
-                <img src="/images/gold.svg" alt="Gold" class="w-8 h-8">
-                <span class="text-xl text-yellow-400" th:text="'+ ' + ${goldReward} + ' gold'">Récompense obtenue</span>
+            <div class="flex justify-center items-center gap-6 mb-8">
+                <div class="flex items-center gap-2">
+                    <img src="/images/gold.svg" alt="Gold" class="w-8 h-8">
+                    <span class="text-xl text-yellow-400 font-bold" th:text="'+ ' + ${goldReward} + ' Or'">+ 100
+                        Or</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <img src="/images/xp_icon.png" alt="XP" class="w-10 h-10">
+                    <span class="text-xl text-blue-400 font-bold" th:text="'+ ' + ${xpReward} + ' XP'">+ 50 XP</span>
+                </div>
             </div>
 
             <a href="/roadmap"

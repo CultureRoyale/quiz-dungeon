@@ -25,6 +25,9 @@ public class CombatService {
     @Autowired
     private com.cultureroyale.quizdungeon.repository.UserQuestionRepository userQuestionRepository;
 
+    @Autowired
+    private UserService userService;
+
     public void startCombat(User user, Boss boss, HttpSession session) {
         session.setAttribute("combat_boss", boss);
         session.setAttribute("combat_boss_current_hp", boss.getMaxHp());
@@ -141,8 +144,12 @@ public class CombatService {
     }
 
     public void handleVictory(User user, Boss boss) {
+        // Gold reward from boss
         user.setGold(user.getGold() + boss.getGoldReward());
-        userRepository.save(user);
+
+        // XP reward based on boss position
+        int xpReward = boss.getPosition() * 50;
+        userService.addXp(user, xpReward); // This handles level up and saving
 
         Combat combat = new Combat();
         combat.setUser(user);
@@ -150,7 +157,7 @@ public class CombatService {
         combat.setType(com.cultureroyale.quizdungeon.model.enums.CombatType.BOSS);
         combat.setResult(com.cultureroyale.quizdungeon.model.enums.CombatResult.VICTOIRE);
         combat.setGoldEarned(boss.getGoldReward());
-        combat.setXpEarned(100); // Valeur arbitraire d'XP
+        combat.setXpEarned(xpReward);
         combatRepository.save(combat);
     }
 

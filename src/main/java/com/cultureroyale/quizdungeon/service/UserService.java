@@ -42,4 +42,24 @@ public class UserService {
     public void save(User user) {
         userRepository.save(user);
     }
+
+    public void addXp(User user, int amount) {
+        user.setXp(user.getXp() + amount);
+        checkLevelUp(user);
+        userRepository.save(user);
+    }
+
+    private void checkLevelUp(User user) {
+        while (user.getXp() >= getRequiredXp(user.getLevel())) {
+            user.setXp(user.getXp() - getRequiredXp(user.getLevel()));
+            user.setLevel(user.getLevel() + 1);
+            user.setMaxHp(user.getMaxHp() + 10);
+            user.setCurrentHp(user.getMaxHp()); 
+            user.setGold(user.getGold() + 100 * user.getLevel()); 
+        }
+    }
+
+    public int getRequiredXp(int level) {
+        return level * 100;
+    }
 }
