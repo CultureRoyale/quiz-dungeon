@@ -11,16 +11,29 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import com.cultureroyale.quizdungeon.model.UserQuestion;
+import com.cultureroyale.quizdungeon.repository.UserRepository;
+import com.cultureroyale.quizdungeon.repository.UserQuestionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
-// Gestion donjon : GET /dungeon/edit (édition), POST /dungeon/add-question, DELETE /dungeon/remove-question
-// PvP : GET /dungeon/attack (sélection cible), GET /dungeon/attack/refresh (nouvelle cible)
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
 public class DungeonController {
 
-    private final DungeonService dungeonService;
+    @Autowired
+    private DungeonService dungeonService;
+
     private final UserService userService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private UserQuestionRepository userQuestionRepository;
 
     @GetMapping("/dungeon/attack")
     public String attackDungeon(Model model, Principal principal) {
@@ -62,6 +75,33 @@ public class DungeonController {
         } else {
             return "redirect:/dungeon/attack?error=not_enough_gold";
         }
+    }
+
+    @GetMapping("/dungeon/edit")
+    public String editDungeon(Authentication authentication, Model model) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElseThrow();
+        Dungeon dungeon = dungeonService.getDungeonByUser(user);
+
+        List<UserQuestion> unlockedQuestions = userQuestionRepository.findByUserId(user.getId());
+
+        model.addAttribute("dungeon", dungeon);
+        model.addAttribute("unlockedQuestions", unlockedQuestions);
+        model.addAttribute("dungeonQuestions", dungeon.getDungeonQuestions());
+
+        return "dungeon-edit";
+    }
+
+    @PostMapping("/dungeon/save")
+    @ResponseBody
+    public String saveDungeon(@RequestBody List<Long> questionIds, Authentication authentication) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElseThrow();
+        Dungeon dungeon = dungeonService.getDungeonByUser(user);
+
+        dungeonService.updateDungeonQuestions(dungeon, questionIds);
+
+        return "OK";
     }
 
 }

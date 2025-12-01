@@ -26,15 +26,15 @@
             overflow-x: auto;
             overflow-y: hidden;
             scroll-snap-type: x mandatory;
-            gap: 1.5rem;
-            padding: 1rem 0.5rem;
+            gap: 4rem;
+            padding: 4rem 2rem;
             position: relative;
             z-index: 1;
             scrollbar-width: none;
-            /* Firefox */
             -ms-overflow-style: none;
-            /* IE/Edge */
             scroll-behavior: smooth;
+            align-items: center;
+            min-height: 450px;
         }
 
         .boss-roadmap::-webkit-scrollbar {
@@ -43,15 +43,46 @@
 
         .boss-card {
             flex: 0 0 auto;
-            width: 224px;
+            width: 200px;
             scroll-snap-align: center;
             position: relative;
+            z-index: 2;
+            transition: transform 0.3s ease;
+        }
+
+        /* Zigzag offsets */
+        .boss-card:nth-child(odd) {
+            transform: translateY(-50px);
+        }
+
+        .boss-card:nth-child(even) {
+            transform: translateY(50px);
+        }
+
+        .roadmap-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .connection-line {
+            fill: none;
+            stroke: #f59e0b;
+            /* amber-500 */
+            stroke-width: 4;
+            stroke-dasharray: 10, 10;
+            /* Dashed line */
+            opacity: 0.6;
         }
 
         .boss-image-wrapper {
             width: aut;
             height: auto;
-            margin: 0 auto 1rem;
+            margin: 0 auto 0.75rem;
             position: relative;
             z-index: 2;
             transition: transform 0.3s ease;
@@ -65,7 +96,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 20px;
+            border-radius: 16px;
 
         }
 
@@ -78,7 +109,6 @@
 <body>
 
     <main layout:fragment="content" class="container mx-auto px-4 py-4">
-        <h1 class="text-4xl font-dungeon text-center mb-2 text-amber-400">Roadmap des Boss</h1>
 
         <!-- Stats utilisateur -->
 
@@ -88,7 +118,7 @@
             <!-- Boutons de navigation -->
             <button id="scrollLeft"
                 class="absolute left-2 top-1/2 transform -translate-y-1/2 z-20 bg-gray-900/80 hover:bg-amber-500/80 text-white p-3 rounded-full border-2 border-amber-500 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 -ml-12 md:-ml-20">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
@@ -96,20 +126,22 @@
 
             <button id="scrollRight"
                 class="absolute right-2 top-1/2 transform -translate-y-1/2 z-20 bg-gray-900/80 hover:bg-amber-500/80 text-white p-3 rounded-full border-2 border-amber-500 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 -mr-12 md:-mr-20">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
             </button>
 
-            <!-- Ligne de progression -->
-            <div class="progress-line"></div>
-
             <!-- Conteneur scrollable des boss -->
             <div class="boss-roadmap" id="bossRoadmap">
+                <!-- SVG for connection line -->
+                <svg class="roadmap-svg" id="roadmapSvg">
+                    <path class="connection-line" id="connectionPath" d="" />
+                </svg>
+
                 <div th:each="boss : ${bosses}"
-                    class="boss-card bg-gray-900 rounded-lg border-2 py-4 px-5 flex flex-col"
-                    th:classappend="${unlockStatus.get(boss.id)} ? 'border-amber-500 hover:shadow-lg hover:shadow-amber-500/50 transition-shadow' : 'border-gray-700'">
+                    class="boss-card bg-gray-900 rounded-lg border-2 py-3 px-4 flex flex-col"
+                    th:classappend="${unlockStatus.get(boss.id)} ? 'border-amber-500 transition-shadow' : 'border-gray-700'">
 
                     <!-- Image du boss avec badge position -->
                     <div class="boss-image-wrapper">
@@ -119,23 +151,23 @@
 
                         <!-- Badge position -->
                         <div
-                            class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-gray-900 border-2 border-amber-500 rounded-full w-8 h-8 flex items-center justify-center shadow-lg z-10">
-                            <span class="font-dungeon text-amber-400 text-sm" th:text="${boss.position}">1</span>
+                            class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-gray-900 border-2 border-amber-500 rounded-full w-6 h-6 flex items-center justify-center shadow-lg z-10">
+                            <span class="font-dungeon text-amber-400 text-xs" th:text="${boss.position}">1</span>
                         </div>
 
                         <!-- Badge vaincu -->
                         <div th:if="${defeatedStatus.get(boss.id)}"
-                            class="absolute -top-2 -right-2 bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg z-10">
-                            <span class="text-lg">✓</span>
+                            class="absolute -top-2 -right-2 bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-lg z-10">
+                            <span class="text-base">✓</span>
                         </div>
                     </div>
 
                     <!-- Informations du boss -->
-                    <div class="p-4 flex flex-col flex-grow">
-                        <h3 class="font-dungeon text-xl mb-4 text-amber-400"
+                    <div class="p-2 flex flex-col flex-grow">
+                        <h3 class="font-dungeon text-lg mb-2 text-amber-400"
                             th:text="${unlockStatus.get(boss.id)} ? ${boss.name} : '?'">Boss Name</h3>
 
-                        <div class="space-y-2 text-sm">
+                        <div class="space-y-1 text-xs">
                             <div class="flex justify-between">
                                 <span class="text-gray-400">Difficulté:</span>
                                 <span class="font-bold" th:if="${unlockStatus.get(boss.id)}"
@@ -149,7 +181,7 @@
                                 <span class="text-red-400 font-bold flex items-center"
                                     th:if="${unlockStatus.get(boss.id)}">
                                     <span th:text="${boss.maxHp}">100</span>
-                                    <img th:src="@{/images/hp.svg}" class="h-4 w-4 ml-1" alt="HP">
+                                    <img th:src="@{/images/hp.svg}" class="h-3 w-3 ml-1" alt="HP">
                                 </span>
                                 <span class="text-gray-500 font-bold" th:unless="${unlockStatus.get(boss.id)}">?</span>
                             </div>
@@ -159,7 +191,7 @@
                                 <span class="text-yellow-400 font-bold flex items-center"
                                     th:if="${unlockStatus.get(boss.id)}">
                                     <span th:text="${boss.goldReward}">50</span>
-                                    <img th:src="@{/images/gold.svg}" class="h-4 w-4 ml-1" alt="Gold">
+                                    <img th:src="@{/images/gold.svg}" class="h-3 w-3 ml-1" alt="Gold">
                                 </span>
                                 <span class="text-gray-500 font-bold" th:unless="${unlockStatus.get(boss.id)}">?</span>
                             </div>
@@ -167,7 +199,7 @@
 
                         <!-- Bouton combat (si unlocked) - utilise le fragment button -->
                         <!-- Bouton combat -->
-                        <div class="mt-auto pt-4">
+                        <div class="mt-auto pt-3">
                             <th:block th:if="${unlockStatus.get(boss.id)}">
                                 <a th:href="@{/combat/start/{id}(id=${boss.id})}"
                                     th:if="${!defeatedStatus.get(boss.id)}">
@@ -199,16 +231,72 @@
             <div th:replace="~{fragments/user_hp_bar :: userHpBar(user=${user}, compact=false)}"></div>
         </div>
 
-        <!-- Script pour scroll boutons -->
+        <!-- Script pour scroll boutons et ligne -->
         <script>
             window.addEventListener('DOMContentLoaded', () => {
                 const roadmap = document.getElementById('bossRoadmap');
                 const leftBtn = document.getElementById('scrollLeft');
                 const rightBtn = document.getElementById('scrollRight');
+                const svg = document.getElementById('roadmapSvg');
+                const path = document.getElementById('connectionPath');
+
+                // Draw Line Function
+                function drawLine() {
+                    const cards = document.querySelectorAll('.boss-card');
+                    if (cards.length < 2) return;
+
+                    let d = "";
+
+                    // Get container coordinates relative to viewport
+                    const containerRect = roadmap.getBoundingClientRect();
+                    const scrollLeft = roadmap.scrollLeft;
+
+                    cards.forEach((card, index) => {
+                        // Get card visual position relative to viewport (includes transforms)
+                        const cardRect = card.getBoundingClientRect();
+
+                        // Calculate position relative to the container's scrollable content
+                        // We add scrollLeft because we want the position in the full scrollable width
+                        const x = cardRect.left - containerRect.left + scrollLeft + (cardRect.width / 2);
+                        const y = cardRect.top - containerRect.top + (cardRect.height / 2);
+
+                        if (index === 0) {
+                            d += `M ${x} ${y}`;
+                        } else {
+                            // Bezier curve for smooth connection
+                            const prevCard = cards[index - 1];
+                            const prevRect = prevCard.getBoundingClientRect();
+                            const prevX = prevRect.left - containerRect.left + scrollLeft + (prevRect.width / 2);
+                            const prevY = prevRect.top - containerRect.top + (prevRect.height / 2);
+
+                            const cp1x = prevX + (x - prevX) / 2;
+                            const cp1y = prevY;
+                            const cp2x = prevX + (x - prevX) / 2;
+                            const cp2y = y;
+
+                            d += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x} ${y}`;
+                        }
+                    });
+
+                    path.setAttribute('d', d);
+
+                    // Ensure SVG is wide enough
+                    const lastCard = cards[cards.length - 1];
+                    const lastRect = lastCard.getBoundingClientRect();
+                    const totalWidth = lastRect.left - containerRect.left + scrollLeft + lastRect.width + 50;
+                    svg.style.width = `${totalWidth}px`;
+                }
+
+                // Initial draw
+                setTimeout(drawLine, 100);
+
+                // Redraw on window resize
+                window.addEventListener('resize', drawLine);
+
 
                 if (!roadmap || !leftBtn || !rightBtn) return;
 
-                const scrollAmount = 224 + 24; // 224px width + 1.5rem gap (approx 24px)
+                const scrollAmount = 200 + 64; // 200px width + 4rem gap (64px)
 
                 leftBtn.addEventListener('click', () => {
                     roadmap.scrollBy({

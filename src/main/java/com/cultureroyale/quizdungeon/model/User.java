@@ -42,6 +42,9 @@ public class User {
     private Dungeon currentOpponentDungeon;
 
     private LocalDateTime currentOpponentDungeonAssignedAt;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private java.util.List<UserQuestion> unlockedQuestions = new java.util.ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
