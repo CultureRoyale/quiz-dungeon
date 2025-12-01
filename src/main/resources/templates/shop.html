@@ -8,167 +8,137 @@
 
 <body>
 
-    <main layout:fragment="content" class="container mx-auto px-4 py-8 flex flex-col items-center">
-        <h1 class="text-4xl font-dungeon text-center mb-8 text-white">Boutique</h1>
+    <main layout:fragment="content" class="flex-grow flex items-center justify-center p-4">
+        <div class="w-full max-w-7xl p-8 border border-gray-600 bg-gray-900 shadow-2xl relative">
+            <h1 class="text-3xl text-center mb-4 font-dungeon tracking-wider">Boutique</h1>
+            <div class="border-b-2 border-white mb-8"></div>
 
-        <!-- Messages de succès/erreur -->
-        <div th:if="${success}" class="bg-green-600 text-white px-4 py-2 rounded mb-4 shadow-lg animate-bounce">
-            <span th:text="${success}">Succès</span>
-        </div>
-        <div th:if="${error}" class="bg-red-600 text-white px-4 py-2 rounded mb-4 shadow-lg animate-pulse">
-            <span th:text="${error}">Erreur</span>
-        </div>
-
-        <div class="w-full max-w-4xl space-y-8">
-            <!-- Boosts -->
-            <div class="border-t-2 border-white/20 pt-8">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 justify-items-center">
-
-                    <!-- Potion -->
-                    <div class="flex flex-col items-center group">
-                        <div class="w-32 h-32 mb-4 transition-transform group-hover:scale-110 duration-300">
-                            <img th:src="@{/images/shop/potion.png}" alt="Potion"
-                                class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]">
-                        </div>
-                        <h3 class="font-dungeon text-xl text-white mb-1">Potion <span
-                                class="text-green-400 text-sm">(+20 pv)</span></h3>
-                        <form th:action="@{/shop/buy}" method="post">
-                            <input type="hidden" name="item" value="potion">
-                            <button th:replace="~{fragments/button :: shopButton('50')}"></button>
-                        </form>
-                    </div>
-
-                    <!-- Dague -->
-                    <div class="flex flex-col items-center group">
-                        <div class="w-32 h-32 mb-4 transition-transform group-hover:scale-110 duration-300">
-                            <img th:src="@{/images/shop/dagger.png}" alt="Dague"
-                                class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">
-                        </div>
-                        <h3 class="font-dungeon text-xl text-white mb-1">Dague <span class="text-red-500 text-sm">(+20
-                                Boost Donjon)</span></h3>
-                        <form th:action="@{/shop/buy}" method="post">
-                            <input type="hidden" name="item" value="dagger">
-                            <button th:replace="~{fragments/button :: shopButton('100')}"></button>
-                        </form>
-                    </div>
-
-                    <!-- Piment -->
-                    <div class="flex flex-col items-center group">
-                        <div class="w-32 h-32 mb-4 transition-transform group-hover:scale-110 duration-300">
-                            <img th:src="@{/images/shop/chili.png}" alt="Piment"
-                                class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]">
-                        </div>
-                        <h3 class="font-dungeon text-xl text-white mb-1">Piment <span
-                                class="text-green-400 text-sm">(-50 pv, </span><span class="text-red-500 text-sm">+50
-                                Boost Donjon)</span></h3>
-                        <form th:action="@{/shop/buy}" method="post">
-                            <input type="hidden" name="item" value="chili">
-                            <button th:replace="~{fragments/button :: shopButton('200')}"></button>
-                        </form>
-                    </div>
-
-                </div>
+            <!-- User HP Bar Fragment -->
+            <div class="w-full mb-8">
+                <div th:replace="~{fragments/user_hp_bar :: userHpBar(user=${user})}"></div>
             </div>
 
-            <!-- Cosmetics -->
-            <div class="border-t-2 border-b-2 border-white/20 py-8">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 justify-items-center">
+            <!-- Toast Fragment -->
+            <div th:replace="~{fragments/toast :: toast}"></div>
+            <div th:replace="~{fragments/toast :: toast-script}"></div>
 
-                    <!-- Tiki -->
-                    <div class="flex flex-col items-center group">
-                        <div class="w-32 h-32 mb-4 transition-transform group-hover:scale-110 duration-300">
-                            <img th:src="@{/images/shop/theme_tiki.png}" alt="Tiki"
-                                class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(251,191,36,0.5)]">
+            <!-- Trigger Toast from Server Messages -->
+            <!-- Trigger Toast from Server Messages -->
+            <script th:if="${success}" th:inline="javascript">
+                document.addEventListener('DOMContentLoaded', function () {
+                    var msg = /*[[${success}]]*/ 'Success';
+                    showToast(msg, 'success');
+                });
+            </script>
+            <script th:if="${error}" th:inline="javascript">
+                document.addEventListener('DOMContentLoaded', function () {
+                    var msg = /*[[${error}]]*/ 'Error';
+                    showToast(msg, 'error');
+                });
+            </script>
+
+            <div class="space-y-12">
+
+                <!-- Boosts Row -->
+                <div class="relative">
+                    <h2 class="absolute -top-6 left-0 text-gray-400 font-dungeon tracking-wider text-sm uppercase">
+                        Boosts</h2>
+                    <div class="border-t border-gray-600 pt-6 flex flex-row gap-12 justify-center flex-wrap">
+
+                        <!-- Potion -->
+                        <div class="flex flex-col items-center group w-40">
+                            <div class="w-20 h-20 mb-4 transition-transform group-hover:scale-110 duration-300">
+                                <img th:src="@{/images/shop/potion.png}" alt="Potion"
+                                    class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]">
+                            </div>
+                            <h3 class="font-dungeon text-xl text-white mb-1 text-center leading-tight">Potion <br><span
+                                    class="text-green-400 text-sm">(+20 pv)</span></h3>
+                            <form th:action="@{/shop/buy}" method="post" class="mt-auto pt-2">
+                                <input type="hidden" name="item" value="potion">
+                                <button th:replace="~{fragments/button :: shopButton('50')}"></button>
+                            </form>
                         </div>
-                        <h3 class="font-dungeon text-xl text-white mb-1">Thème Tiki</h3>
-                        <form th:action="@{/shop/buy}" method="post">
-                            <input type="hidden" name="item" value="theme_tiki">
-                            <button th:replace="~{fragments/button :: shopButton('1000')}"></button>
-                        </form>
-                    </div>
 
-                    <!-- Lava -->
-                    <div class="flex flex-col items-center group">
-                        <div class="w-32 h-32 mb-4 transition-transform group-hover:scale-110 duration-300">
-                            <img th:src="@{/images/shop/theme_lava.png}" alt="Lava"
-                                class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(249,115,22,0.5)]">
+                        <!-- Dague -->
+                        <div class="flex flex-col items-center group w-40">
+                            <div class="w-20 h-20 mb-4 transition-transform group-hover:scale-110 duration-300">
+                                <img th:src="@{/images/shop/dagger.png}" alt="Dague"
+                                    class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">
+                            </div>
+                            <h3 class="font-dungeon text-xl text-white mb-1 text-center leading-tight">Dague <br><span
+                                    class="text-red-500 text-sm">(+20 Boost)</span></h3>
+                            <form th:action="@{/shop/buy}" method="post" class="mt-auto pt-2">
+                                <input type="hidden" name="item" value="dagger">
+                                <button th:replace="~{fragments/button :: shopButton('100')}"></button>
+                            </form>
                         </div>
-                        <h3 class="font-dungeon text-xl text-white mb-1">Thème Lava</h3>
-                        <form th:action="@{/shop/buy}" method="post">
-                            <input type="hidden" name="item" value="theme_lava">
-                            <button th:replace="~{fragments/button :: shopButton('1000')}"></button>
-                        </form>
-                    </div>
 
-                    <!-- Gold -->
-                    <div class="flex flex-col items-center group">
-                        <div class="w-32 h-32 mb-4 transition-transform group-hover:scale-110 duration-300">
-                            <img th:src="@{/images/shop/theme_gold.png}" alt="Gold"
-                                class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]">
+                        <!-- Piment -->
+                        <div class="flex flex-col items-center group w-40">
+                            <div class="w-20 h-20 mb-4 transition-transform group-hover:scale-110 duration-300">
+                                <img th:src="@{/images/shop/chili.png}" alt="Piment"
+                                    class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(239,68,68,0.5)]">
+                            </div>
+                            <h3 class="font-dungeon text-xl text-white mb-1 text-center leading-tight">Piment <br><span
+                                    class="text-green-400 text-sm">(-50pv, </span><span class="text-red-500 text-sm">+50
+                                    Boost)</span></h3>
+                            <form th:action="@{/shop/buy}" method="post" class="mt-auto pt-2">
+                                <input type="hidden" name="item" value="chili">
+                                <button th:replace="~{fragments/button :: shopButton('200')}"></button>
+                            </form>
                         </div>
-                        <h3 class="font-dungeon text-xl text-white mb-1">Thème Gold</h3>
-                        <form th:action="@{/shop/buy}" method="post">
-                            <input type="hidden" name="item" value="theme_gold">
-                            <button th:replace="~{fragments/button :: shopButton('1000')}"></button>
-                        </form>
                     </div>
-
                 </div>
+
+                <!-- Cosmetics Row -->
+                <div class="relative">
+                    <h2 class="absolute -top-6 left-0 text-gray-400 font-dungeon tracking-wider text-sm uppercase">
+                        Cosmétiques</h2>
+                    <div class="border-t border-gray-600 pt-6 flex flex-row gap-12 justify-center flex-wrap">
+
+                        <!-- Tiki -->
+                        <div class="flex flex-col items-center group w-40">
+                            <div class="w-20 h-20 mb-4 transition-transform group-hover:scale-110 duration-300">
+                                <img th:src="@{/images/shop/theme_tiki.png}" alt="Tiki"
+                                    class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(251,191,36,0.5)]">
+                            </div>
+                            <h3 class="font-dungeon text-xl text-white mb-1 text-center leading-tight">Thème Tiki</h3>
+                            <form th:action="@{/shop/buy}" method="post" class="mt-auto pt-2">
+                                <input type="hidden" name="item" value="theme_tiki">
+                                <button th:replace="~{fragments/button :: shopButton('1000')}"></button>
+                            </form>
+                        </div>
+
+                        <!-- Lava -->
+                        <div class="flex flex-col items-center group w-40">
+                            <div class="w-20 h-20 mb-4 transition-transform group-hover:scale-110 duration-300">
+                                <img th:src="@{/images/shop/theme_lava.png}" alt="Lava"
+                                    class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(249,115,22,0.5)]">
+                            </div>
+                            <h3 class="font-dungeon text-xl text-white mb-1 text-center leading-tight">Thème Lava</h3>
+                            <form th:action="@{/shop/buy}" method="post" class="mt-auto pt-2">
+                                <input type="hidden" name="item" value="theme_lava">
+                                <button th:replace="~{fragments/button :: shopButton('1000')}"></button>
+                            </form>
+                        </div>
+
+                        <!-- Gold -->
+                        <div class="flex flex-col items-center group w-40">
+                            <div class="w-20 h-20 mb-4 transition-transform group-hover:scale-110 duration-300">
+                                <img th:src="@{/images/shop/theme_gold.png}" alt="Gold"
+                                    class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]">
+                            </div>
+                            <h3 class="font-dungeon text-xl text-white mb-1 text-center leading-tight">Thème Gold</h3>
+                            <form th:action="@{/shop/buy}" method="post" class="mt-auto pt-2">
+                                <input type="hidden" name="item" value="theme_gold">
+                                <button th:replace="~{fragments/button :: shopButton('1000')}"></button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
-
-        <!-- Footer Stats -->
-        <div class="fixed bottom-0 left-0 right-0 p-4 z-50 pointer-events-none">
-            <div
-                class="bg-gray-900 border-2 border-gray-600 rounded-lg p-3 font-dungeon text-white shadow-lg select-none w-full max-w-3xl mx-auto pointer-events-auto">
-                <!-- Top Row -->
-                <div class="flex justify-between items-end mb-1 px-1">
-                    <!-- Username & Level -->
-                    <div class="text-2xl tracking-wide drop-shadow-md flex items-baseline gap-2">
-                        <span th:text="${user.username}">sylvain</span>
-                        <span class="text-gray-400 text-lg" th:text="'Lvl ' + ${user.level}">Lvl 1</span>
-                    </div>
-                    <!-- Gold & Boost -->
-                    <div class="flex items-center gap-4 mb-1">
-                        <div class="flex items-center gap-1">
-                            <span class="text-red-500 text-xl drop-shadow-md"
-                                th:text="'+' + ${dungeon.damageBoost} + '%'">+0%</span>
-                            <svg class="w-5 h-5 mb-1 text-red-500 fill-current" viewBox="0 0 256 256"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M221.65723,34.34326A8.00246,8.00246,0,0,0,216,32h-.02539l-63.79883.20117A8.00073,8.00073,0,0,0,146.0332,35.106L75.637,120.32275,67.31348,111.999A16.02162,16.02162,0,0,0,44.68555,112L32.001,124.68555A15.99888,15.99888,0,0,0,32,147.31348l20.88672,20.88769L22.94531,198.14258a16.01777,16.01777,0,0,0,.001,22.62695l12.28418,12.28418a16.00007,16.00007,0,0,0,22.62793,0L87.79883,203.1123,108.68652,224.001A16.02251,16.02251,0,0,0,131.31445,224L143.999,211.31445A15.99888,15.99888,0,0,0,144,188.68652l-8.32324-8.32324,85.21679-70.39648a8.00125,8.00125,0,0,0,2.90528-6.14258L224,40.02539A8.001,8.001,0,0,0,221.65723,34.34326Zm-13.84668,65.67822-83.49829,68.97706L111.314,156l54.34327-54.34277a8.00053,8.00053,0,0,0-11.31446-11.31446L100,144.686,87.00195,131.6875,155.97852,48.189l51.99609-.16357Z" />
-                            </svg>
-                        </div>
-                        <div class="flex items-center gap-1">
-                            <span class="text-[#F1B32B] text-2xl drop-shadow-md" th:text="${user.gold}">25</span>
-                            <img th:src="@{/images/gold.svg}" alt="Gold" class="w-6 h-6">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- HP Bar Container -->
-                <div class="relative w-full mt-4 mb-2">
-                    <!-- HP Text (Overlay) -->
-                    <div class="absolute left-0 right-0 bottom-6 flex justify-center z-20 pointer-events-none">
-                        <span
-                            class="text-xl leading-none drop-shadow-[0_2px_0_rgba(0,0,0,1)] stroke-black text-white font-dungeon tracking-wider"
-                            style="-webkit-text-stroke: 1.5px black; paint-order: stroke fill;"
-                            th:text="'Hp : ' + ${user.currentHp} + '/' + ${user.maxHp}">Hp : 45/100</span>
-                    </div>
-
-                    <!-- Bar -->
-                    <div class="relative w-full h-8 bg-gray-900 rounded border-2 border-black overflow-hidden z-10">
-                        <!-- Progress Bar -->
-                        <div class="h-full transition-all duration-500 ease-out"
-                            th:style="'width: ' + (${user.currentHp} * 100.0 / ${user.maxHp}) + '%; background: linear-gradient(to bottom, #4ade80 50%, #166534 50%);'">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- Spacer for fixed footer -->
-        <div class="h-24"></div>
-
     </main>
 </body>
 
