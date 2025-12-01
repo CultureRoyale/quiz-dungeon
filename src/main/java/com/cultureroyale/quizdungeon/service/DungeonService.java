@@ -25,6 +25,10 @@ public class DungeonService {
         return dungeonRepository.save(dungeon);
     }
 
+    public Dungeon getRandomDungeon(User excludedUser) {
+        return dungeonRepository.findRandomDungeonExceptUser(excludedUser.getId()).orElse(null);
+    }
+
     public Dungeon getDungeonByUser(User user) {
         return dungeonRepository.findByUserId(user.getId()).orElseGet(() -> createDungeon(user));
     }

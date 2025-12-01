@@ -3,12 +3,12 @@
 
 <body>
     <button th:fragment="submitButton(text)" type="submit"
-        class="w-full bg-gradient-to-b from-yellow-400 to-orange-500 hover:from-yellow-300 hover:to-orange-400 text-white font-dungeon text-2xl py-3 rounded-lg border-2 border-yellow-200 shadow-[0_4px_0_rgb(194,65,12)] active:shadow-none active:translate-y-1 transition-all uppercase tracking-wider drop-shadow-md mt-8">
+        class="w-full bg-gradient-to-b from-yellow-400 to-orange-500 hover:from-yellow-300 hover:to-orange-400 text-white font-dungeon text-2xl py-3 rounded-lg border-2 border-yellow-200 shadow-[0_4px_0_rgb(194,65,12)] active:shadow-none active:translate-y-1 transition-all uppercase tracking-wider mt-8">
         <span th:text="${text}" class="drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)]">Button Text</span>
     </button>
 
     <button th:fragment="smallButton(text)" type="submit"
-        class="w-full bg-gradient-to-b from-yellow-400 to-orange-500 hover:from-yellow-300 hover:to-orange-400 text-white font-dungeon text-lg py-2 rounded-lg border-2 border-yellow-200 shadow-[0_3px_0_rgb(194,65,12)] active:shadow-none active:translate-y-1 transition-all uppercase tracking-wider drop-shadow-md">
+        class="w-full bg-gradient-to-b from-yellow-400 to-orange-500 hover:from-yellow-300 hover:to-orange-400 text-white font-dungeon text-lg py-2 rounded-lg border-2 border-yellow-200 shadow-[0_3px_0_rgb(194,65,12)] active:shadow-none active:translate-y-1 transition-all uppercase tracking-wider">
         <span th:text="${text}" class="drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">Button Text</span>
     </button>
 
@@ -18,12 +18,12 @@
     </button>
 
     <button th:fragment="greenButton(text)" type="submit"
-        class="w-full bg-gradient-to-b from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white font-dungeon text-lg py-2 rounded-lg border-2 border-green-400 shadow-[0_3px_0_rgb(6,95,70)] active:shadow-none active:translate-y-1 transition-all uppercase tracking-wider drop-shadow-md">
+        class="w-full bg-gradient-to-b from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white font-dungeon text-lg py-2 rounded-lg border-2 border-green-400 shadow-[0_3px_0_rgb(6,95,70)] active:shadow-none active:translate-y-1 transition-all uppercase tracking-wider">
         <span th:text="${text}" class="drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">Button Text</span>
     </button>
 
     <button th:fragment="shopButton(price)" type="submit"
-        class="bg-gradient-to-b from-fuchsia-500 to-pink-600 hover:from-fuchsia-400 hover:to-pink-500 text-white font-dungeon text-lg py-1 px-6 rounded-lg border-2 border-fuchsia-400 shadow-[0_3px_0_rgb(134,25,143)] active:shadow-none active:translate-y-1 transition-all uppercase tracking-wider drop-shadow-md flex items-center gap-2 mx-auto">
+        class="bg-gradient-to-b from-fuchsia-500 to-pink-600 hover:from-fuchsia-400 hover:to-pink-500 text-white font-dungeon text-lg py-1 px-6 rounded-lg border-2 border-fuchsia-400 shadow-[0_3px_0_rgb(134,25,143)] active:shadow-none active:translate-y-1 transition-all uppercase tracking-wider flex items-center gap-2 mx-auto">
         <span th:text="${price}" class="drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">100</span>
         <img th:src="@{/images/gold.svg}" class="w-4 h-4 inline-block drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">
     </button>
