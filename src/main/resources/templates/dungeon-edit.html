@@ -10,7 +10,135 @@
 
     <main layout:fragment="content" class="container mx-auto px-4 py-8">
         <h1 class="text-4xl font-dungeon text-center mb-8">Édition du Donjon</h1>
-        <!-- Édition donjon : liste questions débloquées, liste questions dans donjon, boutons add/remove -->
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Stats Column -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-bold mb-4 text-yellow-500">Stats du Donjon</h2>
+                <div class="mb-4">
+                    <p class="text-lg">Thème: <span class="font-bold" th:text="${dungeon.cosmeticTheme}">Défaut</span>
+                    </p>
+                    <!-- Image placeholder based on theme -->
+                    <div class="w-full h-32 bg-gray-700 mt-2 rounded flex items-center justify-center">
+                        <span class="text-gray-400">Image du Thème</span>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <p class="text-lg">Or stocké: <span class="font-bold text-yellow-400"
+                            th:text="${dungeon.user.gold}">0</span> <i class="fas fa-coins"></i></p>
+                </div>
+                <div class="mb-4">
+                    <p class="text-lg">Boost d'attaque: <span class="font-bold text-red-400"
+                            th:text="${dungeon.damageBoost}">0</span>%</p>
+                </div>
+                <button onclick="saveDungeon()"
+                    class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition duration-300">
+                    Sauvegarder
+                </button>
+            </div>
+
+            <!-- Unlocked Questions (Source) -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-bold mb-4 text-blue-400">Questions Débloquées</h2>
+
+                <div class="mb-4">
+                    <input type="text" id="filterInput" placeholder="Filtrer (catégorie, difficulté)..."
+                        class="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div id="unlockedList"
+                    class="space-y-2 min-h-[200px] max-h-[600px] overflow-y-auto p-2 bg-gray-900 rounded border border-gray-700">
+                    <div th:each="uq : ${unlockedQuestions}" th:data-id="${uq.question.id}"
+                        th:data-category="${uq.question.category}" th:data-difficulty="${uq.question.difficulty}"
+                        class="question-item bg-gray-700 p-3 rounded cursor-move hover:bg-gray-600 transition duration-200 border-l-4 border-blue-500">
+                        <p class="font-bold text-sm"
+                            th:text="${uq.question.category} + ' - ' + ${uq.question.difficulty}"></p>
+                        <p class="text-xs mt-1 truncate" th:text="${uq.question.questionText}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dungeon Questions (Target) -->
+            <div class="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-bold mb-4 text-red-400">Questions du Donjon</h2>
+                <p class="text-sm text-gray-400 mb-4">Glissez les questions ici pour les ajouter à votre donjon.</p>
+
+                <div id="dungeonList"
+                    class="space-y-2 min-h-[200px] max-h-[600px] overflow-y-auto p-2 bg-gray-900 rounded border border-gray-700">
+                    <div th:each="dq : ${dungeonQuestions}" th:data-id="${dq.question.id}"
+                        class="question-item bg-gray-700 p-3 rounded cursor-move hover:bg-gray-600 transition duration-200 border-l-4 border-red-500">
+                        <p class="font-bold text-sm"
+                            th:text="${dq.question.category} + ' - ' + ${dq.question.difficulty}"></p>
+                        <p class="text-xs mt-1 truncate" th:text="${dq.question.questionText}"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SortableJS -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+        <script>
+            // Initialize Sortable
+            new Sortable(document.getElementById('unlockedList'), {
+                group: {
+                    name: 'shared',
+                    pull: 'clone', // Clone items from this list
+                    put: false // Do not allow items to be put back into this list
+                },
+                animation: 150,
+                sort: false // Disable sorting in the source list
+            });
+
+            new Sortable(document.getElementById('dungeonList'), {
+                group: 'shared',
+                animation: 150
+            });
+
+            // Filter Logic
+            document.getElementById('filterInput').addEventListener('input', function (e) {
+                const term = e.target.value.toLowerCase();
+                const items = document.querySelectorAll('#unlockedList .question-item');
+
+                items.forEach(item => {
+                    const text = item.innerText.toLowerCase();
+                    const category = item.getAttribute('data-category').toLowerCase();
+                    const difficulty = item.getAttribute('data-difficulty').toLowerCase();
+
+                    if (text.includes(term) || category.includes(term) || difficulty.includes(term)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+
+            // Save Logic
+            function saveDungeon() {
+                const dungeonList = document.getElementById('dungeonList');
+                const items = dungeonList.querySelectorAll('.question-item');
+                const ids = Array.from(items).map(item => item.getAttribute('data-id'));
+
+                fetch('/dungeon/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // Add CSRF token if Spring Security is enabled
+                    },
+                    body: JSON.stringify(ids)
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('Donjon sauvegardé avec succès !');
+                        } else {
+                            alert('Erreur lors de la sauvegarde.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Erreur lors de la sauvegarde.');
+                    });
+            }
+        </script>
     </main>
 
 </body>

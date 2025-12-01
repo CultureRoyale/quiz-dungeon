@@ -31,8 +31,7 @@ public class Dungeon {
     @ToString.Exclude
     private User user;
 
-    @ManyToMany
-    @JoinTable(name = "dungeon_questions", joinColumns = @JoinColumn(name = "dungeon_id"), inverseJoinColumns = @JoinColumn(name = "question_id"))
+    @OneToMany(mappedBy = "dungeon", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<Question> questions = new ArrayList<>();
+    private List<DungeonQuestion> dungeonQuestions = new ArrayList<>();
 }
