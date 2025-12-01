@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import org.springframework.http.ResponseEntity;
 import org.thymeleaf.spring6.SpringTemplateEngine;
-import org.thymeleaf.context.Context;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -317,8 +316,10 @@ public class CombatController {
         Boss boss = (Boss) session.getAttribute("combat_boss");
         if (boss != null) {
             model.addAttribute("goldReward", boss.getGoldReward());
+            model.addAttribute("xpReward", boss.getPosition() * 50);
         } else {
             model.addAttribute("goldReward", 0);
+            model.addAttribute("xpReward", 0);
         }
         return "boss-victory";
     }

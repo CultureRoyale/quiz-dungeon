@@ -2,7 +2,6 @@ package com.cultureroyale.quizdungeon.service;
 
 import com.cultureroyale.quizdungeon.model.Boss;
 import com.cultureroyale.quizdungeon.model.Question;
-import com.cultureroyale.quizdungeon.model.enums.Difficulty;
 import com.cultureroyale.quizdungeon.repository.QuestionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
