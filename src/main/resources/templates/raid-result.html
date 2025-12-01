@@ -1,16 +1,74 @@
 <!DOCTYPE html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
     layout:decorate="~{layouts/layout}">
 
 <head>
-    <title>Résultat Raid</title>
+    <title>Raid Result</title>
 </head>
 
 <body>
 
-    <main layout:fragment="content" class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-dungeon text-center mb-8">Résultat du Raid</h1>
-        <!-- Résultat raid : victoire/défaite, gold gagné/perdu, bouton retour roadmap -->
+    <main layout:fragment="content" class="container mx-auto px-4 py-8 text-center">
+        <audio th:if="${status == 'VICTORY'}" th:src="@{/audios/Victory.mp3}" autoplay></audio>
+        <audio th:if="${status == 'DEFEAT'}" th:src="@{/audios/Defeat.mp3}" autoplay></audio>
+        <audio th:if="${status == 'DRAW'}" th:src="@{/audios/Draw.mp3}" autoplay></audio>
+
+
+        <div
+            class="max-w-md mx-auto bg-gray-800 rounded-lg p-8 shadow-lg border border-gray-700 flex flex-col justify-center items-center h-full">
+
+            <div th:if="${status == 'VICTORY'}">
+                <h1 class="text-4xl font-dungeon text-yellow-400 mb-4">VICTOIRE !</h1>
+                <p class="text-gray-300 mb-6">Vous avez vaincu le donjon !</p>
+
+                <div class="flex justify-center items-center gap-4">
+                    <div class="text-center">
+                        <div class="flex items-center justify-center gap-1 px-4 py-3 text-center">
+                            <p class="text-2xl font-bold text-yellow-400" th:text="'+' + ${goldChange}">+0</p>
+                            <img th:src="@{/images/gold.svg}" alt="Gold" class="w-6 h-6">
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-2xl font-bold text-blue-400" th:text="'+' + ${xpReward} + ' XP'">+0 XP</p>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${status == 'DEFEAT'}">
+                <h1 class="text-4xl font-dungeon text-red-500 mb-4">DÉFAITE...</h1>
+                <p class="text-gray-300 mb-6">Le donjon vous a vaincu.</p>
+
+                <div class="flex justify-center items-center gap-4">
+                    <div class="text-center">
+                        <div class="flex items-center justify-center gap-1 px-4 py-3 text-center">
+                            <p class="text-2xl font-bold text-red-400" th:text="${goldChange}">-0</p>
+                            <img th:src="@{/images/gold.svg}" alt="Gold" class="w-6 h-6">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${status == 'DRAW'}">
+                <h1 class="text-4xl font-dungeon text-blue-400 mb-4">MATCH NUL</h1>
+                <p class="text-gray-300 mb-6">Vous avez survécu, mais le donjon tient toujours.</p>
+
+                <div class="flex justify-center items-center gap-4">
+                    <div class="text-center">
+                        <p class="text-2xl font-bold text-blue-400" th:text="'+' + ${xpReward} + ' XP'">+0 XP</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-4 w-full">
+                <a th:href="@{/dungeon/attack}" class="inline-block w-full">
+                    <div th:replace="~{fragments/button :: submitButton('RETOURNER AU HUB')}"></div>
+                </a>
+                <a th:href="@{/roadmap}" class="text-gray-400 hover:text-white transition-colors">
+                    Retour à la carte
+                </a>
+            </div>
+        </div>
+
     </main>
 
 </body>

@@ -9,6 +9,6 @@ import java.util.Optional;
 public interface DungeonRepository extends JpaRepository<Dungeon, Long> {
     Optional<Dungeon> findByUserId(Long userId);
 
-    @Query(value = "SELECT * FROM dungeons WHERE user_id != :userId ORDER BY RAND() LIMIT 1", nativeQuery = true)
+    @Query(value = "SELECT * FROM dungeons d WHERE d.user_id != :userId AND d.id IN (SELECT dq.dungeon_id FROM dungeon_questions dq) ORDER BY RAND() LIMIT 1", nativeQuery = true)
     Optional<Dungeon> findRandomDungeonExceptUser(@Param("userId") Long userId);
 }
