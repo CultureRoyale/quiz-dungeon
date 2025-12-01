@@ -9,8 +9,54 @@
 <body>
 
     <main layout:fragment="content" class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-dungeon text-center mb-8">Sélection Cible</h1>
-        <!-- Sélection cible PvP : affichage joueur cible (nom, niveau, nombre questions donjon), boutons attaquer/refresh -->
+        <audio th:src="@{/audios/Menu.mp3}" autoplay loop></audio>
+        <h1 class="text-4xl font-dungeon text-center mb-2 text-amber-400 mb-2">Attaquer un Donjon</h1>
+
+        <div th:if="${dungeon == null}" class="text-center text-gray-400 mt-8">
+            <p>Aucun donjon disponible pour le moment.</p>
+            <a th:href="@{/roadmap}" class="inline-block mt-4 text-amber-400 hover:text-amber-300">Retour à la
+                roadmap</a>
+        </div>
+
+        <div th:if="${dungeon != null}">
+            <div th:if="${param.error}" class="bg-red-500 text-white p-4 rounded-lg mb-4 text-center">
+                <p>Pas assez d'or ! Il vous faut 80 pièces d'or.</p>
+            </div>
+
+            <div class="text-center mb-2">
+                <img th:src="@{'/images/shop/theme_' + ${dungeon.cosmeticTheme} + '.png'}"
+                    th:alt="${dungeon.cosmeticTheme}"
+                    class="mx-auto h-[450px] object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] my-5">
+
+                <h2 class="text-3xl font-dungeon text-white my-2" th:text="${dungeon.name}">Nom du Donjon</h2>
+                <p class="text-gray-400">Créé par <span class="text-amber-400"
+                        th:text="${dungeon.user.username}">User</span></p>
+            </div>
+
+            <div class="flex justify-center gap-8 mb-8">
+                <div class="flex items-center gap-2 px-4 py-3 text-center p-4 ">
+                    <img th:src="@{/images/sword.svg}" alt="Icône Épée" class="w-7 h-7">
+                    <p class="text-2xl font-bold text-white" th:text="|Level ${dungeon.questions.size()}|">Level 0</p>
+                </div>
+                <div class="flex items-center gap-2 px-4 py-3 text-center p-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-7 h-7">
+                        <path
+                            d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                    </svg>
+                    <p class="text-2xl font-bold text-white" th:text="${dungeon.questions.size()}">80</p>
+                </div>
+            </div>
+
+            <div class="flex justify-center items-center gap-8 mb-8">
+                <a th:href="@{/dungeon/attack/start/{id}(id=${dungeon.id})}" class="inline-block w-64">
+                    <div th:replace="~{fragments/button :: submitButton('ATTAQUER')}"></div>
+                </a>
+                <form th:action="@{/dungeon/attack/buy}" method="post" class="inline-block w-64">
+                    <div th:replace="~{fragments/buy_button :: buyButton('SUIVANT', 80)}"></div>
+                </form>
+            </div>
+        </div>
+
     </main>
 
 </body>

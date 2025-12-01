@@ -38,6 +38,11 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Dungeon dungeon;
 
+    @ManyToOne
+    private Dungeon currentOpponentDungeon;
+
+    private LocalDateTime currentOpponentDungeonAssignedAt;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

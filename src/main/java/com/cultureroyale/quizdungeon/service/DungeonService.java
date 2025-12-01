@@ -23,4 +23,8 @@ public class DungeonService {
     public Dungeon save(Dungeon dungeon) {
         return dungeonRepository.save(dungeon);
     }
+
+    public Dungeon getRandomDungeon(User excludedUser) {
+        return dungeonRepository.findRandomDungeonExceptUser(excludedUser.getId()).orElse(null);
+    }
 }
