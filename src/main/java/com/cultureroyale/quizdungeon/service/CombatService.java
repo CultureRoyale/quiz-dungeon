@@ -81,6 +81,22 @@ public class CombatService {
         }
     }
 
+    public int calculateUserBaseAttack(Boss boss) {
+        double difficultyMultiplier = 1.0;
+        switch (boss.getDifficulty()) {
+            case FACILE:
+                difficultyMultiplier = 2.0;
+                break;
+            case MOYEN:
+                difficultyMultiplier = 1.0;
+                break;
+            case DIFFICILE:
+                difficultyMultiplier = 0.5;
+                break;
+        }
+        return (int) ((boss.getMaxHp() / 20.0) * difficultyMultiplier);
+    }
+
     public CombatResult processTurn(User user, Boss boss, boolean isCorrect, HelpLevel helpLevel, HttpSession session) {
         int bossHp = (int) session.getAttribute("combat_boss_current_hp");
         int userHp = user.getCurrentHp();
@@ -95,19 +111,7 @@ public class CombatService {
             }
 
             // User attacks
-            double difficultyMultiplier = 1.0;
-            switch (boss.getDifficulty()) {
-                case FACILE:
-                    difficultyMultiplier = 2.0;
-                    break;
-                case MOYEN:
-                    difficultyMultiplier = 1.0;
-                    break;
-                case DIFFICILE:
-                    difficultyMultiplier = 0.5;
-                    break;
-            }
-            double baseDamage = (boss.getMaxHp() / 20.0) * difficultyMultiplier;
+            int baseDamage = calculateUserBaseAttack(boss);
             int damageDealt = (int) (baseDamage * helpLevel.getDamageMultiplier());
             bossHp -= damageDealt;
             message = "Bonne réponse ! Vous infligez " + damageDealt + " dégâts.";

@@ -15,6 +15,18 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.text.Normalizer;
 import java.util.regex.Pattern;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Locale;
+import org.springframework.http.ResponseEntity;
+import org.thymeleaf.spring6.SpringTemplateEngine;
+import org.thymeleaf.context.Context;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.thymeleaf.web.servlet.JakartaServletWebApplication;
+import org.thymeleaf.web.IWebExchange;
+import org.thymeleaf.context.WebContext;
 
 @Controller
 @RequestMapping("/combat")
@@ -28,6 +40,12 @@ public class CombatController {
 
     @Autowired
     private BossRepository bossRepository;
+
+    @Autowired
+    private SpringTemplateEngine templateEngine;
+
+    @Autowired
+    private ServletContext servletContext;
 
     @GetMapping("/start/{bossId}")
     public String startCombat(@PathVariable Long bossId, Authentication authentication, HttpSession session) {
@@ -63,20 +81,7 @@ public class CombatController {
         User user = userRepository.findByUsername(username).orElseThrow();
 
         // Calculate user attack based on boss max HP (logic from CombatService)
-        // baseDamage = boss.getMaxHp() / 20.0 * difficultyMultiplier
-        double difficultyMultiplier = 1.0;
-        switch (boss.getDifficulty()) {
-            case FACILE:
-                difficultyMultiplier = 2.0;
-                break;
-            case MOYEN:
-                difficultyMultiplier = 1.0;
-                break;
-            case DIFFICILE:
-                difficultyMultiplier = 0.5;
-                break;
-        }
-        int userAttack = (int) ((boss.getMaxHp() / 20.0) * difficultyMultiplier);
+        int userAttack = combatService.calculateUserBaseAttack(boss);
         user.setAttack(userAttack);
 
         model.addAttribute("user", user);
@@ -104,14 +109,20 @@ public class CombatController {
     }
 
     @PostMapping("/submit")
-    public String submitAnswer(@RequestParam(required = false) String answer,
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> submitAnswer(@RequestParam(required = false) String answer,
             @RequestParam(required = false) Long choiceId,
             @RequestParam(defaultValue = "FOUR_CHOICES") HelpLevel helpLevel,
-            Authentication authentication, HttpSession session, Model model) {
+            Authentication authentication, HttpSession session, Locale locale,
+            HttpServletRequest request, HttpServletResponse response) {
+
+        Map<String, Object> jsonResponse = new HashMap<>();
 
         Boss boss = (Boss) session.getAttribute("combat_boss");
-        if (boss == null)
-            return "redirect:/roadmap";
+        if (boss == null) {
+            jsonResponse.put("redirectUrl", "/roadmap");
+            return ResponseEntity.ok(jsonResponse);
+        }
 
         String username = authentication.getName();
         User user = userRepository.findByUsername(username).orElseThrow();
@@ -133,16 +144,18 @@ public class CombatController {
                 choices.add(new Choice(3L, question.getBadAnswer2()));
                 choices.add(new Choice(4L, question.getBadAnswer3()));
             } else {
-                return "redirect:/combat/battle";
+                jsonResponse.put("redirectUrl", "/combat/battle");
+                return ResponseEntity.ok(jsonResponse);
             }
         }
 
+        com.cultureroyale.quizdungeon.model.Question currentQuestion = combatService.getCurrentQuestion(session);
+
         if (answer != null && !answer.trim().isEmpty()) {
             // Text submission
-            com.cultureroyale.quizdungeon.model.Question question = combatService.getCurrentQuestion(session);
-            if (question != null) {
+            if (currentQuestion != null) {
                 // Compare answer (case insensitive and accent insensitive)
-                String correctAnswer = normalize(question.getCorrectAnswer().trim());
+                String correctAnswer = normalize(currentQuestion.getCorrectAnswer().trim());
                 String userAnswer = normalize(answer.trim());
 
                 // direct comparison (case insensitive and accent insensitive)
@@ -182,47 +195,94 @@ public class CombatController {
                         }
                     }
                 }
-
-                CombatService.CombatResult result = combatService.processTurn(user, boss, isCorrect, helpLevel,
-                        session);
-
-                if (result.status == CombatService.CombatStatus.VICTORY) {
-                    session.setAttribute("combat_status", "VICTORY");
-                    combatService.handleVictory(user, boss);
-                } else if (result.status == CombatService.CombatStatus.DEFEAT) {
-                    session.setAttribute("combat_status", "DEFEAT");
-                    combatService.handleDefeat(user, boss);
-                }
-
-                model.addAttribute("userAnswer", answer);
-                model.addAttribute("correctAnswer", question.getCorrectAnswer());
-                model.addAttribute("correct", isCorrect);
-
-                return "fragments/quiz-text-result :: result";
             }
         } else {
             // Choice submission
             isCorrect = (choiceId != null && choiceId == 1L);
-
-            CombatService.CombatResult result = combatService.processTurn(user, boss, isCorrect, helpLevel, session);
-
-            if (result.status == CombatService.CombatStatus.VICTORY) {
-                session.setAttribute("combat_status", "VICTORY");
-                combatService.handleVictory(user, boss);
-            } else if (result.status == CombatService.CombatStatus.DEFEAT) {
-                session.setAttribute("combat_status", "DEFEAT");
-                combatService.handleDefeat(user, boss);
-            }
-
-            model.addAttribute("choices", choices);
-            model.addAttribute("selectedChoiceId", null);
-            model.addAttribute("submittedChoiceId", submittedId != null ? submittedId : -1L);
-            model.addAttribute("correctChoiceId", 1L);
-            model.addAttribute("correct", isCorrect);
-
-            return "fragments/quiz-choices-list :: list";
         }
-        return "redirect:/combat/battle"; // Fallback in case question is null for text submission
+
+        CombatService.CombatResult result = combatService.processTurn(user, boss, isCorrect, helpLevel, session);
+
+        // Prepare context for rendering fragments
+        JakartaServletWebApplication application = JakartaServletWebApplication.buildApplication(servletContext);
+        IWebExchange exchange = application.buildExchange(request, response);
+        WebContext context = new WebContext(exchange, locale);
+        context.setVariable("user", user);
+
+        // Update Boss HP Bar
+        context.setVariable("bossName", boss.getName());
+        context.setVariable("bossHp", result.bossHp);
+        context.setVariable("bossMaxHp", boss.getMaxHp());
+        context.setVariable("bossAtk", boss.getAttack());
+        context.setVariable("bossImage", boss.getImagePath());
+        String bossHpBarHtml = templateEngine.process("fragments/boss_hp_bar", java.util.Set.of("bossHpBar"), context);
+        jsonResponse.put("bossHpBarHtml", bossHpBarHtml);
+
+        // Update User HP Bar
+        // Re-fetch user to ensure latest state if needed, but 'user' object should be
+        // updated by processTurn
+        // Ensure user attack is set for display
+        user.setAttack(combatService.calculateUserBaseAttack(boss));
+        context.setVariable("user", user);
+        context.setVariable("compact", false);
+        String userHpBarHtml = templateEngine.process("fragments/user_hp_bar", java.util.Set.of("userHpBar"), context);
+        jsonResponse.put("userHpBarHtml", userHpBarHtml);
+
+        // Render Result Feedback
+        if (answer != null && !answer.trim().isEmpty()) {
+            context.setVariable("userAnswer", answer);
+            context.setVariable("correctAnswer", currentQuestion.getCorrectAnswer());
+            context.setVariable("correct", isCorrect);
+            String resultHtml = templateEngine.process("fragments/quiz-text-result", java.util.Set.of("result"),
+                    context);
+            jsonResponse.put("resultHtml", resultHtml);
+        } else {
+            context.setVariable("choices", choices);
+            context.setVariable("selectedChoiceId", null);
+            context.setVariable("submittedChoiceId", submittedId != null ? submittedId : -1L);
+            context.setVariable("correctChoiceId", 1L);
+            context.setVariable("correct", isCorrect);
+            String resultHtml = templateEngine.process("fragments/quiz-choices-list", java.util.Set.of("list"),
+                    context);
+            jsonResponse.put("resultHtml", resultHtml);
+        }
+
+        if (result.status == CombatService.CombatStatus.VICTORY) {
+            session.setAttribute("combat_status", "VICTORY");
+            combatService.handleVictory(user, boss);
+            jsonResponse.put("status", "VICTORY");
+            jsonResponse.put("redirectUrl", "/combat/victory");
+        } else if (result.status == CombatService.CombatStatus.DEFEAT) {
+            session.setAttribute("combat_status", "DEFEAT");
+            combatService.handleDefeat(user, boss);
+            jsonResponse.put("status", "DEFEAT");
+            jsonResponse.put("redirectUrl", "/combat/defeat");
+        } else {
+            jsonResponse.put("status", "ONGOING");
+            // Render Next Question
+            com.cultureroyale.quizdungeon.model.Question nextQuestion = combatService.getCurrentQuestion(session);
+            if (nextQuestion != null) {
+
+                // Prepare choices for the next question
+                java.util.List<Choice> nextChoices = new java.util.ArrayList<>();
+                nextChoices.add(new Choice(1L, nextQuestion.getCorrectAnswer()));
+                nextChoices.add(new Choice(2L, nextQuestion.getBadAnswer1()));
+                nextChoices.add(new Choice(3L, nextQuestion.getBadAnswer2()));
+                nextChoices.add(new Choice(4L, nextQuestion.getBadAnswer3()));
+                java.util.Collections.shuffle(nextChoices);
+                session.setAttribute("combat_current_choices", nextChoices);
+
+                context.setVariable("question", nextQuestion.getQuestionText());
+                context.setVariable("choices", nextChoices);
+                context.setVariable("selectedChoiceId", null);
+
+                String nextQuestionHtml = templateEngine.process("fragments/quiz-interface-options",
+                        java.util.Set.of("choices"), context);
+                jsonResponse.put("nextQuestionHtml", nextQuestionHtml);
+            }
+        }
+
+        return ResponseEntity.ok(jsonResponse);
     }
 
     @GetMapping("/choices")
