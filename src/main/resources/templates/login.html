@@ -21,16 +21,7 @@
 
             <div class="border-b-2 border-white mb-8"></div>
 
-            <!-- Message de succès -->
-            <div th:if="${message} and ${param.logout == null}"
-                class="mb-4 p-3 bg-green-900 border border-green-600 rounded text-green-200 text-sm">
-                <span th:text="${message}"></span>
-            </div>
-
-            <!-- Message d'erreur -->
-            <div th:if="${error}" class="mb-4 p-3 bg-red-900 border border-red-600 rounded text-red-200 text-sm">
-                <span th:text="${error}"></span>
-            </div>
+            <!-- Messages handled by toast -->
 
             <form th:action="@{/login}" method="post" class="space-y-6">
                 <div>
@@ -54,22 +45,31 @@
                 <a th:href="@{/register}" class="text-gray-400 hover:text-white transition-colors text-sm">Pas encore de
                     compte ? Créer un compte</a>
             </div>
+
+            <!-- Toast Fragments -->
+            <div th:replace="~{fragments/toast :: toast}"></div>
+            <div th:replace="~{fragments/toast :: toast-script}"></div>
+
+            <!-- Trigger Toast from Server Messages -->
+            <script th:if="${message}" th:inline="javascript">
+                document.addEventListener('DOMContentLoaded', function () {
+                    var msg = /*[[${message}]]*/ 'Message';
+                    showToast(msg, 'success');
+                });
+            </script>
+            <script th:if="${error}" th:inline="javascript">
+                document.addEventListener('DOMContentLoaded', function () {
+                    var msg = /*[[${error}]]*/ 'Error';
+                    showToast(msg, 'error');
+                });
+            </script>
+            <script th:inline="javascript">
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Additional client-side logic if needed
+                });
+            </script>
         </div>
     </main>
-
-    <!-- Toast Fragments -->
-    <div th:replace="~{fragments/toast :: toast}"></div>
-    <th:block th:replace="~{fragments/toast :: toast-script}"></th:block>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Check for logout parameter
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('logout')) {
-                showToast('Déconnexion réussie !', 'success');
-            }
-        });
-    </script>
 </body>
 
 </html>

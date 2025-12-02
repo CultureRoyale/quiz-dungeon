@@ -30,16 +30,20 @@ public class HomeController {
     public String login(Model model,
             @RequestParam(required = false) String error,
             @RequestParam(required = false) String logout,
-            @RequestParam(required = false) String registered) {
+            @RequestParam(required = false) String registered,
+            jakarta.servlet.http.HttpServletRequest request) {
+
+        // Force session creation to ensure CSRF token can be generated
+        request.getSession(true);
 
         if (error != null) {
             model.addAttribute("error", "Identifiant ou mot de passe incorrect");
         }
         if (logout != null) {
-            model.addAttribute("message", "Vous avez été déconnecté avec succès");
+            model.addAttribute("message", "Déconnecté avec succès");
         }
         if (registered != null) {
-            model.addAttribute("message", "Inscription réussie ! Vous pouvez maintenant vous connecter");
+            model.addAttribute("message", "Inscription effectuée avec succès");
         }
 
         return "login";

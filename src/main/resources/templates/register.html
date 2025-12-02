@@ -20,10 +20,7 @@
 
             <div class="border-b-2 border-white mb-8"></div>
 
-            <!-- Message d'erreur -->
-            <div th:if="${error}" class="mb-4 p-3 bg-red-900 border border-red-600 rounded text-red-200 text-sm">
-                <span th:text="${error}"></span>
-            </div>
+            <!-- Messages handled by toast -->
 
             <form th:action="@{/register}" method="post" class="space-y-6">
                 <div>
@@ -55,9 +52,20 @@
                 <a th:href="@{/login}" class="text-gray-400 hover:text-white transition-colors text-sm">Déjà un compte ?
                     Se connecter</a>
             </div>
+
+            <!-- Toast Fragments -->
+            <div th:replace="~{fragments/toast :: toast}"></div>
+            <div th:replace="~{fragments/toast :: toast-script}"></div>
+
+            <!-- Trigger Toast from Server Messages -->
+            <script th:if="${error}" th:inline="javascript">
+                document.addEventListener('DOMContentLoaded', function () {
+                    var msg = /*[[${error}]]*/ 'Error';
+                    showToast(msg, 'error');
+                });
+            </script>
         </div>
     </main>
-
 </body>
 
 </html>
