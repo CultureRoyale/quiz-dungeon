@@ -24,18 +24,7 @@
 
             <!-- Trigger Toast from Server Messages -->
             <!-- Trigger Toast from Server Messages -->
-            <script th:if="${success}" th:inline="javascript">
-                document.addEventListener('DOMContentLoaded', function () {
-                    var msg = /*[[${success}]]*/ 'Success';
-                    showToast(msg, 'success');
-                });
-            </script>
-            <script th:if="${error}" th:inline="javascript">
-                document.addEventListener('DOMContentLoaded', function () {
-                    var msg = /*[[${error}]]*/ 'Error';
-                    showToast(msg, 'error');
-                });
-            </script>
+
 
             <div class="space-y-12">
 
@@ -53,24 +42,36 @@
                             </div>
                             <h3 class="font-dungeon text-xl text-white mb-1 text-center leading-tight">Potion <br><span
                                     class="text-green-400 text-sm">(+20 pv)</span></h3>
-                            <form th:action="@{/shop/buy}" method="post" class="mt-auto pt-2">
-                                <input type="hidden" name="item" value="potion">
-                                <button th:replace="~{fragments/button :: shopButton('50')}"></button>
-                            </form>
+                            <div class="mt-auto pt-2" th:onclick="|buyItem('potion')|">
+                                <button th:replace="~{fragments/button :: shopButton('30')}"></button>
+                            </div>
+                        </div>
+
+                        <!-- Super Potion -->
+                        <div class="flex flex-col items-center group w-40">
+                            <div class="w-20 h-20 mb-4 transition-transform group-hover:scale-110 duration-300">
+                                <img th:src="@{/images/shop/potion.png}" alt="Super Potion"
+                                    class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(236,72,153,0.5)] hue-rotate-90">
+                            </div>
+                            <h3 class="font-dungeon text-xl text-white mb-1 text-center leading-tight">Super Potion
+                                <br><span class="text-green-400 text-sm">(+60 pv)</span>
+                            </h3>
+                            <div class="mt-auto pt-2" th:onclick="|buyItem('super_potion')|">
+                                <button th:replace="~{fragments/button :: shopButton('67')}"></button>
+                            </div>
                         </div>
 
                         <!-- Dague -->
                         <div class="flex flex-col items-center group w-40">
                             <div class="w-20 h-20 mb-4 transition-transform group-hover:scale-110 duration-300">
-                                <img th:src="@{/images/shop/dagger.png}" alt="Dague"
+                                <img th:src="@{/images/shop/cannon.webp}" alt="Cannon"
                                     class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]">
                             </div>
-                            <h3 class="font-dungeon text-xl text-white mb-1 text-center leading-tight">Dague <br><span
-                                    class="text-red-500 text-sm">(+20 Boost)</span></h3>
-                            <form th:action="@{/shop/buy}" method="post" class="mt-auto pt-2">
-                                <input type="hidden" name="item" value="dagger">
+                            <h3 class="font-dungeon text-xl text-white mb-1 text-center leading-tight">Cannon <br><span
+                                    class="text-red-500 text-sm">(+20% Boost donjon)</span></h3>
+                            <div class="mt-auto pt-2" th:onclick="|buyItem('cannon')|">
                                 <button th:replace="~{fragments/button :: shopButton('100')}"></button>
-                            </form>
+                            </div>
                         </div>
 
                         <!-- Piment -->
@@ -82,10 +83,9 @@
                             <h3 class="font-dungeon text-xl text-white mb-1 text-center leading-tight">Piment <br><span
                                     class="text-green-400 text-sm">(-50pv, </span><span class="text-red-500 text-sm">+50
                                     Boost)</span></h3>
-                            <form th:action="@{/shop/buy}" method="post" class="mt-auto pt-2">
-                                <input type="hidden" name="item" value="chili">
+                            <div class="mt-auto pt-2" th:onclick="|buyItem('chili')|">
                                 <button th:replace="~{fragments/button :: shopButton('200')}"></button>
-                            </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -103,10 +103,9 @@
                                     class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(251,191,36,0.5)]">
                             </div>
                             <h3 class="font-dungeon text-xl text-white mb-1 text-center leading-tight">Thème Tiki</h3>
-                            <form th:action="@{/shop/buy}" method="post" class="mt-auto pt-2">
-                                <input type="hidden" name="item" value="theme_tiki">
+                            <div class="mt-auto pt-2" th:onclick="|buyItem('theme_tiki')|">
                                 <button th:replace="~{fragments/button :: shopButton('1000')}"></button>
-                            </form>
+                            </div>
                         </div>
 
                         <!-- Lava -->
@@ -116,10 +115,9 @@
                                     class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(249,115,22,0.5)]">
                             </div>
                             <h3 class="font-dungeon text-xl text-white mb-1 text-center leading-tight">Thème Lava</h3>
-                            <form th:action="@{/shop/buy}" method="post" class="mt-auto pt-2">
-                                <input type="hidden" name="item" value="theme_lava">
+                            <div class="mt-auto pt-2" th:onclick="|buyItem('theme_lava')|">
                                 <button th:replace="~{fragments/button :: shopButton('1000')}"></button>
-                            </form>
+                            </div>
                         </div>
 
                         <!-- Gold -->
@@ -129,10 +127,9 @@
                                     class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]">
                             </div>
                             <h3 class="font-dungeon text-xl text-white mb-1 text-center leading-tight">Thème Gold</h3>
-                            <form th:action="@{/shop/buy}" method="post" class="mt-auto pt-2">
-                                <input type="hidden" name="item" value="theme_gold">
+                            <div class="mt-auto pt-2" th:onclick="|buyItem('theme_gold')|">
                                 <button th:replace="~{fragments/button :: shopButton('1000')}"></button>
-                            </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -140,6 +137,57 @@
             </div>
         </div>
     </main>
+
+    <th:block layout:fragment="scripts">
+        <script>
+            function buyItem(item) {
+                const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+                fetch('/shop/buy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: 'item=' + item
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast(data.message, 'success');
+                            updateUserStats(data);
+                        } else {
+                            showToast(data.message, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('Erreur de communication avec le serveur', 'error');
+                    });
+            }
+
+            function updateUserStats(data) {
+                const goldEl = document.getElementById('user-gold');
+                const hpTextEl = document.getElementById('user-hp-text');
+                const hpProgressEl = document.getElementById('user-hp-progress');
+                const damageBoostEl = document.getElementById('user-damage-boost');
+
+                if (goldEl) goldEl.textContent = data.gold;
+
+                if (hpTextEl) hpTextEl.textContent = 'Hp : ' + data.currentHp + '/' + data.maxHp;
+
+                if (hpProgressEl) {
+                    const percentage = (data.currentHp / data.maxHp) * 100;
+                    hpProgressEl.style.width = percentage + '%';
+                }
+
+                if (damageBoostEl && data.damageBoost !== undefined) {
+                    damageBoostEl.textContent = '+' + data.damageBoost + '%';
+                }
+            }
+        </script>
+    </th:block>
 </body>
 
 </html>

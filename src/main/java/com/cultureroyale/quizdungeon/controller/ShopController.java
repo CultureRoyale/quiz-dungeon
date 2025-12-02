@@ -12,7 +12,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 
@@ -41,8 +40,9 @@ public class ShopController {
     }
 
     @PostMapping("/shop/buy")
-    public String buyItem(@RequestParam("item") String item, Principal principal,
-            RedirectAttributes redirectAttributes) {
+    @org.springframework.web.bind.annotation.ResponseBody
+    public org.springframework.http.ResponseEntity<java.util.Map<String, Object>> buyItem(
+            @RequestParam("item") String item, Principal principal) {
         String username = principal.getName();
         User user = userService.findByUsername(username);
         Dungeon dungeon = dungeonRepository.findByUserId(user.getId()).orElse(null);
@@ -56,8 +56,8 @@ public class ShopController {
 
         switch (item) {
             case "potion":
-                if (user.getGold() >= 50) {
-                    user.setGold(user.getGold() - 50);
+                if (user.getGold() >= 30) {
+                    user.setGold(user.getGold() - 30);
                     user.setCurrentHp(Math.min(user.getCurrentHp() + 20, user.getMaxHp()));
                     success = true;
                     message = "Potion achetée ! (+20 PV Max)";
@@ -65,12 +65,22 @@ public class ShopController {
                     message = "Pas assez d'or !";
                 }
                 break;
-            case "dagger":
+            case "super_potion":
+                if (user.getGold() >= 67) {
+                    user.setGold(user.getGold() - 67);
+                    user.setCurrentHp(Math.min(user.getCurrentHp() + 60, user.getMaxHp()));
+                    success = true;
+                    message = "Super Potion achetée ! (+60 PV Max)";
+                } else {
+                    message = "Pas assez d'or !";
+                }
+                break;
+            case "cannon":
                 if (user.getGold() >= 100) {
                     user.setGold(user.getGold() - 100);
                     dungeon.setDamageBoost(dungeon.getDamageBoost() + 20);
                     success = true;
-                    message = "Dague achetée ! (+20% Dégâts Donjon)";
+                    message = "Cannon acheté ! (+20% Dégâts Donjon)";
                 } else {
                     message = "Pas assez d'or !";
                 }
@@ -111,11 +121,16 @@ public class ShopController {
         if (success) {
             userRepository.save(user);
             dungeonRepository.save(dungeon);
-            redirectAttributes.addFlashAttribute("success", message);
-        } else {
-            redirectAttributes.addFlashAttribute("error", message);
         }
 
-        return "redirect:/shop";
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        response.put("success", success);
+        response.put("message", message);
+        response.put("gold", user.getGold());
+        response.put("currentHp", user.getCurrentHp());
+        response.put("maxHp", user.getMaxHp());
+        response.put("damageBoost", dungeon.getDamageBoost());
+
+        return org.springframework.http.ResponseEntity.ok(response);
     }
 }
