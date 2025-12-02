@@ -7,6 +7,7 @@ import com.cultureroyale.quizdungeon.model.dto.Choice;
 import com.cultureroyale.quizdungeon.model.enums.HelpLevel;
 import com.cultureroyale.quizdungeon.repository.DungeonRepository;
 import com.cultureroyale.quizdungeon.repository.UserRepository;
+import com.cultureroyale.quizdungeon.service.UserService;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,6 +33,9 @@ public class RaidController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private DungeonRepository dungeonRepository;
@@ -229,6 +233,7 @@ public class RaidController {
         } else {
             // Next Question
             int nextIndex = (int) session.getAttribute("raid_current_question_index") + 1;
+            @SuppressWarnings("unchecked")
             List<DungeonQuestion> questions = (List<DungeonQuestion>) session.getAttribute("raid_questions");
 
             if (nextIndex >= questions.size()) {
@@ -312,6 +317,7 @@ public class RaidController {
     }
 
     private DungeonQuestion getCurrentQuestion(HttpSession session) {
+        @SuppressWarnings("unchecked")
         List<DungeonQuestion> questions = (List<DungeonQuestion>) session.getAttribute("raid_questions");
         int index = (int) session.getAttribute("raid_current_question_index");
         if (questions != null && index < questions.size()) {
@@ -331,21 +337,17 @@ public class RaidController {
         attacker.setGold(attacker.getGold() + transferAmount);
 
         userRepository.save(owner);
-        userRepository.save(attacker);
 
         session.setAttribute("raid_gold_change", transferAmount);
-
-        // XP Reward (e.g., 50 XP per question level)
-        int xpReward = dungeon.getDungeonQuestions().size() * 10;
-        attacker.setXp(attacker.getXp() + xpReward);
-        session.setAttribute("raid_xp_reward", xpReward);
 
         // Clear opponent
         attacker.setCurrentOpponentDungeon(null);
         attacker.setCurrentOpponentDungeonAssignedAt(null);
 
-        userRepository.save(owner);
-        userRepository.save(attacker);
+        // XP Reward (25 XP per question)
+        int xpReward = dungeon.getDungeonQuestions().size() * 25;
+        session.setAttribute("raid_xp_reward", xpReward);
+        userService.addXp(attacker, xpReward);
     }
 
     private void handleDefeat(User attacker, Dungeon dungeon, HttpSession session) {
@@ -378,18 +380,14 @@ public class RaidController {
     private void handleDraw(User attacker, Dungeon dungeon, HttpSession session) {
         session.setAttribute("raid_status", "DRAW");
 
-        // XP Reward (e.g., half of victory XP)
-        int xpReward = dungeon.getDungeonQuestions().size() * 25; // Half of victory XP (50 per question)
-        attacker.setXp(attacker.getXp() + xpReward);
-        session.setAttribute("raid_xp_reward", xpReward);
-
         // Clear opponent
         attacker.setCurrentOpponentDungeon(null);
         attacker.setCurrentOpponentDungeonAssignedAt(null);
 
-        userRepository.save(attacker);
-        // No gold change for draw, so no need to save owner or set gold_change session
-        // attribute
+        // XP Reward (10 XP per question)
+        int xpReward = dungeon.getDungeonQuestions().size() * 10;
+        session.setAttribute("raid_xp_reward", xpReward);
+        userService.addXp(attacker, xpReward);
     }
 
     private String normalize(String input) {
