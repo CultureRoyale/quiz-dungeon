@@ -121,7 +121,7 @@
         <script>
             let nextQuestionHtmlContent = '';
 
-            function showChoices(count) {
+            function showChoices(helpLevel) {
                 const inputSection = document.getElementById('step-1-input');
                 const choicesSection = document.getElementById('step-2-choices');
                 const choicesContainer = document.getElementById('choices-container');
@@ -132,7 +132,7 @@
                 choicesSection.classList.add('flex');
 
                 // Fetch choices from server
-                fetch('/raid/choices?count=' + count)
+                fetch('/raid/choices?helpLevel=' + helpLevel)
                     .then(response => response.text())
                     .then(html => {
                         choicesContainer.innerHTML = html;
@@ -158,19 +158,12 @@
                     const input = document.querySelector('#step-1-input input[type="text"]');
                     if (!input.value.trim()) return;
                     formData.append('answer', input.value);
-                    formData.append('helpLevel', 'NO_HELP'); // For text input, no help is used
+                    // helpLevel is handled by backend session
                 } else {
                     const selectedChoice = document.querySelector('#choices-container input[name="choiceId"]:checked');
                     if (!selectedChoice) return;
                     formData.append('choiceId', selectedChoice.value);
-                    const helpLevelInput = document.querySelector('#choices-container input[name="helpLevel"]');
-
-                    const choicesCount = document.querySelectorAll('#choices-container input[name="choiceId"]').length;
-                    if (choicesCount <= 2) {
-                        formData.append('helpLevel', 'TWO_CHOICES');
-                    } else {
-                        formData.append('helpLevel', 'FOUR_CHOICES');
-                    }
+                    // helpLevel is handled by backend session
                 }
 
                 // Get CSRF token
@@ -246,7 +239,10 @@
                                 }
 
                                 // Shake if damage taken
-                                if (parseFloat(newUserWidth) < parseFloat(oldUserWidth)) {
+                                const oldHp = parseInt(userContainer.getAttribute('data-current-hp') || '0');
+                                const newHp = parseInt(newUserContainer.getAttribute('data-current-hp') || '0');
+
+                                if (newHp < oldHp) {
                                     if (newUserContainer) newUserContainer.classList.add('shake');
                                 }
                             }
@@ -280,12 +276,42 @@
                         quizInterface.outerHTML = nextQuestionHtmlContent;
                         // Reset variable
                         nextQuestionHtmlContent = '';
+
+                        // Force focus on input
+                        setTimeout(() => {
+                            const input = document.getElementById('answer-input');
+                            if (input) input.focus();
+                        }, 50);
                     }
                 } else {
                     // Fallback if no next question content (shouldn't happen if flow is correct)
                     location.reload();
                 }
             }
+
+            // Global Enter key handler
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter') {
+                    const choicesSection = document.getElementById('step-2-choices');
+                    // Only proceed if choices section is visible (Choice mode or Result mode)
+                    if (choicesSection && !choicesSection.classList.contains('hidden')) {
+                        // 1. Check for "Continuer" button (Result phase)
+                        // It can be in quiz-text-result or quiz-choices-list
+                        const continueBtn = choicesSection.querySelector('button[onclick="nextQuestion()"]');
+                        if (continueBtn) {
+                            continueBtn.click();
+                            return;
+                        }
+
+                        // 2. Check for "Valider" button (Selection phase)
+                        const submitBtn = choicesSection.querySelector('button[onclick="submitAnswer(\'choice\')"]');
+                        if (submitBtn) {
+                            submitBtn.click();
+                            return;
+                        }
+                    }
+                }
+            });
         </script>
     </th:block>
 

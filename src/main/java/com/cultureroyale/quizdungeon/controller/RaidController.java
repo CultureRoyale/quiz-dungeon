@@ -23,9 +23,7 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.web.IWebExchange;
 import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 
-import java.text.Normalizer;
 import java.util.*;
-import java.util.regex.Pattern;
 
 @Controller
 @RequestMapping("/raid")
@@ -45,6 +43,9 @@ public class RaidController {
 
     @Autowired
     private ServletContext servletContext;
+
+    @Autowired
+    private QuestionController questionController;
 
     @GetMapping("/start/{dungeonId}")
     public String startRaid(@PathVariable Long dungeonId, Authentication authentication, HttpSession session) {
@@ -68,7 +69,9 @@ public class RaidController {
         List<DungeonQuestion> questions = new ArrayList<>(dungeon.getDungeonQuestions());
         questions.sort(Comparator.comparingInt(DungeonQuestion::getPosition));
         session.setAttribute("raid_questions", questions);
+        session.setAttribute("raid_questions", questions);
         session.setAttribute("raid_current_question_index", 0);
+        session.removeAttribute("raid_help_level");
 
         return "redirect:/raid/battle";
     }
@@ -120,7 +123,6 @@ public class RaidController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> submitAnswer(@RequestParam(required = false) String answer,
             @RequestParam(required = false) Long choiceId,
-            @RequestParam(defaultValue = "FOUR_CHOICES") HelpLevel helpLevel,
             Authentication authentication, HttpSession session, Locale locale,
             HttpServletRequest request, HttpServletResponse response) {
         Map<String, Object> jsonResponse = new HashMap<>();
@@ -144,22 +146,22 @@ public class RaidController {
         DungeonQuestion currentDQ = getCurrentQuestion(session);
 
         // Validate Answer
-        if (answer != null && !answer.trim().isEmpty()) {
-            if (currentDQ != null) {
-                String correctAnswer = normalize(currentDQ.getQuestion().getCorrectAnswer().trim());
-                String userAnswer = normalize(answer.trim());
-                if (correctAnswer.equalsIgnoreCase(userAnswer))
-                    isCorrect = true;
-                // Add fuzzy logic if needed, keeping simple for now as per previous controller
-            }
+        if (currentDQ != null) {
+            isCorrect = questionController.verifyAnswer(answer, choiceId, currentDQ.getQuestion().getCorrectAnswer());
         } else {
-            isCorrect = (choiceId != null && choiceId == 1L);
+            isCorrect = false;
         }
 
         // Combat Logic
         int dungeonHp = (int) session.getAttribute("raid_dungeon_current_hp");
         int userHp = (int) session.getAttribute("raid_user_current_hp");
         int dungeonMaxHp = (int) session.getAttribute("raid_dungeon_max_hp");
+
+        // Check for backend abuse: if help was requested, enforce it
+        HelpLevel helpLevel = (HelpLevel) session.getAttribute("raid_help_level");
+        if (helpLevel == null) {
+            helpLevel = HelpLevel.NO_HELP;
+        }
 
         if (isCorrect) {
             // Damage to Dungeon
@@ -252,7 +254,9 @@ public class RaidController {
                 nextChoices.add(new Choice(3L, nextDQ.getQuestion().getBadAnswer2()));
                 nextChoices.add(new Choice(4L, nextDQ.getQuestion().getBadAnswer3()));
                 Collections.shuffle(nextChoices);
+                Collections.shuffle(nextChoices);
                 session.setAttribute("raid_current_choices", nextChoices);
+                session.removeAttribute("raid_help_level"); // Reset help level
 
                 context.setVariable("question", nextDQ.getQuestion().getQuestionText());
                 context.setVariable("choices", nextChoices);
@@ -269,7 +273,8 @@ public class RaidController {
     }
 
     @GetMapping("/choices")
-    public String getChoices(@RequestParam(defaultValue = "4") int count, HttpSession session, Model model) {
+    public String getChoices(@RequestParam(defaultValue = "FOUR_CHOICES") HelpLevel helpLevel, HttpSession session,
+            Model model) {
         DungeonQuestion dq = getCurrentQuestion(session);
         if (dq == null)
             return "";
@@ -277,12 +282,16 @@ public class RaidController {
         List<Choice> choices = new ArrayList<>();
         choices.add(new Choice(1L, dq.getQuestion().getCorrectAnswer()));
         choices.add(new Choice(2L, dq.getQuestion().getBadAnswer1()));
-        if (count > 2) {
+        if (helpLevel == HelpLevel.FOUR_CHOICES) {
             choices.add(new Choice(3L, dq.getQuestion().getBadAnswer2()));
             choices.add(new Choice(4L, dq.getQuestion().getBadAnswer3()));
         }
         Collections.shuffle(choices);
+        Collections.shuffle(choices);
         session.setAttribute("raid_current_choices", choices);
+
+        // Track help level usage to prevent abuse
+        session.setAttribute("raid_help_level", helpLevel);
 
         model.addAttribute("choices", choices);
         model.addAttribute("selectedChoiceId", null);
@@ -390,11 +399,4 @@ public class RaidController {
         userService.addXp(attacker, xpReward);
     }
 
-    private String normalize(String input) {
-        if (input == null)
-            return null;
-        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
-        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
-        return pattern.matcher(normalized).replaceAll("").toLowerCase();
-    }
 }

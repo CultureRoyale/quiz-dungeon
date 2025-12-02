@@ -13,8 +13,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import java.text.Normalizer;
-import java.util.regex.Pattern;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Locale;
@@ -46,6 +44,9 @@ public class CombatController {
     @Autowired
     private ServletContext servletContext;
 
+    @Autowired
+    private QuestionController questionController;
+
     @GetMapping("/start/{bossId}")
     public String startCombat(@PathVariable Long bossId, Authentication authentication, HttpSession session) {
         String username = authentication.getName();
@@ -55,6 +56,7 @@ public class CombatController {
         // Clear any previous combat status
         session.removeAttribute("combat_status");
         session.removeAttribute("combat_current_choices");
+        session.removeAttribute("combat_help_level");
 
         combatService.startCombat(user, boss, session);
 
@@ -111,7 +113,6 @@ public class CombatController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> submitAnswer(@RequestParam(required = false) String answer,
             @RequestParam(required = false) Long choiceId,
-            @RequestParam(defaultValue = "FOUR_CHOICES") HelpLevel helpLevel,
             Authentication authentication, HttpSession session, Locale locale,
             HttpServletRequest request, HttpServletResponse response) {
 
@@ -150,54 +151,18 @@ public class CombatController {
 
         com.cultureroyale.quizdungeon.model.Question currentQuestion = combatService.getCurrentQuestion(session);
 
-        if (answer != null && !answer.trim().isEmpty()) {
-            // Text submission
-            if (currentQuestion != null) {
-                // Compare answer (case insensitive and accent insensitive)
-                String correctAnswer = normalize(currentQuestion.getCorrectAnswer().trim());
-                String userAnswer = normalize(answer.trim());
-
-                // direct comparison (case insensitive and accent insensitive)
-                if (correctAnswer.equalsIgnoreCase(userAnswer)) {
-                    isCorrect = true;
-                } else {
-                    // forgiveness: Levenshtein distance check if length > 3
-                    if (userAnswer.length() > 3) {
-                        int distance = calculateLevenshteinDistance(userAnswer, correctAnswer);
-                        if (distance <= 3) {
-                            isCorrect = true;
-                        }
-                    }
-
-                    // VERY VERY forgiving
-                    if (!isCorrect) {
-                        String[] userWords = userAnswer.split("\\s+");
-                        String[] correctWords = correctAnswer.split("\\s+");
-
-                        for (String uWord : userWords) {
-                            for (String cWord : correctWords) {
-                                if (uWord.equalsIgnoreCase(cWord)) {
-                                    isCorrect = true;
-                                    break;
-                                }
-                                // SUPER forgiving
-                                if (uWord.length() > 3) {
-                                    int dist = calculateLevenshteinDistance(uWord, cWord);
-                                    if (dist <= 3) {
-                                        isCorrect = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            if (isCorrect)
-                                break;
-                        }
-                    }
-                }
-            }
+        if (currentQuestion != null) {
+            isCorrect = questionController.verifyAnswer(answer, choiceId, currentQuestion.getCorrectAnswer());
         } else {
-            // Choice submission
-            isCorrect = (choiceId != null && choiceId == 1L);
+            // Fallback if question is null, though it shouldn't be for text answer if logic
+            // holds
+            isCorrect = false;
+        }
+
+        // Check for backend abuse: if help was requested, enforce it
+        HelpLevel helpLevel = (HelpLevel) session.getAttribute("combat_help_level");
+        if (helpLevel == null) {
+            helpLevel = HelpLevel.NO_HELP;
         }
 
         CombatService.CombatResult result = combatService.processTurn(user, boss, isCorrect, helpLevel, session);
@@ -269,7 +234,9 @@ public class CombatController {
                 nextChoices.add(new Choice(3L, nextQuestion.getBadAnswer2()));
                 nextChoices.add(new Choice(4L, nextQuestion.getBadAnswer3()));
                 java.util.Collections.shuffle(nextChoices);
+                java.util.Collections.shuffle(nextChoices);
                 session.setAttribute("combat_current_choices", nextChoices);
+                session.removeAttribute("combat_help_level"); // Reset help level for new question
 
                 context.setVariable("question", nextQuestion.getQuestionText());
                 context.setVariable("choices", nextChoices);
@@ -285,7 +252,8 @@ public class CombatController {
     }
 
     @GetMapping("/choices")
-    public String getChoices(@RequestParam(defaultValue = "4") int count, HttpSession session, Model model) {
+    public String getChoices(@RequestParam(defaultValue = "FOUR_CHOICES") HelpLevel helpLevel, HttpSession session,
+            Model model) {
         com.cultureroyale.quizdungeon.model.Question question = combatService.getCurrentQuestion(session);
         if (question == null) {
             return ""; // Or handle error
@@ -294,7 +262,7 @@ public class CombatController {
         java.util.List<Choice> choices = new java.util.ArrayList<>();
         choices.add(new Choice(1L, question.getCorrectAnswer()));
         choices.add(new Choice(2L, question.getBadAnswer1()));
-        if (count > 2) {
+        if (helpLevel == HelpLevel.FOUR_CHOICES) {
             choices.add(new Choice(3L, question.getBadAnswer2()));
             choices.add(new Choice(4L, question.getBadAnswer3()));
         }
@@ -302,6 +270,9 @@ public class CombatController {
 
         // Store choices in session for result display
         session.setAttribute("combat_current_choices", choices);
+
+        // Track help level usage to prevent abuse
+        session.setAttribute("combat_help_level", helpLevel);
 
         model.addAttribute("choices", choices);
         model.addAttribute("selectedChoiceId", null);
@@ -327,44 +298,6 @@ public class CombatController {
     @GetMapping("/defeat")
     public String defeat() {
         return "boss-fail";
-    }
-
-    // Levenshtein distance
-    // https://fr.wikipedia.org/wiki/Distance_de_Levenshtein
-    private int calculateLevenshteinDistance(String x, String y) {
-        int[][] dp = new int[x.length() + 1][y.length() + 1];
-
-        for (int i = 0; i <= x.length(); i++) {
-            for (int j = 0; j <= y.length(); j++) {
-                if (i == 0) {
-                    dp[i][j] = j;
-                } else if (j == 0) {
-                    dp[i][j] = i;
-                } else {
-                    dp[i][j] = min(dp[i - 1][j - 1] + costOfSubstitution(x.charAt(i - 1), y.charAt(j - 1)),
-                            dp[i - 1][j] + 1,
-                            dp[i][j - 1] + 1);
-                }
-            }
-        }
-
-        return dp[x.length()][y.length()];
-    }
-
-    private int costOfSubstitution(char a, char b) {
-        return a == b ? 0 : 1;
-    }
-
-    private int min(int... numbers) {
-        return java.util.Arrays.stream(numbers).min().orElse(Integer.MAX_VALUE);
-    }
-
-    private String normalize(String input) {
-        if (input == null)
-            return null;
-        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
-        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
-        return pattern.matcher(normalized).replaceAll("").toLowerCase();
     }
 
 }
