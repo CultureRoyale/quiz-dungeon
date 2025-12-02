@@ -31,7 +31,6 @@ public class ShopController {
         User user = userService.findByUsername(username);
         Dungeon dungeon = dungeonRepository.findByUserId(user.getId()).orElse(null);
 
-        
         if (dungeon == null) {
             dungeon = dungeonService.createDungeon(user);
         }

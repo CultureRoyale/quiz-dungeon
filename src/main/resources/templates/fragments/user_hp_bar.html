@@ -2,7 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <body>
-    <div th:fragment="userHpBar" id="user-hp-container"
+    <div th:fragment="userHpBar" id="user-hp-container" th:data-current-hp="${user.currentHp}"
+        th:data-max-hp="${user.maxHp}"
         class="bg-gray-800 border-2 border-gray-600 rounded-lg p-3 font-dungeon text-white shadow-lg select-none w-full max-w-3xl mx-auto">
         <!-- Top Row -->
         <div class="flex flex-col md:flex-row justify-between items-end mb-1 px-1 gap-2 md:gap-0">
@@ -14,7 +15,7 @@
             <!-- Gold -->
             <div class="flex items-center gap-3 md:gap-4 mb-1">
                 <!-- Attack -->
-                <div class="flex items-center gap-1">
+                <div class="flex items-center gap-1" th:if="${user.attack != null and user.attack > 0}">
                     <span th:text="${user.attack}" class="text-white text-lg md:text-2xl drop-shadow-md">5</span>
                     <img th:src="@{/images/sword.svg}" alt="Attack" class="w-5 h-5 md:w-6 md:h-6">
                 </div>
