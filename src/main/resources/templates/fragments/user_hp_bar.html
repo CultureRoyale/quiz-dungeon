@@ -5,29 +5,29 @@
     <div th:fragment="userHpBar" id="user-hp-container"
         class="bg-gray-800 border-2 border-gray-600 rounded-lg p-3 font-dungeon text-white shadow-lg select-none w-full max-w-3xl mx-auto">
         <!-- Top Row -->
-        <div class="flex justify-between items-end mb-1 px-1">
+        <div class="flex flex-col md:flex-row justify-between items-end mb-1 px-1 gap-2 md:gap-0">
             <!-- Username & Level -->
-            <div class="text-2xl tracking-wide drop-shadow-md flex items-baseline gap-2">
+            <div class="text-xl md:text-2xl tracking-wide drop-shadow-md flex items-baseline gap-2">
                 <span th:text="${user.username}">User123</span>
-                <span th:text="'Lvl ' + ${user.level}" class="text-gray-400 text-lg">Lvl 1</span>
+                <span th:text="'Lvl ' + ${user.level}" class="text-gray-400 text-base md:text-lg">Lvl 1</span>
             </div>
             <!-- Gold -->
-            <div class="flex items-center gap-4 mb-1">
+            <div class="flex items-center gap-3 md:gap-4 mb-1">
                 <!-- Attack -->
                 <div class="flex items-center gap-1">
-                    <span th:text="${user.attack}" class="text-white text-2xl drop-shadow-md">5</span>
-                    <img th:src="@{/images/sword.svg}" alt="Attack" class="w-6 h-6">
+                    <span th:text="${user.attack}" class="text-white text-lg md:text-2xl drop-shadow-md">5</span>
+                    <img th:src="@{/images/sword.svg}" alt="Attack" class="w-5 h-5 md:w-6 md:h-6">
                 </div>
                 <!-- Dungeon Boost (if applicable, assuming user has a dungeon) -->
                 <div class="flex items-center gap-1" th:if="${user.dungeon != null}">
                     <span th:text="'+' + ${user.dungeon.damageBoost} + '%'"
-                        class="text-red-500 text-xl drop-shadow-md"></span>
-                    <img th:src="@{/images/dungeon_icon.svg}" alt="Dungeon" class="w-5 h-5">
+                        class="text-red-500 text-base md:text-xl drop-shadow-md"></span>
+                    <img th:src="@{/images/dungeon_icon.svg}" alt="Dungeon" class="w-4 h-4 md:w-5 md:h-5">
                 </div>
                 <!-- Gold -->
                 <div class="flex items-center gap-1">
-                    <span th:text="${user.gold}" class="text-[#F1B32B] text-2xl drop-shadow-md">500</span>
-                    <img th:src="@{/images/gold.svg}" alt="Gold" class="w-6 h-6">
+                    <span th:text="${user.gold}" class="text-[#F1B32B] text-lg md:text-2xl drop-shadow-md">500</span>
+                    <img th:src="@{/images/gold.svg}" alt="Gold" class="w-5 h-5 md:w-6 md:h-6">
                 </div>
             </div>
         </div>
