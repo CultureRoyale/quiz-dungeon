@@ -92,7 +92,7 @@
 
 
         <!-- Left Column: Boss (Dungeon) -->
-        <div class="flex-shrink-0 sticky top-4">
+        <div class="flex-shrink-0 w-full lg:w-auto lg:sticky lg:top-4 flex justify-center lg:block">
             <!-- Reusing boss_hp_bar but passing dungeon stats -->
             <div
                 th:replace="~{fragments/boss_hp_bar :: bossHpBar(bossName=${dungeon.name}, bossHp=${dungeonHp}, bossMaxHp=${dungeonMaxHp}, bossAtk=${dungeonAtk}, bossImage='/images/shop/theme_' + ${dungeon.cosmeticTheme} + '.png')}">
