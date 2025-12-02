@@ -50,9 +50,13 @@ public class DungeonController {
         if (currentUser.getCurrentOpponentDungeon() == null || isExpired) {
             Dungeon randomDungeon = dungeonService.getRandomDungeon(currentUser);
             if (randomDungeon != null) {
+                System.out.println("ASSIGNMENT: Assigning new dungeon " + randomDungeon.getName() + " to user "
+                        + currentUser.getUsername());
                 currentUser.setCurrentOpponentDungeon(randomDungeon);
                 currentUser.setCurrentOpponentDungeonAssignedAt(java.time.LocalDateTime.now());
                 userService.save(currentUser);
+            } else {
+                System.out.println("ASSIGNMENT: No dungeon found for user " + currentUser.getUsername());
             }
         }
 
