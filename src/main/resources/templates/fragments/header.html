@@ -62,6 +62,15 @@
                 </div>
 
                 <div class="relative group cursor-pointer">
+                    <a th:href="@{/leaderboard}">
+                        <button
+                            class="flex items-center gap-2 text-2xl font-quizzical font-black uppercase tracking-widest pb-2 border-b-4 border-gray-700 hover:border-white hover:text-gray-100 transition-all duration-200">
+                            <span class="drop-shadow-[0_4px_0_rgba(0,0,0,1)]">Classement</span>
+                        </button>
+                    </a>
+                </div>
+
+                <div class="relative group cursor-pointer">
                     <a th:href="@{/shop}">
                         <button
                             class="flex items-center gap-2 text-2xl font-quizzical font-black uppercase tracking-widest pb-2 border-b-4 border-gray-700 hover:border-white hover:text-gray-100 transition-all duration-200">
@@ -126,6 +135,9 @@
                     <a th:href="@{/dungeon/attack}" class="block py-2 text-white hover:text-amber-500 text-lg">Attaquer
                         un Donjon</a>
                 </div>
+
+                <a th:href="@{/leaderboard}"
+                    class="block py-2 text-white hover:text-amber-500 text-lg border-b border-gray-700">Classement</a>
 
                 <a th:href="@{/shop}"
                     class="block py-2 text-white hover:text-amber-500 text-lg border-b border-gray-700">Boutique</a>

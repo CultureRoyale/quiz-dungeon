@@ -42,7 +42,23 @@ public class ShopController {
     @PostMapping("/shop/buy")
     @org.springframework.web.bind.annotation.ResponseBody
     public org.springframework.http.ResponseEntity<java.util.Map<String, Object>> buyItem(
-            @RequestParam("item") String item, Principal principal) {
+            @RequestParam("item") String item, Principal principal, jakarta.servlet.http.HttpSession session) {
+
+        // Check for active combat/raid and terminate if exists
+        if (session.getAttribute("raid_status") != null && "ONGOING".equals(session.getAttribute("raid_status"))) {
+            session.removeAttribute("raid_dungeon");
+            session.removeAttribute("raid_status");
+            session.removeAttribute("raid_questions");
+            session.removeAttribute("raid_current_question_index");
+        }
+
+        if (session.getAttribute("combat_boss") != null &&
+                (session.getAttribute("combat_status") == null
+                        || "ONGOING".equals(session.getAttribute("combat_status")))) {
+            session.removeAttribute("combat_boss");
+            session.removeAttribute("combat_status");
+            session.removeAttribute("combat_current_question");
+        }
         String username = principal.getName();
         User user = userService.findByUsername(username);
         Dungeon dungeon = dungeonRepository.findByUserId(user.getId()).orElse(null);

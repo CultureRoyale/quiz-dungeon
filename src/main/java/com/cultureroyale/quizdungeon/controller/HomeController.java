@@ -59,6 +59,9 @@ public class HomeController {
             dungeon = dungeonService.createDungeon(user);
         }
 
+        userService.checkLevelUp(user);
+        userService.save(user);
+
         model.addAttribute("user", user);
         model.addAttribute("dungeon", dungeon);
         return "user-profile";

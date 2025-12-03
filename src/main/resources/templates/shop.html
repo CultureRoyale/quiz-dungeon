@@ -10,7 +10,22 @@
 
     <main layout:fragment="content" class="flex-grow flex items-center justify-center p-4">
         <div class="w-full max-w-7xl p-8 border border-gray-600 bg-gray-900 shadow-2xl relative">
-            <h1 class="text-3xl text-center mb-4 font-dungeon tracking-wider">Boutique</h1>
+            <h1 class="text-3xl text-center mb-4 font-dungeon tracking-wider flex items-center justify-center gap-2">
+                Boutique
+                <div class="group relative inline-block">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="w-6 h-6 text-gray-400 cursor-help">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                    </svg>
+                    <div
+                        class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block w-96 bg-gray-800 text-white text-xs rounded p-2 text-center border border-gray-600 shadow-lg z-50 font-sans normal-case tracking-normal">
+                        <span class="align-middle">Un achat termine un combat ou un raid en cours</span>
+                        <img th:src="@{/images/mimimi.webp}" alt="mimimi"
+                            class="w-16 h-16 inline-block mr-1 align-middle">
+                    </div>
+                </div>
+            </h1>
             <div class="border-b-2 border-white mb-8"></div>
 
             <!-- User HP Bar Fragment -->

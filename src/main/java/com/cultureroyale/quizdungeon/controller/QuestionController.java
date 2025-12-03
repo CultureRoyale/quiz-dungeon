@@ -30,7 +30,7 @@ public class QuestionController {
         // forgiveness: Levenshtein distance check if length > 3
         if (userAnswer.length() > 3) {
             int distance = calculateLevenshteinDistance(userAnswer, correctAnswer);
-            if (distance <= 3) {
+            if (distance <= 2) {
                 return true;
             }
         }

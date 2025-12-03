@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{layouts/layout}">
+
+<head>
+    <title>Classement - Quiz Dungeon</title>
+</head>
+
+<body>
+    <main layout:fragment="content" class="flex-grow flex items-center justify-center p-4">
+        <div class="w-full max-w-4xl p-8 border border-gray-600 bg-gray-900 shadow-2xl relative">
+            <h1 class="text-3xl text-center mb-4 font-dungeon tracking-wider text-white">Classement des joueurs</h1>
+            <div class="border-b-2 border-white mb-8"></div>
+
+            <div class="bg-gray-800 rounded-lg border-2 border-gray-600 p-6 shadow-lg font-dungeon select-none">
+                <div class="overflow-x-auto overflow-y-auto max-h-[60vh]">
+                    <table class="w-full text-left text-white">
+                        <thead class="text-lg text-gray-400 uppercase bg-gray-900 border-b-2 border-gray-600">
+                            <tr>
+                                <th scope="col" class="px-6 py-4 font-bold tracking-wider">Rang</th>
+                                <th scope="col" class="px-6 py-4 font-bold tracking-wider">Joueur</th>
+                                <th scope="col" class="px-6 py-4 font-bold tracking-wider">Niveau</th>
+                                <th scope="col" class="px-6 py-4 font-bold text-right tracking-wider">Or</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-xl">
+                            <tr th:each="user, iterStat : ${users}"
+                                class="border-b border-gray-700 hover:bg-gray-700 transition-colors">
+                                <td class="px-6 py-4 font-bold text-amber-500 drop-shadow-md"
+                                    th:text="${iterStat.count}">1</td>
+                                <td class="px-6 py-4 font-medium tracking-wide drop-shadow-md"
+                                    th:text="${user.username}">Pseudo</td>
+                                <td class="px-6 py-4">
+                                    <span class="text-gray-400 drop-shadow-md" th:text="'Lvl ' + ${user.level}">Lvl
+                                        1</span>
+                                </td>
+                                <td class="px-6 py-4 text-right flex justify-end items-center gap-2">
+                                    <span th:text="${user.gold}" class="text-[#F1B32B] drop-shadow-md">1000</span>
+                                    <img th:src="@{/images/gold.svg}" alt="Gold" class="w-6 h-6">
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(users)}">
+                                <td colspan="4" class="px-6 py-8 text-center text-gray-500 italic text-lg">Aucun joueur
+                                    classé pour le moment.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

@@ -189,6 +189,7 @@ public class RaidController {
 
         // Update User Object for View (HP)
         user.setCurrentHp(userHp);
+        userRepository.save(user);
         context.setVariable("user", user);
 
         // Update Dungeon HP Bar (reusing boss_hp_bar but with dungeon stats)

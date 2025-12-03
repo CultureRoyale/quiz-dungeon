@@ -49,13 +49,13 @@ public class UserService {
         userRepository.save(user);
     }
 
-    private void checkLevelUp(User user) {
+    public void checkLevelUp(User user) {
         while (user.getXp() >= getRequiredXp(user.getLevel())) {
             user.setXp(user.getXp() - getRequiredXp(user.getLevel()));
             user.setLevel(user.getLevel() + 1);
             user.setMaxHp(user.getMaxHp() + 10);
-            user.setCurrentHp(user.getMaxHp()); 
-            user.setGold(user.getGold() + 100 * user.getLevel()); 
+            user.setCurrentHp(user.getMaxHp());
+            user.setGold(user.getGold() + 100 * user.getLevel());
         }
     }
 
