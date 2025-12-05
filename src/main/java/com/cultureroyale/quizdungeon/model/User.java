@@ -28,6 +28,9 @@ public class User {
     private int maxHp;
     private int currentHp;
     private int gold;
+    private int stolenGold;
+    private int bossKills;
+    private int dungeonsLooted;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -45,6 +48,10 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private java.util.List<UserQuestion> unlockedQuestions = new java.util.ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private java.util.List<UserAchievement> achievements = new java.util.ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
