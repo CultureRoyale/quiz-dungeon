@@ -3,6 +3,9 @@ package com.cultureroyale.quizdungeon.service;
 import com.cultureroyale.quizdungeon.model.Boss;
 import com.cultureroyale.quizdungeon.model.Question;
 import com.cultureroyale.quizdungeon.repository.QuestionRepository;
+import com.cultureroyale.quizdungeon.repository.UserQuestionRepository;
+import com.cultureroyale.quizdungeon.model.User;
+import com.cultureroyale.quizdungeon.model.UserQuestion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +19,27 @@ public class QuestionService {
 
     @Autowired
     private QuestionRepository questionRepository;
+
+    @Autowired
+    private UserQuestionRepository userQuestionRepository;
+
+    @Autowired
+    private AchievementService achievementService;
+
+    public void unlockQuestion(User user, Question question) {
+        if (!userQuestionRepository.existsByUserIdAndQuestionId(user.getId(), question.getId())) {
+            UserQuestion uq = UserQuestion
+                    .builder()
+                    .user(user)
+                    .question(question)
+                    .build();
+            userQuestionRepository.save(uq);
+
+            // Check achievement
+            int unlockedCount = userQuestionRepository.countByUserId(user.getId());
+            achievementService.checkAndUnlock(user, "QUESTIONS_ANSWERED", unlockedCount);
+        }
+    }
 
     public Optional<Question> getQuestionForBoss(Boss boss, List<Long> usedQuestionIds) {
         // Parse categories

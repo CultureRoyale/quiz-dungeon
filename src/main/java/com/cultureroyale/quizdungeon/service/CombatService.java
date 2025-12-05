@@ -23,10 +23,10 @@ public class CombatService {
     private QuestionService questionService;
 
     @Autowired
-    private com.cultureroyale.quizdungeon.repository.UserQuestionRepository userQuestionRepository;
+    private UserService userService;
 
     @Autowired
-    private UserService userService;
+    private AchievementService achievementService;
 
     public void startCombat(User user, Boss boss, HttpSession session) {
         session.setAttribute("combat_boss", boss);
@@ -73,17 +73,6 @@ public class CombatService {
         return (com.cultureroyale.quizdungeon.model.Question) session.getAttribute("combat_current_question");
     }
 
-    public void unlockQuestion(User user, com.cultureroyale.quizdungeon.model.Question question) {
-        if (!userQuestionRepository.existsByUserIdAndQuestionId(user.getId(), question.getId())) {
-            com.cultureroyale.quizdungeon.model.UserQuestion uq = com.cultureroyale.quizdungeon.model.UserQuestion
-                    .builder()
-                    .user(user)
-                    .question(question)
-                    .build();
-            userQuestionRepository.save(uq);
-        }
-    }
-
     public int calculateUserBaseAttack(Boss boss) {
         double difficultyMultiplier = 1.0;
         switch (boss.getDifficulty()) {
@@ -110,7 +99,7 @@ public class CombatService {
             // Unlock question
             com.cultureroyale.quizdungeon.model.Question currentQuestion = getCurrentQuestion(session);
             if (currentQuestion != null) {
-                unlockQuestion(user, currentQuestion);
+                questionService.unlockQuestion(user, currentQuestion);
             }
 
             // User attacks
@@ -150,6 +139,10 @@ public class CombatService {
         // XP reward based on boss position
         int xpReward = boss.getPosition() * 50;
         userService.addXp(user, xpReward); // This handles level up and saving
+
+        // Update Stats & Achievements
+        user.setBossKills(user.getBossKills() + 1);
+        achievementService.checkAndUnlock(user, "BOSS_KILLS", user.getBossKills());
 
         Combat combat = new Combat();
         combat.setUser(user);

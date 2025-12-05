@@ -11,4 +11,6 @@ public interface UserQuestionRepository extends JpaRepository<UserQuestion, Long
     List<UserQuestion> findByUserId(Long userId);
 
     boolean existsByUserIdAndQuestionId(Long userId, Long questionId);
+
+    int countByUserId(Long userId);
 }

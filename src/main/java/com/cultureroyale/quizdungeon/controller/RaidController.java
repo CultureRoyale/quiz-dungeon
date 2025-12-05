@@ -8,6 +8,9 @@ import com.cultureroyale.quizdungeon.model.enums.HelpLevel;
 import com.cultureroyale.quizdungeon.repository.DungeonRepository;
 import com.cultureroyale.quizdungeon.repository.UserRepository;
 import com.cultureroyale.quizdungeon.service.UserService;
+import com.cultureroyale.quizdungeon.service.AchievementService;
+import com.cultureroyale.quizdungeon.service.QuestionService;
+
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -46,6 +49,12 @@ public class RaidController {
 
     @Autowired
     private QuestionController questionController;
+
+    @Autowired
+    private AchievementService achievementService;
+
+    @Autowired
+    private QuestionService questionService;
 
     @GetMapping("/start/{dungeonId}")
     public String startRaid(@PathVariable Long dungeonId, Authentication authentication, HttpSession session) {
@@ -148,6 +157,10 @@ public class RaidController {
         // Validate Answer
         if (currentDQ != null) {
             isCorrect = questionController.verifyAnswer(answer, choiceId, currentDQ.getQuestion().getCorrectAnswer());
+            if (isCorrect) {
+                // Unlock question and check achievement
+                questionService.unlockQuestion(user, currentDQ.getQuestion());
+            }
         } else {
             isCorrect = false;
         }
@@ -345,6 +358,13 @@ public class RaidController {
 
         owner.setGold(ownerGold - transferAmount);
         attacker.setGold(attacker.getGold() + transferAmount);
+
+        // Update Stats & Achievements
+        attacker.setDungeonsLooted(attacker.getDungeonsLooted() + 1);
+        attacker.setStolenGold(attacker.getStolenGold() + transferAmount);
+
+        achievementService.checkAndUnlock(attacker, "DUNGEONS_LOOTED", attacker.getDungeonsLooted());
+        achievementService.checkAndUnlock(attacker, "GOLD_COLLECTED", attacker.getStolenGold());
 
         userRepository.save(owner);
 

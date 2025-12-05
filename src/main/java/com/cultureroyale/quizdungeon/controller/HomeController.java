@@ -5,6 +5,7 @@ import com.cultureroyale.quizdungeon.model.User;
 import com.cultureroyale.quizdungeon.repository.DungeonRepository;
 import com.cultureroyale.quizdungeon.service.DungeonService;
 import com.cultureroyale.quizdungeon.service.UserService;
+import com.cultureroyale.quizdungeon.service.AchievementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,6 +21,7 @@ public class HomeController {
     private final UserService userService;
     private final DungeonRepository dungeonRepository;
     private final DungeonService dungeonService;
+    private final AchievementService achievementService;
 
     @GetMapping("/")
     public String index(Model model) {
@@ -64,6 +66,13 @@ public class HomeController {
 
         model.addAttribute("user", user);
         model.addAttribute("dungeon", dungeon);
+        java.util.List<com.cultureroyale.quizdungeon.model.UserAchievement> userAchievements = achievementService
+                .getUserAchievements(user);
+        model.addAttribute("userAchievements", userAchievements);
+        model.addAttribute("allAchievements", achievementService.getAllAchievements());
+        model.addAttribute("unlockedAchievementIds", userAchievements.stream()
+                .map(ua -> ua.getAchievement().getId())
+                .collect(java.util.stream.Collectors.toSet()));
         return "user-profile";
     }
 }

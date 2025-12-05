@@ -13,14 +13,14 @@
 
 <body>
 
-    <main layout:fragment="content" class="flex-grow flex items-center justify-center p-4">
+    <main layout:fragment="content" class="flex-grow flex flex-col lg:flex-row items-start justify-center p-4 gap-8">
+
+        <!-- Main Profile Container -->
         <div class="w-full max-w-2xl p-8 border border-gray-600 bg-gray-900 shadow-2xl relative">
 
             <h1 class="text-3xl text-center mb-4 font-dungeon tracking-wider">Mon Profil</h1>
 
             <div class="border-b-2 border-white mb-8"></div>
-
-
 
             <!-- User HP Bar Fragment -->
             <div class="w-full mb-8">
@@ -77,7 +77,82 @@
                 </a>
             </div>
         </div>
+
+        <!-- Achievements Container (Separate Box) -->
+        <div class="w-full h-full max-w-sm p-8 border border-gray-600 bg-gray-900 shadow-2xl relative">
+            <h2 class="text-2xl text-center mb-4 font-dungeon tracking-wider">Succès</h2>
+            <div class="border-b-2 border-white mb-8"></div>
+
+            <div
+                class="grid grid-cols-3 gap-4 overflow-y-auto overflow-x-hidden max-h-[600px] pr-2 custom-scrollbar content-start">
+                <div th:each="achievement : ${allAchievements}"
+                    class="achievement-item relative group flex flex-col items-center justify-center p-1 rounded transition-colors aspect-square focus:outline-none"
+                    tabindex="0" th:data-name="${achievement.name}" th:data-description="${achievement.description}"
+                    th:classappend="${!unlockedAchievementIds.contains(achievement.id)} ? 'grayscale opacity-70' : ''">
+
+                    <div class="w-full h-full flex items-center justify-center pointer-events-none">
+                        <img th:if="${achievement.iconPath != null}" th:src="@{${achievement.iconPath}}"
+                            class="w-full h-full object-contain" alt="Achievement Icon">
+                        <div th:unless="${achievement.iconPath != null}"
+                            class="w-full h-full bg-gray-600 rounded-full flex items-center justify-center">
+                            <span class="text-xs">?</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
+
+    <th:block layout:fragment="scripts">
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const items = document.querySelectorAll('.achievement-item');
+                let tooltip = null;
+
+                function showTooltip(e) {
+                    const target = e.currentTarget;
+                    const name = target.getAttribute('data-name');
+                    const desc = target.getAttribute('data-description');
+
+                    if (tooltip) tooltip.remove();
+
+                    tooltip = document.createElement('div');
+                    tooltip.className = 'fixed z-[9999] bg-black text-white text-xs rounded px-3 py-2 border border-gray-600 shadow-lg w-48 text-center pointer-events-none';
+                    tooltip.innerHTML = `<h3 class="font-bold text-yellow-500 mb-1">${name}</h3><p>${desc}</p>`;
+                    document.body.appendChild(tooltip);
+
+                    const rect = target.getBoundingClientRect();
+                    const tooltipRect = tooltip.getBoundingClientRect();
+
+                    // Position below the element
+                    let top = rect.bottom;
+                    let left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+
+                    // Keep within viewport
+                    if (left < 0) left = 10;
+                    if (left + tooltipRect.width > window.innerWidth) left = window.innerWidth - tooltipRect.width - 10;
+                    if (top + tooltipRect.height > window.innerHeight) top = rect.top - tooltipRect.height - 10; // Flip to top if no space below
+
+                    tooltip.style.top = `${top}px`;
+                    tooltip.style.left = `${left}px`;
+                }
+
+                function hideTooltip() {
+                    if (tooltip) {
+                        tooltip.remove();
+                        tooltip = null;
+                    }
+                }
+
+                items.forEach(item => {
+                    item.addEventListener('mouseenter', showTooltip);
+                    item.addEventListener('mouseleave', hideTooltip);
+                    item.addEventListener('focus', showTooltip);
+                    item.addEventListener('blur', hideTooltip);
+                });
+            });
+        </script>
+    </th:block>
 
 </body>
 
