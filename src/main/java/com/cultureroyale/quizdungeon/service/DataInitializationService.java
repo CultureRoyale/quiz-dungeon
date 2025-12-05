@@ -20,13 +20,9 @@ public class DataInitializationService {
     @PostConstruct
     public void initializeBosses() {
         if (bossRepository.count() > 0) {
-            System.out.println(
-                    "Boss déjà initialisés (" + bossRepository.count() + " boss). Vérification des attaques...");
             updateExistingBosses();
             return;
         }
-
-        System.out.println("📡 Initialisation des 9 boss...");
 
         createBoss(1, "Gobelin", Difficulty.FACILE, 100, 5, 3, 50, "gobelin.png");
         createBoss(2, "Barbare", Difficulty.FACILE, 150, 8, 3, 75, "barbare.png");
@@ -38,7 +34,6 @@ public class DataInitializationService {
         createBoss(8, "P.E.K.K.A", Difficulty.DIFFICILE, 800, 35, 9, 400, "pekka.png");
         createBoss(9, "Méga Chevalier", Difficulty.DIFFICILE, 1000, 40, 9, 500, "mega_chevalier.png");
 
-        System.out.println("9 boss initialisés avec succès");
     }
 
     private void updateExistingBosses() {
@@ -82,9 +77,6 @@ public class DataInitializationService {
         }
         if (updated) {
             bossRepository.saveAll(bosses);
-            System.out.println("✅ Attaques des boss mises à jour.");
-        } else {
-            System.out.println("✅ Attaques déjà à jour.");
         }
     }
 
