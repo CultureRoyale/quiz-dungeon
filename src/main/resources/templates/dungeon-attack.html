@@ -37,7 +37,8 @@
             <div class="text-center mb-2">
                 <img th:src="@{'/images/shop/theme_' + ${dungeon.cosmeticTheme} + '.png'}"
                     th:alt="${dungeon.cosmeticTheme}"
-                    class="mx-auto h-[375px] object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] my-5">
+                    class="mx-auto h-[375px] object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] my-5"
+                    loading="lazy">
 
                 <h2 class="text-3xl font-dungeon text-white my-2 drop-shadow-[0_4px_0_rgba(0,0,0,1)]"
                     th:text="${dungeon.name}">Nom du Donjon</h2>
@@ -63,11 +64,11 @@
                 </div>
                 <div class="flex items-center gap-1 px-4 py-3 text-center pl-4">
                     <p class="text-2xl font-bold text-red-500" th:text="|+${dungeon.damageBoost}%|">+0%</p>
-                    <img th:src="@{/images/dungeon_icon.svg}" alt="Dungeon" class="w-6 h-6">
+                    <img th:src="@{/images/dungeon_icon.svg}" alt="Dungeon" class="w-6 h-6" loading="lazy">
                 </div>
                 <div class="flex items-center gap-1 px-4 py-3 text-center pl-4">
                     <p class="text-2xl font-bold text-yellow-500" th:text="${dungeon.user.gold}"></p>
-                    <img th:src="@{/images/gold.svg}" alt="Gold" class="w-6 h-6">
+                    <img th:src="@{/images/gold.svg}" alt="Gold" class="w-6 h-6" loading="lazy">
                 </div>
             </div>
 
