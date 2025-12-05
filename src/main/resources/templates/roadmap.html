@@ -147,7 +147,8 @@
                     <div class="boss-image-wrapper">
                         <img th:src="${unlockStatus.get(boss.id)} ? @{${boss.imagePath}} : @{/images/lock.png}"
                             th:alt="${unlockStatus.get(boss.id)} ? ${boss.name} : 'Locked'" class="boss-image"
-                            th:classappend="${defeatedStatus.get(boss.id)} ? 'defeated' : (${unlockStatus.get(boss.id)} ? 'unlocked' : 'locked')">
+                            th:classappend="${defeatedStatus.get(boss.id)} ? 'defeated' : (${unlockStatus.get(boss.id)} ? 'unlocked' : 'locked')"
+                            loading="lazy">
 
                         <!-- Badge position -->
                         <div
@@ -181,7 +182,7 @@
                                 <span class="text-red-400 font-bold flex items-center"
                                     th:if="${unlockStatus.get(boss.id)}">
                                     <span th:text="${boss.maxHp}">100</span>
-                                    <img th:src="@{/images/hp.svg}" class="h-3 w-3 ml-1" alt="HP">
+                                    <img th:src="@{/images/hp.svg}" class="h-3 w-3 ml-1" alt="HP" loading="lazy">
                                 </span>
                                 <span class="text-gray-500 font-bold" th:unless="${unlockStatus.get(boss.id)}">?</span>
                             </div>
@@ -191,7 +192,7 @@
                                 <span class="text-yellow-400 font-bold flex items-center"
                                     th:if="${unlockStatus.get(boss.id)}">
                                     <span th:text="${boss.goldReward}">50</span>
-                                    <img th:src="@{/images/gold.svg}" class="h-3 w-3 ml-1" alt="Gold">
+                                    <img th:src="@{/images/gold.svg}" class="h-3 w-3 ml-1" alt="Gold" loading="lazy">
                                 </span>
                                 <span class="text-gray-500 font-bold" th:unless="${unlockStatus.get(boss.id)}">?</span>
                             </div>
