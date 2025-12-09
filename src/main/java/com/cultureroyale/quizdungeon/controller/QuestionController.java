@@ -4,6 +4,8 @@ import org.springframework.stereotype.Controller;
 import java.text.Normalizer;
 import java.util.regex.Pattern;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 @Controller
 public class QuestionController {
@@ -39,7 +41,7 @@ public class QuestionController {
         String[] userWords = userAnswer.split("\\s+");
         String[] correctWords = correctAnswer.split("\\s+");
 
-        java.util.Set<String> determinants = new java.util.HashSet<>(Arrays.asList(
+        Set<String> determinants = new HashSet<>(Arrays.asList(
                 "le", "la", "les", "l", "un", "une", "des", "du", "de", "d", "au", "aux",
                 "ce", "cet", "cette", "ces", "mon", "ton", "son", "ma", "ta", "sa",
                 "mes", "tes", "ses", "notre", "votre", "leur", "nos", "vos", "leurs"));

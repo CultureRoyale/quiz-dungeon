@@ -6,7 +6,13 @@ import com.cultureroyale.quizdungeon.model.enums.HelpLevel;
 import com.cultureroyale.quizdungeon.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import com.cultureroyale.quizdungeon.model.Combat;
+import com.cultureroyale.quizdungeon.model.Question;
 import com.cultureroyale.quizdungeon.repository.CombatRepository;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +38,7 @@ public class CombatService {
         session.setAttribute("combat_boss", boss);
         session.setAttribute("combat_boss_current_hp", boss.getMaxHp());
         session.setAttribute("combat_user_current_hp", user.getCurrentHp());
-        session.setAttribute("combat_used_questions", new java.util.ArrayList<Long>());
+        session.setAttribute("combat_used_questions", new ArrayList<Long>());
 
         // Initial question
         loadNextQuestion(boss, session);
@@ -40,27 +46,23 @@ public class CombatService {
 
     private void loadNextQuestion(Boss boss, HttpSession session) {
         @SuppressWarnings("unchecked")
-        java.util.List<Long> usedQuestionIds = (java.util.List<Long>) session.getAttribute("combat_used_questions");
+        List<Long> usedQuestionIds = (List<Long>) session.getAttribute("combat_used_questions");
         if (usedQuestionIds == null) {
-            usedQuestionIds = new java.util.ArrayList<>();
+            usedQuestionIds = new ArrayList<>();
             session.setAttribute("combat_used_questions", usedQuestionIds);
         }
 
-        java.util.Optional<com.cultureroyale.quizdungeon.model.Question> questionOpt = questionService
-                .getQuestionForBoss(boss, usedQuestionIds);
+        Optional<Question> questionOpt = questionService.getQuestionForBoss(boss, usedQuestionIds);
 
         if (questionOpt.isPresent()) {
-            com.cultureroyale.quizdungeon.model.Question question = questionOpt.get();
+            Question question = questionOpt.get();
             session.setAttribute("combat_current_question", question);
             usedQuestionIds.add(question.getId());
         } else {
-            // Handle case where no questions are available (e.g. all used)
-            // If still empty, it means we used ALL questions for these categories.
-            // Let's clear the used list and try again (looping).
             usedQuestionIds.clear();
             questionOpt = questionService.getQuestionForBoss(boss, usedQuestionIds);
             if (questionOpt.isPresent()) {
-                com.cultureroyale.quizdungeon.model.Question question = questionOpt.get();
+                Question question = questionOpt.get();
                 session.setAttribute("combat_current_question", question);
                 usedQuestionIds.add(question.getId());
             } else {
@@ -69,8 +71,8 @@ public class CombatService {
         }
     }
 
-    public com.cultureroyale.quizdungeon.model.Question getCurrentQuestion(HttpSession session) {
-        return (com.cultureroyale.quizdungeon.model.Question) session.getAttribute("combat_current_question");
+    public Question getCurrentQuestion(HttpSession session) {
+        return (Question) session.getAttribute("combat_current_question");
     }
 
     public int calculateUserBaseAttack(Boss boss) {
@@ -97,7 +99,7 @@ public class CombatService {
 
         if (isCorrect) {
             // Unlock question
-            com.cultureroyale.quizdungeon.model.Question currentQuestion = getCurrentQuestion(session);
+            Question currentQuestion = getCurrentQuestion(session);
             if (currentQuestion != null) {
                 questionService.unlockQuestion(user, currentQuestion);
             }

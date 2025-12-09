@@ -6,14 +6,21 @@ import com.cultureroyale.quizdungeon.repository.DungeonRepository;
 import com.cultureroyale.quizdungeon.repository.UserRepository;
 import com.cultureroyale.quizdungeon.service.DungeonService;
 import com.cultureroyale.quizdungeon.service.UserService;
+
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -40,9 +47,9 @@ public class ShopController {
     }
 
     @PostMapping("/shop/buy")
-    @org.springframework.web.bind.annotation.ResponseBody
-    public org.springframework.http.ResponseEntity<java.util.Map<String, Object>> buyItem(
-            @RequestParam("item") String item, Principal principal, jakarta.servlet.http.HttpSession session) {
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> buyItem(
+            @RequestParam("item") String item, Principal principal, HttpSession session) {
 
         // Check for active combat/raid and terminate if exists
         if (session.getAttribute("raid_status") != null && "ONGOING".equals(session.getAttribute("raid_status"))) {
@@ -139,7 +146,7 @@ public class ShopController {
             dungeonRepository.save(dungeon);
         }
 
-        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        Map<String, Object> response = new HashMap<>();
         response.put("success", success);
         response.put("message", message);
         response.put("gold", user.getGold());
@@ -147,6 +154,6 @@ public class ShopController {
         response.put("maxHp", user.getMaxHp());
         response.put("damageBoost", dungeon.getDamageBoost());
 
-        return org.springframework.http.ResponseEntity.ok(response);
+        return ResponseEntity.ok(response);
     }
 }

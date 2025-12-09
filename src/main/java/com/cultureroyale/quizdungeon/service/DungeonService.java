@@ -1,8 +1,15 @@
 package com.cultureroyale.quizdungeon.service;
 
 import com.cultureroyale.quizdungeon.model.Dungeon;
+import com.cultureroyale.quizdungeon.model.DungeonQuestion;
+import com.cultureroyale.quizdungeon.model.Question;
 import com.cultureroyale.quizdungeon.model.User;
 import lombok.RequiredArgsConstructor;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,14 +41,14 @@ public class DungeonService {
     }
 
     @org.springframework.transaction.annotation.Transactional
-    public void updateDungeonQuestions(Dungeon dungeon, java.util.List<Long> questionIds) {
+    public void updateDungeonQuestions(Dungeon dungeon, List<Long> questionIds) {
         // Clear existing questions (triggers orphanRemoval)
         dungeon.getDungeonQuestions().clear();
         dungeonRepository.saveAndFlush(dungeon); // Force delete to happen before insert
 
         // Add new questions
         int position = 1;
-        java.util.Set<Long> addedQuestionIds = new java.util.HashSet<>();
+        Set<Long> addedQuestionIds = new HashSet<>();
 
         for (Long qId : questionIds) {
             // Prevent duplicates
@@ -49,9 +56,9 @@ public class DungeonService {
                 continue;
             }
 
-            com.cultureroyale.quizdungeon.model.Question q = questionRepository.findById(qId).orElse(null);
+            Question q = questionRepository.findById(qId).orElse(null);
             if (q != null) {
-                com.cultureroyale.quizdungeon.model.DungeonQuestion dq = com.cultureroyale.quizdungeon.model.DungeonQuestion
+                DungeonQuestion dq = DungeonQuestion
                         .builder()
                         .dungeon(dungeon)
                         .question(q)

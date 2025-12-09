@@ -1,6 +1,7 @@
 package com.cultureroyale.quizdungeon.controller;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 
 import com.cultureroyale.quizdungeon.model.Dungeon;
 import com.cultureroyale.quizdungeon.model.User;
@@ -42,7 +43,7 @@ public class DungeonController {
         boolean isExpired = false;
         if (currentUser.getCurrentOpponentDungeonAssignedAt() != null) {
             if (currentUser.getCurrentOpponentDungeonAssignedAt().plusMinutes(10)
-                    .isBefore(java.time.LocalDateTime.now())) {
+                    .isBefore(LocalDateTime.now())) {
                 isExpired = true;
             }
         }
@@ -51,7 +52,7 @@ public class DungeonController {
             Dungeon randomDungeon = dungeonService.getRandomDungeon(currentUser);
             if (randomDungeon != null) {
                 currentUser.setCurrentOpponentDungeon(randomDungeon);
-                currentUser.setCurrentOpponentDungeonAssignedAt(java.time.LocalDateTime.now());
+                currentUser.setCurrentOpponentDungeonAssignedAt(LocalDateTime.now());
                 userService.save(currentUser);
             }
         }
@@ -68,7 +69,7 @@ public class DungeonController {
 
             Dungeon newDungeon = dungeonService.getRandomDungeon(currentUser);
             currentUser.setCurrentOpponentDungeon(newDungeon);
-            currentUser.setCurrentOpponentDungeonAssignedAt(java.time.LocalDateTime.now());
+            currentUser.setCurrentOpponentDungeonAssignedAt(LocalDateTime.now());
             userService.save(currentUser);
 
             return "redirect:/dungeon/attack";

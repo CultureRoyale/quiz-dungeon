@@ -2,9 +2,13 @@ package com.cultureroyale.quizdungeon.controller;
 
 import com.cultureroyale.quizdungeon.model.Dungeon;
 import com.cultureroyale.quizdungeon.model.User;
+import com.cultureroyale.quizdungeon.model.UserAchievement;
 import com.cultureroyale.quizdungeon.repository.DungeonRepository;
 import com.cultureroyale.quizdungeon.service.DungeonService;
 import com.cultureroyale.quizdungeon.service.UserService;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import com.cultureroyale.quizdungeon.service.AchievementService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -13,6 +17,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
@@ -33,7 +39,7 @@ public class HomeController {
             @RequestParam(required = false) String error,
             @RequestParam(required = false) String logout,
             @RequestParam(required = false) String registered,
-            jakarta.servlet.http.HttpServletRequest request) {
+            HttpServletRequest request) {
 
         // Force session creation to ensure CSRF token can be generated
         request.getSession(true);
@@ -66,13 +72,13 @@ public class HomeController {
 
         model.addAttribute("user", user);
         model.addAttribute("dungeon", dungeon);
-        java.util.List<com.cultureroyale.quizdungeon.model.UserAchievement> userAchievements = achievementService
+        List<UserAchievement> userAchievements = achievementService
                 .getUserAchievements(user);
         model.addAttribute("userAchievements", userAchievements);
         model.addAttribute("allAchievements", achievementService.getAllAchievements());
         model.addAttribute("unlockedAchievementIds", userAchievements.stream()
                 .map(ua -> ua.getAchievement().getId())
-                .collect(java.util.stream.Collectors.toSet()));
+                .collect(Collectors.toSet()));
         return "user-profile";
     }
 }

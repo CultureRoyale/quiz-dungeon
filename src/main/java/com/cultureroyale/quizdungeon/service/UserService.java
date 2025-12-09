@@ -2,9 +2,13 @@ package com.cultureroyale.quizdungeon.service;
 
 import com.cultureroyale.quizdungeon.model.User;
 import com.cultureroyale.quizdungeon.repository.UserRepository;
+import com.cultureroyale.quizdungeon.model.Combat;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -13,6 +17,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final DungeonService dungeonService;
+    private final com.cultureroyale.quizdungeon.repository.CombatRepository combatRepository;
 
     public User registerUser(String username, String password) {
         if (userRepository.existsByUsername(username)) {
@@ -61,5 +66,36 @@ public class UserService {
 
     public int getRequiredXp(int level) {
         return level * 100;
+    }
+
+    public void updatePassword(User user, String newPassword) {
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void deleteUser(User user) {
+        // Break link to current opponent dungeon (TransientObjectException fix)
+        user.setCurrentOpponentDungeon(null);
+        // No explicit save needed, managed by transaction
+
+        // Break links where user is target in other combats (FK constraint fix)
+        List<Combat> targetCombats = combatRepository
+                .findByTargetUser(user);
+        for (Combat c : targetCombats) {
+            c.setTargetUser(null);
+        }
+
+        // Break links where other users are targeting this user's dungeon (FK
+        // constraint fix)
+        if (user.getDungeon() != null) {
+            List<User> opponents = userRepository.findByCurrentOpponentDungeon(user.getDungeon());
+            for (User opponent : opponents) {
+                opponent.setCurrentOpponentDungeon(null);
+            }
+        }
+
+        // Delete user (Cascade will handle own dungeon and own combats)
+        userRepository.delete(user);
     }
 }
