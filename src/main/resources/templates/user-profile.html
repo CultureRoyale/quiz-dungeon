@@ -38,7 +38,8 @@
                     <div class="w-40 h-40 relative group">
                         <img th:src="@{'/images/shop/theme_' + ${dungeon.cosmeticTheme} + '.png'}"
                             th:alt="${dungeon.cosmeticTheme}"
-                            class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-transform group-hover:scale-110">
+                            class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-transform group-hover:scale-110"
+                            loading="lazy">
                     </div>
                 </div>
 
@@ -48,7 +49,7 @@
                     <h3 class="text-center text-gray-400 text-sm uppercase mb-1 ">Boost<br>Donjon</h3>
                     <div class="flex items-center gap-1 font-dungeon text-xl text-red-500">
                         <span th:text="'+' + ${dungeon.damageBoost} + '%'">+0%</span>
-                        <img th:src="@{/images/dungeon_icon.svg}" alt="Dungeon" class="w-5 h-5">
+                        <img th:src="@{/images/dungeon_icon.svg}" alt="Dungeon" class="w-5 h-5" loading="lazy">
                     </div>
                 </div>
 
@@ -57,7 +58,7 @@
                     <h3 class="text-center text-gray-400 text-sm uppercase mb-1 ">Or<br>Stocké</h3>
                     <div class="flex items-center gap-1 font-dungeon text-xl text-yellow-400">
                         <span th:text="${user.gold}">0</span>
-                        <img th:src="@{/images/gold.svg}" alt="Gold" class="w-5 h-5">
+                        <img th:src="@{/images/gold.svg}" alt="Gold" class="w-5 h-5" loading="lazy">
                     </div>
                 </div>
 
