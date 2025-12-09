@@ -2,6 +2,7 @@ package com.cultureroyale.quizdungeon.controller;
 
 import com.cultureroyale.quizdungeon.model.Boss;
 import com.cultureroyale.quizdungeon.model.User;
+import com.cultureroyale.quizdungeon.model.Question;
 import com.cultureroyale.quizdungeon.model.dto.Choice;
 import com.cultureroyale.quizdungeon.model.enums.HelpLevel;
 import com.cultureroyale.quizdungeon.repository.BossRepository;
@@ -15,7 +16,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.ArrayList;
+import java.util.Collections;
+
 import org.springframework.http.ResponseEntity;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import jakarta.servlet.ServletContext;
@@ -95,7 +101,7 @@ public class CombatController {
         model.addAttribute("bossImage", boss.getImagePath());
 
         // Get current question
-        com.cultureroyale.quizdungeon.model.Question question = combatService.getCurrentQuestion(session);
+        Question question = combatService.getCurrentQuestion(session);
         if (question == null) {
             return "redirect:/combat/defeat";
         }
@@ -103,7 +109,7 @@ public class CombatController {
         model.addAttribute("question", question.getQuestionText());
 
         // Choices are loaded via AJAX now, so we don't need to pass them here
-        model.addAttribute("choices", new java.util.ArrayList<>());
+        model.addAttribute("choices", new ArrayList<>());
         model.addAttribute("selectedChoiceId", null);
 
         return "quiz-battle";
@@ -132,13 +138,13 @@ public class CombatController {
 
         // Retrieve choices from session to display result
         @SuppressWarnings("unchecked")
-        java.util.List<Choice> choices = (java.util.List<Choice>) session.getAttribute("combat_current_choices");
+        List<Choice> choices = (List<Choice>) session.getAttribute("combat_current_choices");
 
         if (choices == null) {
             // Try to get question to reconstruct choices for feedback if needed
-            com.cultureroyale.quizdungeon.model.Question question = combatService.getCurrentQuestion(session);
+            Question question = combatService.getCurrentQuestion(session);
             if (question != null) {
-                choices = new java.util.ArrayList<>();
+                choices = new ArrayList<>();
                 choices.add(new Choice(1L, question.getCorrectAnswer()));
                 choices.add(new Choice(2L, question.getBadAnswer1()));
                 choices.add(new Choice(3L, question.getBadAnswer2()));
@@ -149,13 +155,12 @@ public class CombatController {
             }
         }
 
-        com.cultureroyale.quizdungeon.model.Question currentQuestion = combatService.getCurrentQuestion(session);
+        Question currentQuestion = combatService.getCurrentQuestion(session);
 
         if (currentQuestion != null) {
             isCorrect = questionController.verifyAnswer(answer, choiceId, currentQuestion.getCorrectAnswer());
         } else {
-            // Fallback if question is null, though it shouldn't be for text answer if logic
-            // holds
+            // Fallback if question is null
             isCorrect = false;
         }
 
@@ -179,17 +184,14 @@ public class CombatController {
         context.setVariable("bossMaxHp", boss.getMaxHp());
         context.setVariable("bossAtk", boss.getAttack());
         context.setVariable("bossImage", boss.getImagePath());
-        String bossHpBarHtml = templateEngine.process("fragments/boss_hp_bar", java.util.Set.of("bossHpBar"), context);
+        String bossHpBarHtml = templateEngine.process("fragments/boss_hp_bar", Set.of("bossHpBar"), context);
         jsonResponse.put("bossHpBarHtml", bossHpBarHtml);
 
         // Update User HP Bar
-        // Re-fetch user to ensure latest state if needed, but 'user' object should be
-        // updated by processTurn
-        // Ensure user attack is set for display
         user.setAttack(combatService.calculateUserBaseAttack(boss));
         context.setVariable("user", user);
         context.setVariable("compact", false);
-        String userHpBarHtml = templateEngine.process("fragments/user_hp_bar", java.util.Set.of("userHpBar"), context);
+        String userHpBarHtml = templateEngine.process("fragments/user_hp_bar", Set.of("userHpBar"), context);
         jsonResponse.put("userHpBarHtml", userHpBarHtml);
 
         // Render Result Feedback
@@ -197,7 +199,7 @@ public class CombatController {
             context.setVariable("userAnswer", answer);
             context.setVariable("correctAnswer", currentQuestion.getCorrectAnswer());
             context.setVariable("correct", isCorrect);
-            String resultHtml = templateEngine.process("fragments/quiz-text-result", java.util.Set.of("result"),
+            String resultHtml = templateEngine.process("fragments/quiz-text-result", Set.of("result"),
                     context);
             jsonResponse.put("resultHtml", resultHtml);
         } else {
@@ -206,7 +208,7 @@ public class CombatController {
             context.setVariable("submittedChoiceId", submittedId != null ? submittedId : -1L);
             context.setVariable("correctChoiceId", 1L);
             context.setVariable("correct", isCorrect);
-            String resultHtml = templateEngine.process("fragments/quiz-choices-list", java.util.Set.of("list"),
+            String resultHtml = templateEngine.process("fragments/quiz-choices-list", Set.of("list"),
                     context);
             jsonResponse.put("resultHtml", resultHtml);
         }
@@ -224,17 +226,17 @@ public class CombatController {
         } else {
             jsonResponse.put("status", "ONGOING");
             // Render Next Question
-            com.cultureroyale.quizdungeon.model.Question nextQuestion = combatService.getCurrentQuestion(session);
+            Question nextQuestion = combatService.getCurrentQuestion(session);
             if (nextQuestion != null) {
 
                 // Prepare choices for the next question
-                java.util.List<Choice> nextChoices = new java.util.ArrayList<>();
+                List<Choice> nextChoices = new ArrayList<>();
                 nextChoices.add(new Choice(1L, nextQuestion.getCorrectAnswer()));
                 nextChoices.add(new Choice(2L, nextQuestion.getBadAnswer1()));
                 nextChoices.add(new Choice(3L, nextQuestion.getBadAnswer2()));
                 nextChoices.add(new Choice(4L, nextQuestion.getBadAnswer3()));
-                java.util.Collections.shuffle(nextChoices);
-                java.util.Collections.shuffle(nextChoices);
+                Collections.shuffle(nextChoices);
+                Collections.shuffle(nextChoices);
                 session.setAttribute("combat_current_choices", nextChoices);
                 session.removeAttribute("combat_help_level"); // Reset help level for new question
 
@@ -243,7 +245,7 @@ public class CombatController {
                 context.setVariable("selectedChoiceId", null);
 
                 String nextQuestionHtml = templateEngine.process("fragments/quiz-interface-options",
-                        java.util.Set.of("choices"), context);
+                        Set.of("choices"), context);
                 jsonResponse.put("nextQuestionHtml", nextQuestionHtml);
             }
         }
@@ -254,19 +256,19 @@ public class CombatController {
     @GetMapping("/choices")
     public String getChoices(@RequestParam(defaultValue = "FOUR_CHOICES") HelpLevel helpLevel, HttpSession session,
             Model model) {
-        com.cultureroyale.quizdungeon.model.Question question = combatService.getCurrentQuestion(session);
+        Question question = combatService.getCurrentQuestion(session);
         if (question == null) {
             return ""; // Or handle error
         }
 
-        java.util.List<Choice> choices = new java.util.ArrayList<>();
+        List<Choice> choices = new ArrayList<>();
         choices.add(new Choice(1L, question.getCorrectAnswer()));
         choices.add(new Choice(2L, question.getBadAnswer1()));
         if (helpLevel == HelpLevel.FOUR_CHOICES) {
             choices.add(new Choice(3L, question.getBadAnswer2()));
             choices.add(new Choice(4L, question.getBadAnswer3()));
         }
-        java.util.Collections.shuffle(choices);
+        Collections.shuffle(choices);
 
         // Store choices in session for result display
         session.setAttribute("combat_current_choices", choices);

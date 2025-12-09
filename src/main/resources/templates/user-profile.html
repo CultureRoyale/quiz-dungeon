@@ -70,6 +70,38 @@
                 </div>
             </div>
 
+            <!-- Account Management Section -->
+            <div class="mb-8 border-t border-gray-700 pt-6">
+
+                <div class="bg-gray-800 p-6 rounded border border-gray-700 shadow-lg">
+                    <!-- Update Password Form (PUT) -->
+                    <form th:action="@{/user/update}" th:method="put" class="mb-8">
+                        <h3 class="text-md uppercase text-gray-300 mb-4 font-bold text-center tracking-wider">Changer de
+                            mot de passe</h3>
+
+                        <div class="space-y-4 max-w-md mx-auto">
+                            <div>
+                                <input type="password" name="newPassword" placeholder="Nouveau mot de passe" required
+                                    class="w-full bg-gray-900 border border-gray-600 rounded p-3 text-white text-sm focus:border-blue-500 focus:outline-none transition-colors">
+                            </div>
+                            <div>
+                                <input type="password" name="confirmPassword" placeholder="Confirmer le mot de passe"
+                                    required
+                                    class="w-full bg-gray-900 border border-gray-600 rounded p-3 text-white text-sm focus:border-blue-500 focus:outline-none transition-colors">
+                            </div>
+                            <div th:replace="~{fragments/button :: smallButton('Mettre à jour le mot de passe')}"></div>
+                        </div>
+                    </form>
+
+                    <!-- Delete Account Form -->
+                    <form th:action="@{/user/delete}" th:method="delete"
+                        onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.');"
+                        class="text-center border-t border-gray-700 pt-6">
+                        <div th:replace="~{fragments/button :: redButton('Supprimer mon compte')}"></div>
+                    </form>
+                </div>
+            </div>
+
             <!-- Back Button -->
             <div class="text-center">
                 <a th:href="@{/roadmap}"
@@ -104,9 +136,26 @@
         </div>
     </main>
 
+    <!-- Toast Fragment -->
+    <div th:replace="~{fragments/toast :: toast}"></div>
+    <div th:replace="~{fragments/toast :: toast-script}"></div>
+
     <th:block layout:fragment="scripts">
-        <script>
+        <script th:inline="javascript">
             document.addEventListener('DOMContentLoaded', () => {
+                /*<![CDATA[*/
+                const message = /*[[${message}]]*/ null;
+                const error = /*[[${error}]]*/ null;
+                /*]]>*/
+
+                if (message) {
+                    showToast(message, 'success');
+                }
+                if (error) {
+                    showToast(error, 'error');
+                }
+
+                // Tooltip Logic
                 const items = document.querySelectorAll('.achievement-item');
                 let tooltip = null;
 

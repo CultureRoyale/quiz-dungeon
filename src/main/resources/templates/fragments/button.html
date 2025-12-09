@@ -22,6 +22,11 @@
         <span th:text="${text}" class="drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">Button Text</span>
     </button>
 
+    <button th:fragment="redButton(text)" type="submit"
+        class="w-full bg-gradient-to-b from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 text-white font-dungeon text-lg py-2 rounded-lg border-2 border-red-400 shadow-[0_3px_0_rgb(0,0,0)] active:shadow-none active:translate-y-1 transition-all uppercase tracking-wider">
+        <span th:text="${text}" class="drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">Button Text</span>
+    </button>
+
     <button th:fragment="shopButton(price)" type="submit"
         class="bg-gradient-to-b from-fuchsia-500 to-pink-600 hover:from-fuchsia-400 hover:to-pink-500 text-white font-dungeon text-lg py-1 px-6 rounded-lg border-2 border-fuchsia-400 shadow-[0_3px_0_rgb(134,25,143)] active:shadow-none active:translate-y-1 transition-all uppercase tracking-wider flex items-center gap-2 mx-auto">
         <span th:text="${price}" class="drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">100</span>

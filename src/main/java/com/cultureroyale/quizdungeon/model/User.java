@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Table(name = "users")
@@ -38,7 +40,7 @@ public class User {
     @Transient
     private int attack;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Dungeon dungeon;
 
     @ManyToOne
@@ -47,11 +49,15 @@ public class User {
     private LocalDateTime currentOpponentDungeonAssignedAt;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private java.util.List<UserQuestion> unlockedQuestions = new java.util.ArrayList<>();
+    private List<UserQuestion> unlockedQuestions = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private java.util.List<UserAchievement> achievements = new java.util.ArrayList<>();
+    private List<UserAchievement> achievements = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Combat> combats = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
