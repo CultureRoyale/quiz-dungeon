@@ -32,6 +32,9 @@ public class UserService {
                 .maxHp(100)
                 .currentHp(100)
                 .gold(0)
+                .stolenGold(0)
+                .bossKills(0)
+                .dungeonsLooted(0)
                 .build();
 
         user = userRepository.save(user);

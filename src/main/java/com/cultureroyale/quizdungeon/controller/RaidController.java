@@ -71,13 +71,12 @@ public class RaidController {
         session.setAttribute("raid_dungeon_max_hp", dungeonMaxHp);
         session.setAttribute("raid_dungeon_current_hp", dungeonMaxHp);
 
-        // Player HP (use user's max HP)
-        session.setAttribute("raid_user_current_hp", user.getMaxHp());
+        // Player HP (use user's current HP)
+        session.setAttribute("raid_user_current_hp", user.getCurrentHp());
 
         // Load Questions (ordered by position)
         List<DungeonQuestion> questions = new ArrayList<>(dungeon.getDungeonQuestions());
         questions.sort(Comparator.comparingInt(DungeonQuestion::getPosition));
-        session.setAttribute("raid_questions", questions);
         session.setAttribute("raid_questions", questions);
         session.setAttribute("raid_current_question_index", 0);
         session.removeAttribute("raid_help_level");
@@ -125,6 +124,13 @@ public class RaidController {
         model.addAttribute("choices", new ArrayList<>()); // Loaded via AJAX
         model.addAttribute("selectedChoiceId", null);
 
+        // Question count
+        @SuppressWarnings("unchecked")
+        List<DungeonQuestion> questions = (List<DungeonQuestion>) session.getAttribute("raid_questions");
+        int currentIndex = (int) session.getAttribute("raid_current_question_index");
+        model.addAttribute("currentQuestionNumber", currentIndex + 1);
+        model.addAttribute("totalQuestions", questions.size());
+
         return "raid";
     }
 
@@ -143,7 +149,7 @@ public class RaidController {
 
         String username = authentication.getName();
         User user = userRepository.findByUsername(username).orElseThrow();
-        user.setAttack(5); // Ensure attack is set
+        user.setAttack(10); // Base attack to 10
 
         boolean isCorrect = false;
         Long submittedId = choiceId;
@@ -233,6 +239,14 @@ public class RaidController {
             context.setVariable("submittedChoiceId", submittedId != null ? submittedId : -1L);
             context.setVariable("correctChoiceId", 1L);
             context.setVariable("correct", isCorrect);
+
+            // Pass question counts
+            @SuppressWarnings("unchecked")
+            List<DungeonQuestion> qList = (List<DungeonQuestion>) session.getAttribute("raid_questions");
+            int cIndex = (int) session.getAttribute("raid_current_question_index");
+            context.setVariable("currentQuestionNumber", cIndex + 1);
+            context.setVariable("totalQuestions", qList.size());
+
             String resultHtml = templateEngine.process("fragments/quiz-choices-list", Set.of("list"), context);
             jsonResponse.put("resultHtml", resultHtml);
         }
@@ -275,6 +289,8 @@ public class RaidController {
                 context.setVariable("question", nextDQ.getQuestion().getQuestionText());
                 context.setVariable("choices", nextChoices);
                 context.setVariable("selectedChoiceId", null);
+                context.setVariable("currentQuestionNumber", nextIndex + 1);
+                context.setVariable("totalQuestions", questions.size());
 
                 String nextQuestionHtml = templateEngine.process("fragments/quiz-interface-options", Set.of("choices"),
                         context);
@@ -308,9 +324,14 @@ public class RaidController {
         session.setAttribute("raid_help_level", helpLevel);
 
         model.addAttribute("choices", choices);
-        model.addAttribute("selectedChoiceId", null);
         model.addAttribute("submittedChoiceId", null);
         model.addAttribute("correctChoiceId", null);
+
+        @SuppressWarnings("unchecked")
+        List<DungeonQuestion> questions = (List<DungeonQuestion>) session.getAttribute("raid_questions");
+        int currentIndex = (int) session.getAttribute("raid_current_question_index");
+        model.addAttribute("currentQuestionNumber", currentIndex + 1);
+        model.addAttribute("totalQuestions", questions.size());
 
         return "fragments/quiz-choices-list :: list";
     }

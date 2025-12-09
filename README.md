@@ -2,7 +2,7 @@
 
 # Quiz Dungeon
 Quiz Dungeon est un jeu RPG de quiz où vous affrontez des boss en répondant à des questions de culture générale.
-Créer votre propre donjon avec vos questions pour mettre à l'épreuve d'autres joueurs !
+Créez votre propre donjon avec vos questions pour mettre à l'épreuve d'autres joueurs !
 
 ## Lancement du projet en local
 
@@ -34,4 +34,4 @@ Effectuez la commande suivante à la racine du projet.
 
 - Une réponse correcte vous permet d'infliger des dégats à l'adversaire, inversement une réponse fausse permet à l'adversaire de vous attaquer !
 - Sûr de vous ? Répondre à une question au clavier (snipe) vous permet de tripler (x3) votre attaque !
-- Langue au chat ? Répondez à une question avec l'option 50/50, votre attaque seront néanmoins réduit de moitié !
+- Langue au chat ? Répondez à une question avec l'option 50/50, votre attaque sera néanmoins réduite de moitié !

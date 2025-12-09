@@ -19,96 +19,96 @@
         <div class="w-full max-w-2xl p-8 border border-gray-600 bg-gray-900 shadow-2xl relative">
 
             <h1 class="text-3xl text-center mb-4 font-dungeon tracking-wider">Mon Profil</h1>
-
             <div class="border-b-2 border-white mb-8"></div>
 
-            <!-- User HP Bar Fragment -->
-            <div class="w-full mb-8">
-                <div th:replace="~{fragments/user_hp_bar :: userHpBar(user=${user}, compact=false)}"></div>
-            </div>
-            <!-- XP Bar Fragment -->
-            <div class="w-full mb-8 mt-4">
-                <div th:replace="~{fragments/user_xp_bar :: userXpBar}"></div>
-            </div>
-
-            <!-- Dungeon Stats Grid -->
-            <div class="grid grid-cols-4 gap-4 mb-8">
-                <div
-                    class="col-span-2 row-span-2 bg-gray-800 p-4 rounded border border-gray-700 flex flex-col items-center justify-center">
-                    <div class="w-40 h-40 relative group">
-                        <img th:src="@{'/images/shop/theme_' + ${dungeon.cosmeticTheme} + '.png'}"
-                            th:alt="${dungeon.cosmeticTheme}"
-                            class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-transform group-hover:scale-110"
-                            loading="lazy">
-                    </div>
+            <div class="overflow-y-auto max-h-[600px] pr-2">
+                <!-- User HP Bar Fragment -->
+                <div class="w-full mb-8">
+                    <div th:replace="~{fragments/user_hp_bar :: userHpBar(user=${user}, compact=false)}"></div>
+                </div>
+                <!-- XP Bar Fragment -->
+                <div class="w-full mb-8 mt-4">
+                    <div th:replace="~{fragments/user_xp_bar :: userXpBar}"></div>
                 </div>
 
-
-                <div
-                    class="col-span-1 bg-gray-800 p-4 rounded border border-gray-700 flex flex-col items-center justify-center">
-                    <h3 class="text-center text-gray-400 text-sm uppercase mb-1 ">Boost<br>Donjon</h3>
-                    <div class="flex items-center gap-1 font-dungeon text-xl text-red-500">
-                        <span th:text="'+' + ${dungeon.damageBoost} + '%'">+0%</span>
-                        <img th:src="@{/images/dungeon_icon.svg}" alt="Dungeon" class="w-5 h-5" loading="lazy">
-                    </div>
-                </div>
-
-                <div
-                    class="col-span-1 bg-gray-800 p-4 rounded border border-gray-700 flex flex-col items-center justify-center">
-                    <h3 class="text-center text-gray-400 text-sm uppercase mb-1 ">Or<br>Stocké</h3>
-                    <div class="flex items-center gap-1 font-dungeon text-xl text-yellow-400">
-                        <span th:text="${user.gold}">0</span>
-                        <img th:src="@{/images/gold.svg}" alt="Gold" class="w-5 h-5" loading="lazy">
-                    </div>
-                </div>
-
-                <div class="col-span-2 flex items-center justify-center">
-                    <a th:href="@{/dungeon/edit}" class="w-full">
-                        <button type="button"
-                            th:replace="~{fragments/button :: greenButton('Personnaliser donjon')}"></button>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Account Management Section -->
-            <div class="mb-8 border-t border-gray-700 pt-6">
-
-                <div class="bg-gray-800 p-6 rounded border border-gray-700 shadow-lg">
-                    <!-- Update Password Form (PUT) -->
-                    <form th:action="@{/user/update}" th:method="put" class="mb-8">
-                        <h3 class="text-md uppercase text-gray-300 mb-4 font-bold text-center tracking-wider">Changer de
-                            mot de passe</h3>
-
-                        <div class="space-y-4 max-w-md mx-auto">
-                            <div>
-                                <input type="password" name="newPassword" placeholder="Nouveau mot de passe" required
-                                    class="w-full bg-gray-900 border border-gray-600 rounded p-3 text-white text-sm focus:border-blue-500 focus:outline-none transition-colors">
-                            </div>
-                            <div>
-                                <input type="password" name="confirmPassword" placeholder="Confirmer le mot de passe"
-                                    required
-                                    class="w-full bg-gray-900 border border-gray-600 rounded p-3 text-white text-sm focus:border-blue-500 focus:outline-none transition-colors">
-                            </div>
-                            <div th:replace="~{fragments/button :: smallButton('Mettre à jour le mot de passe')}"></div>
+                <!-- Dungeon Stats Grid -->
+                <div class="grid grid-cols-4 gap-4 mb-8">
+                    <div
+                        class="col-span-2 row-span-2 bg-gray-800 p-4 rounded border border-gray-700 flex flex-col items-center justify-center">
+                        <div class="w-40 h-40 relative group">
+                            <img th:src="@{'/images/shop/theme_' + ${dungeon.cosmeticTheme} + '.png'}"
+                                th:alt="${dungeon.cosmeticTheme}"
+                                class="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-transform group-hover:scale-110"
+                                loading="lazy">
                         </div>
-                    </form>
+                    </div>
 
-                    <!-- Delete Account Form -->
-                    <form th:action="@{/user/delete}" th:method="delete"
-                        onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.');"
-                        class="text-center border-t border-gray-700 pt-6">
-                        <div th:replace="~{fragments/button :: redButton('Supprimer mon compte')}"></div>
-                    </form>
+
+                    <div
+                        class="col-span-1 bg-gray-800 p-4 rounded border border-gray-700 flex flex-col items-center justify-center">
+                        <h3 class="text-center text-gray-400 text-sm uppercase mb-1 ">Boost<br>Donjon</h3>
+                        <div class="flex items-center gap-1 font-dungeon text-xl text-red-500">
+                            <span th:text="'+' + ${dungeon.damageBoost} + '%'">+0%</span>
+                            <img th:src="@{/images/dungeon_icon.svg}" alt="Dungeon" class="w-5 h-5" loading="lazy">
+                        </div>
+                    </div>
+
+                    <div
+                        class="col-span-1 bg-gray-800 p-4 rounded border border-gray-700 flex flex-col items-center justify-center">
+                        <h3 class="text-center text-gray-400 text-sm uppercase mb-1 ">Or<br>Stocké</h3>
+                        <div class="flex items-center gap-1 font-dungeon text-xl text-yellow-400">
+                            <span th:text="${user.gold}">0</span>
+                            <img th:src="@{/images/gold.svg}" alt="Gold" class="w-5 h-5" loading="lazy">
+                        </div>
+                    </div>
+
+                    <div class="col-span-2 flex items-center justify-center">
+                        <a th:href="@{/dungeon/edit}" class="w-full">
+                            <button type="button"
+                                th:replace="~{fragments/button :: greenButton('Personnaliser donjon')}"></button>
+                        </a>
+                    </div>
                 </div>
+
+                <!-- Account Management Section -->
+                <div class="mb-8 border-t border-gray-700 pt-6">
+
+                    <div class="bg-gray-800 p-6 rounded border border-gray-700 shadow-lg">
+                        <!-- Update Password Form (PUT) -->
+                        <form th:action="@{/user/update}" th:method="put" class="mb-8">
+                            <h3 class="text-md uppercase text-gray-300 mb-4 font-bold text-center tracking-wider">
+                                Changer de
+                                mot de passe</h3>
+
+                            <div class="space-y-4 max-w-md mx-auto">
+                                <div>
+                                    <input type="password" name="newPassword" placeholder="Nouveau mot de passe"
+                                        required
+                                        class="w-full bg-gray-900 border border-gray-600 rounded p-3 text-white text-sm focus:border-blue-500 focus:outline-none transition-colors">
+                                </div>
+                                <div>
+                                    <input type="password" name="confirmPassword"
+                                        placeholder="Confirmer le mot de passe" required
+                                        class="w-full bg-gray-900 border border-gray-600 rounded p-3 text-white text-sm focus:border-blue-500 focus:outline-none transition-colors">
+                                </div>
+                                <div th:replace="~{fragments/button :: smallButton('Mettre à jour le mot de passe')}">
+                                </div>
+                            </div>
+                        </form>
+
+                        <!-- Delete Account Form -->
+                        <form th:action="@{/user/delete}" th:method="delete"
+                            onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.');"
+                            class="text-center border-t border-gray-700 pt-6">
+                            <div th:replace="~{fragments/button :: redButton('Supprimer mon compte')}"></div>
+                        </form>
+                    </div>
+                </div>
+
             </div>
 
-            <!-- Back Button -->
-            <div class="text-center">
-                <a th:href="@{/roadmap}"
-                    class="bg-gray-700 hover:bg-gray-600 text-white font-dungeon text-xl py-2 px-6 rounded border-2 border-gray-500 transition-all hover:scale-105 inline-block">
-                    Retour à la carte
-                </a>
-            </div>
+
+
         </div>
 
         <!-- Achievements Container (Separate Box) -->
@@ -134,11 +134,10 @@
                 </div>
             </div>
         </div>
+        <!-- Toast Fragment -->
+        <div th:replace="~{fragments/toast :: toast}"></div>
+        <div th:replace="~{fragments/toast :: toast-script}"></div>
     </main>
-
-    <!-- Toast Fragment -->
-    <div th:replace="~{fragments/toast :: toast}"></div>
-    <div th:replace="~{fragments/toast :: toast-script}"></div>
 
     <th:block layout:fragment="scripts">
         <script th:inline="javascript">

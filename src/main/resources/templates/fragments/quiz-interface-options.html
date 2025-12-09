@@ -10,10 +10,15 @@
         - choices: List of choice objects (must have .id and .text)
         - selectedChoiceId: (Optional) ID of the pre-selected choice
     -->
-    <div th:fragment="choices" class="w-full max-w-4xl mx-auto" id="quiz-interface">
+    <div th:fragment="choices" class="w-full max-w-4xl mx-auto relative" id="quiz-interface">
 
         <!-- Question -->
         <div class="mb-8">
+            <h3 th:if="${currentQuestionNumber != null}"
+                class="text-xl md:text-2xl text-gray-400 font-dungeon mb-4 leading-relaxed"
+                th:text="|Question ${currentQuestionNumber} sur ${totalQuestions}|">
+                Question X sur X
+            </h3>
             <h2 class="text-2xl md:text-3xl text-white font-dungeon mb-4 leading-relaxed" th:text="${question}">
                 Question Placeholder
             </h2>

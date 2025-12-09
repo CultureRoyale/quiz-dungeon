@@ -67,6 +67,10 @@
 
     </div>
 
+    <div th:if="${currentQuestionNumber != null}" class="text-center mt-2 text-gray-600 text-xs font-mono">
+        Question <span th:text="${currentQuestionNumber}"></span> sur <span th:text="${totalQuestions}"></span>
+    </div>
+
 </body>
 
 </html>

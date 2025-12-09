@@ -6,6 +6,8 @@ import com.cultureroyale.quizdungeon.model.enums.Difficulty;
 import com.cultureroyale.quizdungeon.repository.BossRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -16,9 +18,11 @@ import java.util.stream.Collectors;
 public class DataInitializationService {
 
     private final BossRepository bossRepository;
+    private final JdbcTemplate jdbcTemplate;
 
     @PostConstruct
     public void initializeBosses() {
+        initializeUserStats();
         if (bossRepository.count() > 0) {
             updateExistingBosses();
             return;
@@ -34,6 +38,22 @@ public class DataInitializationService {
         createBoss(8, "P.E.K.K.A", Difficulty.DIFFICILE, 800, 35, 9, 400, "pekka.png");
         createBoss(9, "Méga Chevalier", Difficulty.DIFFICILE, 1000, 40, 9, 500, "mega_chevalier.png");
 
+    }
+
+    private void initializeUserStats() {
+        // Ensure columns exist
+        try {
+            jdbcTemplate.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS stolen_gold INT DEFAULT 0");
+            jdbcTemplate.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS boss_kills INT DEFAULT 0");
+            jdbcTemplate.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS dungeons_looted INT DEFAULT 0");
+        } catch (Exception e) {
+            System.out.println("Warning: Could not alter table users: " + e.getMessage());
+        }
+
+        // Initialize new columns to 0 if they are null
+        jdbcTemplate.update("UPDATE users SET stolen_gold = 0 WHERE stolen_gold IS NULL");
+        jdbcTemplate.update("UPDATE users SET boss_kills = 0 WHERE boss_kills IS NULL");
+        jdbcTemplate.update("UPDATE users SET dungeons_looted = 0 WHERE dungeons_looted IS NULL");
     }
 
     private void updateExistingBosses() {
