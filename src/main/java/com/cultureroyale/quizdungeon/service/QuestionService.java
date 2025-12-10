@@ -2,6 +2,7 @@ package com.cultureroyale.quizdungeon.service;
 
 import com.cultureroyale.quizdungeon.model.Boss;
 import com.cultureroyale.quizdungeon.model.Question;
+import com.cultureroyale.quizdungeon.model.enums.Category;
 import com.cultureroyale.quizdungeon.repository.QuestionRepository;
 import com.cultureroyale.quizdungeon.repository.UserQuestionRepository;
 import com.cultureroyale.quizdungeon.model.User;
@@ -43,9 +44,8 @@ public class QuestionService {
 
     public Optional<Question> getQuestionForBoss(Boss boss, List<Long> usedQuestionIds) {
         // Parse categories
-        String[] cats = boss.getCategories().split(",");
-        List<String> categories = java.util.Arrays.stream(cats)
-                .map(String::trim)
+        List<String> categories = boss.getCategories().stream()
+                .map(Category::getValue)
                 .collect(Collectors.toList());
 
         // Try to find questions with matching difficulty first

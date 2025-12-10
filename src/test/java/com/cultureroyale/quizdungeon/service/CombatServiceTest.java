@@ -3,6 +3,8 @@ package com.cultureroyale.quizdungeon.service;
 import com.cultureroyale.quizdungeon.model.Boss;
 import com.cultureroyale.quizdungeon.model.Question;
 import com.cultureroyale.quizdungeon.model.User;
+import com.cultureroyale.quizdungeon.model.enums.Category;
+import com.cultureroyale.quizdungeon.model.enums.Difficulty;
 import com.cultureroyale.quizdungeon.model.enums.HelpLevel;
 import com.cultureroyale.quizdungeon.repository.QuestionRepository;
 import com.cultureroyale.quizdungeon.repository.UserRepository;
@@ -13,9 +15,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
@@ -29,6 +34,9 @@ class CombatServiceTest {
 
     @Mock
     private QuestionRepository questionRepository;
+
+    @Mock
+    private QuestionService questionService;
 
     @Mock
     private HttpSession session;
@@ -48,9 +56,13 @@ class CombatServiceTest {
         boss.setMaxHp(100);
         boss.setAttack(10);
         boss.setGoldReward(50);
-        boss.setCategories("History, Science");
+        Set<Category> categories = new HashSet<>();
+        categories.add(Category.HISTOIRE);
+        categories.add(Category.SCIENCE);
+        boss.setCategories(categories);
+        boss.setDifficulty(Difficulty.FACILE);
 
-        when(questionRepository.findRandomByCategoryIn(anyList())).thenReturn(Optional.of(new Question()));
+        when(questionService.getQuestionForBoss(any(), anyList())).thenReturn(Optional.of(new Question()));
     }
 
     @Test
@@ -59,12 +71,12 @@ class CombatServiceTest {
 
         CombatService.CombatResult result = combatService.processTurn(user, boss, true, HelpLevel.NO_HELP, session);
 
-        // Damage = (100 / 20) * 2.0 = 10
-        // Boss HP = 100 - 10 = 90
-        assertEquals(90, result.bossHp);
+        // Damage = (100 / 20) * 2.0 (FACILE) * 3.0 (NO_HELP) = 30
+        // Boss HP = 100 - 30 = 70
+        assertEquals(70, result.bossHp);
         assertEquals(CombatService.CombatStatus.ONGOING, result.status);
-        verify(session).setAttribute("combat_boss_current_hp", 90);
-        verify(questionRepository, atLeastOnce()).findRandomByCategoryIn(anyList());
+        verify(session).setAttribute("combat_boss_current_hp", 70);
+        verify(questionService, atLeastOnce()).getQuestionForBoss(any(), anyList());
     }
 
     @Test
@@ -74,10 +86,10 @@ class CombatServiceTest {
         CombatService.CombatResult result = combatService.processTurn(user, boss, true, HelpLevel.FOUR_CHOICES,
                 session);
 
-        // Damage = (100 / 20) * 1.0 = 5
-        // Boss HP = 100 - 5 = 95
-        assertEquals(95, result.bossHp);
-        verify(session).setAttribute("combat_boss_current_hp", 95);
+        // Damage = (100 / 20) * 2.0 (FACILE) * 1.0 (FOUR_CHOICES) = 10
+        // Boss HP = 100 - 10 = 90
+        assertEquals(90, result.bossHp);
+        verify(session).setAttribute("combat_boss_current_hp", 90);
     }
 
     @Test
@@ -101,7 +113,7 @@ class CombatServiceTest {
                 session);
 
         assertEquals(CombatService.CombatStatus.VICTORY, result.status);
-        assertEquals(0, result.bossHp);
+        assertEquals(-5, result.bossHp);
     }
 
     @Test
