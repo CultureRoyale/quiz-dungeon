@@ -28,15 +28,15 @@ public class DataInitializationService {
             return;
         }
 
-        createBoss(1, "Gobelin", Difficulty.FACILE, 100, 5, 3, 50, "gobelin.png");
-        createBoss(2, "Barbare", Difficulty.FACILE, 150, 8, 3, 75, "barbare.png");
-        createBoss(3, "Chevalier", Difficulty.FACILE, 200, 12, 3, 100, "chevalier.png");
-        createBoss(4, "Géant", Difficulty.MOYEN, 300, 15, 6, 150, "geant.png");
-        createBoss(5, "Valkyrie", Difficulty.MOYEN, 400, 20, 6, 200, "valkyrie.png");
-        createBoss(6, "Bébé Dragon", Difficulty.MOYEN, 500, 25, 6, 250, "bebe_dragon.png");
-        createBoss(7, "Squelette Géant", Difficulty.DIFFICILE, 600, 30, 9, 300, "squelette_geant.png");
-        createBoss(8, "P.E.K.K.A", Difficulty.DIFFICILE, 800, 35, 9, 400, "pekka.png");
-        createBoss(9, "Méga Chevalier", Difficulty.DIFFICILE, 1000, 40, 9, 500, "mega_chevalier.png");
+        createBoss(1, "Gobelin", Difficulty.FACILE, 100, 5, 50, "gobelin.png");
+        createBoss(2, "Barbare", Difficulty.FACILE, 150, 8, 75, "barbare.png");
+        createBoss(3, "Chevalier", Difficulty.FACILE, 200, 12, 100, "chevalier.png");
+        createBoss(4, "Géant", Difficulty.MOYEN, 300, 15, 150, "geant.png");
+        createBoss(5, "Valkyrie", Difficulty.MOYEN, 400, 20, 200, "valkyrie.png");
+        createBoss(6, "Bébé Dragon", Difficulty.MOYEN, 500, 25, 250, "bebe_dragon.png");
+        createBoss(7, "Squelette Géant", Difficulty.DIFFICILE, 600, 30, 300, "squelette_geant.png");
+        createBoss(8, "P.E.K.K.A", Difficulty.DIFFICILE, 800, 35, 400, "pekka.png");
+        createBoss(9, "Méga Chevalier", Difficulty.DIFFICILE, 1000, 40, 500, "mega_chevalier.png");
 
     }
 
@@ -98,33 +98,58 @@ public class DataInitializationService {
         if (updated) {
             bossRepository.saveAll(bosses);
         }
+
+        // Migration: Check for bosses with no categories (due to schema change)
+        boolean migrationNeeded = false;
+        for (Boss boss : bosses) {
+            if (boss.getCategories().isEmpty()) {
+                int nbCategories = getCategoryCountForDifficulty(boss.getDifficulty());
+                boss.setCategories(selectRandomCategories(nbCategories));
+                migrationNeeded = true;
+            }
+        }
+        if (migrationNeeded) {
+            bossRepository.saveAll(bosses);
+        }
     }
 
     private void createBoss(int position, String name, Difficulty difficulty, int maxHp, int attack,
-            int nbCategories, int goldReward, String imageFilename) {
+            int goldReward, String imageFilename) {
         Boss boss = new Boss();
         boss.setPosition(position);
         boss.setName(name);
         boss.setDifficulty(difficulty);
         boss.setMaxHp(maxHp);
         boss.setAttack(attack);
-        boss.setNbCategories(nbCategories);
         boss.setGoldReward(goldReward);
         boss.setImagePath("/images/boss/" + imageFilename);
 
-        String categories = selectRandomCategories(nbCategories);
+        int nbCategories = getCategoryCountForDifficulty(difficulty);
+        Set<Category> categories = selectRandomCategories(nbCategories);
         boss.setCategories(categories);
 
         bossRepository.save(boss);
     }
 
-    private String selectRandomCategories(int count) {
+    private int getCategoryCountForDifficulty(Difficulty difficulty) {
+        switch (difficulty) {
+            case FACILE:
+                return 3;
+            case MOYEN:
+                return 6;
+            case DIFFICILE:
+                return 9;
+            default:
+                return 3;
+        }
+    }
+
+    private Set<Category> selectRandomCategories(int count) {
         List<Category> allCategories = new ArrayList<>(Arrays.asList(Category.values()));
         Collections.shuffle(allCategories);
 
         return allCategories.stream()
                 .limit(count)
-                .map(Category::getValue)
-                .collect(Collectors.joining(","));
+                .collect(Collectors.toSet());
     }
 }

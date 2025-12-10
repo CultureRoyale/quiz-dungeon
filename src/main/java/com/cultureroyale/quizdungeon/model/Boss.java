@@ -28,11 +28,11 @@ public class Boss {
     @Column(nullable = false)
     private int maxHp;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String categories;
-
-    @Column(nullable = false)
-    private int nbCategories;
+    @ElementCollection(targetClass = com.cultureroyale.quizdungeon.model.enums.Category.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "boss_categories", joinColumns = @JoinColumn(name = "boss_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category")
+    private java.util.Set<com.cultureroyale.quizdungeon.model.enums.Category> categories = new java.util.HashSet<>();
 
     @Column(nullable = false)
     private int goldReward;
