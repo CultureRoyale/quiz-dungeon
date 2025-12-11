@@ -1,20 +1,23 @@
 package com.cultureroyale.quizdungeon.service;
 
-import com.cultureroyale.quizdungeon.model.Boss;
-import com.cultureroyale.quizdungeon.model.User;
-import com.cultureroyale.quizdungeon.model.enums.HelpLevel;
-import com.cultureroyale.quizdungeon.repository.UserRepository;
-import jakarta.servlet.http.HttpSession;
-import com.cultureroyale.quizdungeon.model.Combat;
-import com.cultureroyale.quizdungeon.model.Question;
-import com.cultureroyale.quizdungeon.repository.CombatRepository;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.cultureroyale.quizdungeon.model.Boss;
+import com.cultureroyale.quizdungeon.model.Combat;
+import com.cultureroyale.quizdungeon.model.Question;
+import com.cultureroyale.quizdungeon.model.User;
+import com.cultureroyale.quizdungeon.model.dto.TurnResult;
+import com.cultureroyale.quizdungeon.model.enums.CombatResult;
+import com.cultureroyale.quizdungeon.model.enums.HelpLevel;
+import com.cultureroyale.quizdungeon.repository.CombatRepository;
+import com.cultureroyale.quizdungeon.repository.UserRepository;
+
+import jakarta.servlet.http.HttpSession;
 
 @Service
 public class CombatService {
@@ -76,22 +79,16 @@ public class CombatService {
     }
 
     public int calculateUserBaseAttack(Boss boss) {
-        double difficultyMultiplier = 1.0;
-        switch (boss.getDifficulty()) {
-            case FACILE:
-                difficultyMultiplier = 2.0;
-                break;
-            case MOYEN:
-                difficultyMultiplier = 1.0;
-                break;
-            case DIFFICILE:
-                difficultyMultiplier = 0.5;
-                break;
-        }
+        double difficultyMultiplier = switch (boss.getDifficulty()) {
+            case FACILE -> 2.0;
+            case MOYEN -> 1.0;
+            case DIFFICILE -> 0.5;
+        };
         return (int) ((boss.getMaxHp() / 20.0) * difficultyMultiplier);
     }
 
-    public CombatResult processTurn(User user, Boss boss, boolean isCorrect, HelpLevel helpLevel, HttpSession session) {
+    public TurnResult processTurn(User user, Boss boss, boolean isCorrect, HelpLevel helpLevel,
+            HttpSession session) {
         int bossHp = (int) session.getAttribute("combat_boss_current_hp");
         int userHp = user.getCurrentHp();
 
@@ -123,15 +120,15 @@ public class CombatService {
 
         // Check win/loss
         if (bossHp <= 0) {
-            return new CombatResult(CombatStatus.VICTORY, message, bossHp, userHp);
+            return new TurnResult(CombatResult.VICTOIRE, message, bossHp, userHp);
         } else if (userHp <= 0) {
-            return new CombatResult(CombatStatus.DEFEAT, message, bossHp, userHp);
+            return new TurnResult(CombatResult.DEFAITE, message, bossHp, userHp);
         }
 
         // Load next question
         loadNextQuestion(boss, session);
 
-        return new CombatResult(CombatStatus.ONGOING, message, bossHp, userHp);
+        return new TurnResult(CombatResult.EN_COURS, message, bossHp, userHp);
     }
 
     public void handleVictory(User user, Boss boss) {
@@ -169,24 +166,5 @@ public class CombatService {
         combat.setGoldEarned(0);
         combat.setXpEarned(10);
         combatRepository.save(combat);
-    }
-
-    // Helper classes
-    public enum CombatStatus {
-        ONGOING, VICTORY, DEFEAT
-    }
-
-    public static class CombatResult {
-        public CombatStatus status;
-        public String message;
-        public int bossHp;
-        public int userHp;
-
-        public CombatResult(CombatStatus status, String message, int bossHp, int userHp) {
-            this.status = status;
-            this.message = message;
-            this.bossHp = bossHp;
-            this.userHp = userHp;
-        }
     }
 }

@@ -44,8 +44,7 @@ public class BossService {
                 userId,
                 CombatType.BOSS,
                 previousBoss.getId(),
-                CombatResult.VICTOIRE
-        );
+                CombatResult.VICTOIRE);
     }
 
     public Map<Long, Boolean> getBossUnlockStatus(Long userId) {
@@ -64,7 +63,6 @@ public class BossService {
                 userId,
                 CombatType.BOSS,
                 boss.getId(),
-                CombatResult.VICTOIRE
-        );
+                CombatResult.VICTOIRE);
     }
 }

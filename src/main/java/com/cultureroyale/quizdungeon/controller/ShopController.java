@@ -1,14 +1,8 @@
 package com.cultureroyale.quizdungeon.controller;
 
-import com.cultureroyale.quizdungeon.model.Dungeon;
-import com.cultureroyale.quizdungeon.model.User;
-import com.cultureroyale.quizdungeon.repository.DungeonRepository;
-import com.cultureroyale.quizdungeon.repository.UserRepository;
-import com.cultureroyale.quizdungeon.service.DungeonService;
-import com.cultureroyale.quizdungeon.service.UserService;
-
-import jakarta.servlet.http.HttpSession;
-import lombok.RequiredArgsConstructor;
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,9 +12,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.security.Principal;
-import java.util.HashMap;
-import java.util.Map;
+import com.cultureroyale.quizdungeon.model.Dungeon;
+import com.cultureroyale.quizdungeon.model.User;
+import com.cultureroyale.quizdungeon.repository.DungeonRepository;
+import com.cultureroyale.quizdungeon.repository.UserRepository;
+import com.cultureroyale.quizdungeon.service.DungeonService;
+import com.cultureroyale.quizdungeon.service.UserService;
+
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequiredArgsConstructor
@@ -75,10 +75,10 @@ public class ShopController {
         }
 
         boolean success = false;
-        String message = "";
+        String message;
 
         switch (item) {
-            case "potion":
+            case "potion" -> {
                 if (user.getGold() >= 30) {
                     user.setGold(user.getGold() - 30);
                     user.setCurrentHp(Math.min(user.getCurrentHp() + 20, user.getMaxHp()));
@@ -87,8 +87,8 @@ public class ShopController {
                 } else {
                     message = "Pas assez d'or !";
                 }
-                break;
-            case "super_potion":
+            }
+            case "super_potion" -> {
                 if (user.getGold() >= 67) {
                     user.setGold(user.getGold() - 67);
                     user.setCurrentHp(Math.min(user.getCurrentHp() + 60, user.getMaxHp()));
@@ -97,8 +97,8 @@ public class ShopController {
                 } else {
                     message = "Pas assez d'or !";
                 }
-                break;
-            case "cannon":
+            }
+            case "cannon" -> {
                 if (user.getGold() >= 100) {
                     user.setGold(user.getGold() - 100);
                     dungeon.setDamageBoost(dungeon.getDamageBoost() + 20);
@@ -107,8 +107,8 @@ public class ShopController {
                 } else {
                     message = "Pas assez d'or !";
                 }
-                break;
-            case "chili":
+            }
+            case "chili" -> {
                 if (user.getGold() >= 200) {
                     if (user.getCurrentHp() > 50) {
 
@@ -124,10 +124,8 @@ public class ShopController {
                 } else {
                     message = "Pas assez d'or !";
                 }
-                break;
-            case "theme_tiki":
-            case "theme_lava":
-            case "theme_gold":
+            }
+            case "theme_tiki", "theme_lava", "theme_gold" -> {
                 if (user.getGold() >= 1000) {
                     user.setGold(user.getGold() - 1000);
                     dungeon.setCosmeticTheme(item.replace("theme_", ""));
@@ -136,9 +134,8 @@ public class ShopController {
                 } else {
                     message = "Pas assez d'or !";
                 }
-                break;
-            default:
-                message = "Item inconnu";
+            }
+            default -> message = "Item inconnu";
         }
 
         if (success) {

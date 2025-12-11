@@ -1,17 +1,23 @@
 package com.cultureroyale.quizdungeon.service;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
+
 import com.cultureroyale.quizdungeon.model.Boss;
 import com.cultureroyale.quizdungeon.model.enums.Category;
 import com.cultureroyale.quizdungeon.model.enums.Difficulty;
 import com.cultureroyale.quizdungeon.repository.BossRepository;
+
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Service;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,7 +52,7 @@ public class DataInitializationService {
             jdbcTemplate.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS stolen_gold INT DEFAULT 0");
             jdbcTemplate.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS boss_kills INT DEFAULT 0");
             jdbcTemplate.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS dungeons_looted INT DEFAULT 0");
-        } catch (Exception e) {
+        } catch (DataAccessException e) {
             System.out.println("Warning: Could not alter table users: " + e.getMessage());
         }
 
@@ -62,33 +68,15 @@ public class DataInitializationService {
         for (Boss boss : bosses) {
             int newAttack = 0;
             switch (boss.getPosition()) {
-                case 1:
-                    newAttack = 5;
-                    break;
-                case 2:
-                    newAttack = 8;
-                    break;
-                case 3:
-                    newAttack = 12;
-                    break;
-                case 4:
-                    newAttack = 15;
-                    break;
-                case 5:
-                    newAttack = 20;
-                    break;
-                case 6:
-                    newAttack = 25;
-                    break;
-                case 7:
-                    newAttack = 30;
-                    break;
-                case 8:
-                    newAttack = 35;
-                    break;
-                case 9:
-                    newAttack = 40;
-                    break;
+                case 1 -> newAttack = 5;
+                case 2 -> newAttack = 8;
+                case 3 -> newAttack = 12;
+                case 4 -> newAttack = 15;
+                case 5 -> newAttack = 20;
+                case 6 -> newAttack = 25;
+                case 7 -> newAttack = 30;
+                case 8 -> newAttack = 35;
+                case 9 -> newAttack = 40;
             }
             if (boss.getAttack() != newAttack) {
                 boss.setAttack(newAttack);
@@ -132,16 +120,12 @@ public class DataInitializationService {
     }
 
     private int getCategoryCountForDifficulty(Difficulty difficulty) {
-        switch (difficulty) {
-            case FACILE:
-                return 3;
-            case MOYEN:
-                return 6;
-            case DIFFICILE:
-                return 9;
-            default:
-                return 3;
-        }
+        return switch (difficulty) {
+            case FACILE -> 3;
+            case MOYEN -> 6;
+            case DIFFICILE -> 9;
+            default -> 3;
+        };
     }
 
     private Set<Category> selectRandomCategories(int count) {
