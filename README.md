@@ -3,6 +3,7 @@
 # Quiz Dungeon
 Quiz Dungeon est un jeu RPG de quiz où vous affrontez des boss en répondant à des questions de culture générale.
 Créez votre propre donjon avec vos questions pour mettre à l'épreuve d'autres joueurs !
+> **[Accéder à l'auto-évaluation](#auto-évaluation)**
 
 ## Lancement du projet en local
 
@@ -35,3 +36,24 @@ Effectuez la commande suivante à la racine du projet.
 - Une réponse correcte vous permet d'infliger des dégats à l'adversaire, inversement une réponse fausse permet à l'adversaire de vous attaquer !
 - Sûr de vous ? Répondre à une question au clavier (snipe) vous permet de tripler (x3) votre attaque !
 - Langue au chat ? Répondez à une question avec l'option 50/50, votre attaque sera néanmoins réduite de moitié !
+
+## Auto-évaluation
+
+| Critère | Points | Validation | Justification |
+| :--- | :---: | :---: | :--- |
+| **Fonctionnalités** | **10/10** | | |
+| L'application contient bien les fonctionnalités demandées | | Oui | Application de Quiz RPG complète. Logique métier complexe (système de combat, algorithmes de dégâts, économie). |
+| L'application permet d'insérer, mettre à jour, supprimer, chercher une entité en BDD | | Oui | CRUD complet présent (ex: gestion des questions, utilisateurs, donjons). |
+| L'application permet de lier deux entités en BDD | | Oui | [Modèle relationnel complet](https://github.com/CultureRoyale/quiz-dungeon/wiki/MCD) : @OneToOne (User → Dungeon), @OneToMany (User → Combat) et @ManyToMany (Dungeon ↔ Question et User ↔ Achievement). |
+| L'application permet, pour une entité donnée, de créer un lien à une autre entité en BDD | | Oui | Association dynamique via UI : Le joueur sélectionne les questions à intégrer dans son donjon (création de liens Dungeon → Question) et débloque de nouvelles questions (création de liens User → Question). |
+| L'application est jolie / utilise un framework CSS | | Oui | Design travaillé et cohérent avec l'utilisation de Tailwind CSS et des fragments Thymeleaf. [Prototypage réalisé sur Figma](https://github.com/CultureRoyale/quiz-dungeon/wiki/Maquettes-UI-et-logos). |
+| **Technique** | **5/5** | | |
+| L'application utilise le design pattern MVC pour chaque fonctionnalité | | Oui | Architecture MVC pour toutes les fonctionnalités du projet. |
+| Les controlleurs utilisent les méthodes HTTP: GET,POST,PUT,DELETE | | Oui | Utilisation de @GetMapping, @PostMapping, @PutMapping, @DeleteMapping. |
+| Chaque vue manipule des données transmises par son controlleur | | Oui | Utilisation de Thymeleaf avec les attributs du Model. |
+| **Soutenance et Evaluation individuelle** | **4/5** | | |
+| La soutenance est bien préparée | | Oui | Présentation des fonctionnalités et des mécaniques du jeu puis revue du code |
+| Chacun parle suffisamment | | Oui | Chaque partie était bien découpée |
+| Le timing est respecté | | Oui | |
+| Les réponses aux questions sont correctes | | Oui | Révisions effectuées suite aux retours de la soutenance |
+| Le repo comporte des commits réguliers de chaque membre du groupe | | Oui | Historique des commits git |
