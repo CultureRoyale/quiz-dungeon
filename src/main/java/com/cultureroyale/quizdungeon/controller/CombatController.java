@@ -9,7 +9,6 @@ import com.cultureroyale.quizdungeon.repository.BossRepository;
 import com.cultureroyale.quizdungeon.repository.UserRepository;
 import com.cultureroyale.quizdungeon.service.CombatService;
 import com.cultureroyale.quizdungeon.model.dto.TurnResult;
-import com.cultureroyale.quizdungeon.model.enums.CombatResult;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -212,41 +211,45 @@ public class CombatController {
             jsonResponse.put("resultHtml", resultHtml);
         }
 
-        if (result.status == CombatResult.VICTOIRE) {
-            session.setAttribute("combat_status", "VICTORY");
-            combatService.handleVictory(user, boss);
-            jsonResponse.put("status", "VICTORY");
-            jsonResponse.put("redirectUrl", "/combat/victory");
-        } else if (result.status == CombatResult.DEFAITE) {
-            session.setAttribute("combat_status", "DEFEAT");
-            combatService.handleDefeat(user, boss);
-            jsonResponse.put("status", "DEFEAT");
-            jsonResponse.put("redirectUrl", "/combat/defeat");
-        } else {
-            jsonResponse.put("status", "ONGOING");
-            // Render Next Question
-            Question nextQuestion = combatService.getCurrentQuestion(session);
-            if (nextQuestion != null) {
+        switch (result.status) {
+            case VICTOIRE:
+                session.setAttribute("combat_status", "VICTORY");
+                combatService.handleVictory(user, boss);
+                jsonResponse.put("status", "VICTORY");
+                jsonResponse.put("redirectUrl", "/combat/victory");
+                break;
+            case DEFAITE:
+                session.setAttribute("combat_status", "DEFEAT");
+                combatService.handleDefeat(user, boss);
+                jsonResponse.put("status", "DEFEAT");
+                jsonResponse.put("redirectUrl", "/combat/defeat");
+                break;
+            default:
+                jsonResponse.put("status", "ONGOING");
+                // Render Next Question
+                Question nextQuestion = combatService.getCurrentQuestion(session);
+                if (nextQuestion != null) {
 
-                // Prepare choices for the next question
-                List<Choice> nextChoices = new ArrayList<>();
-                nextChoices.add(new Choice(1L, nextQuestion.getCorrectAnswer()));
-                nextChoices.add(new Choice(2L, nextQuestion.getBadAnswer1()));
-                nextChoices.add(new Choice(3L, nextQuestion.getBadAnswer2()));
-                nextChoices.add(new Choice(4L, nextQuestion.getBadAnswer3()));
-                Collections.shuffle(nextChoices);
-                Collections.shuffle(nextChoices);
-                session.setAttribute("combat_current_choices", nextChoices);
-                session.removeAttribute("combat_help_level"); // Reset help level for new question
+                    // Prepare choices for the next question
+                    List<Choice> nextChoices = new ArrayList<>();
+                    nextChoices.add(new Choice(1L, nextQuestion.getCorrectAnswer()));
+                    nextChoices.add(new Choice(2L, nextQuestion.getBadAnswer1()));
+                    nextChoices.add(new Choice(3L, nextQuestion.getBadAnswer2()));
+                    nextChoices.add(new Choice(4L, nextQuestion.getBadAnswer3()));
+                    Collections.shuffle(nextChoices);
+                    Collections.shuffle(nextChoices);
+                    session.setAttribute("combat_current_choices", nextChoices);
+                    session.removeAttribute("combat_help_level"); // Reset help level for new question
 
-                context.setVariable("question", nextQuestion.getQuestionText());
-                context.setVariable("choices", nextChoices);
-                context.setVariable("selectedChoiceId", null);
+                    context.setVariable("question", nextQuestion.getQuestionText());
+                    context.setVariable("choices", nextChoices);
+                    context.setVariable("selectedChoiceId", null);
 
-                String nextQuestionHtml = templateEngine.process("fragments/quiz-interface-options",
-                        Set.of("choices"), context);
-                jsonResponse.put("nextQuestionHtml", nextQuestionHtml);
-            }
+                    String nextQuestionHtml = templateEngine.process("fragments/quiz-interface-options",
+                            Set.of("choices"), context);
+                    jsonResponse.put("nextQuestionHtml", nextQuestionHtml);
+                }
+                break;
         }
 
         return ResponseEntity.ok(jsonResponse);

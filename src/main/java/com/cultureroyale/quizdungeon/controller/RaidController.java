@@ -1,32 +1,44 @@
 package com.cultureroyale.quizdungeon.controller;
 
-import com.cultureroyale.quizdungeon.model.Dungeon;
-import com.cultureroyale.quizdungeon.model.DungeonQuestion;
-import com.cultureroyale.quizdungeon.model.User;
-import com.cultureroyale.quizdungeon.model.dto.Choice;
-import com.cultureroyale.quizdungeon.model.dto.TurnResult;
-import com.cultureroyale.quizdungeon.model.enums.CombatResult;
-import com.cultureroyale.quizdungeon.model.enums.HelpLevel;
-import com.cultureroyale.quizdungeon.repository.DungeonRepository;
-import com.cultureroyale.quizdungeon.repository.UserRepository;
-import com.cultureroyale.quizdungeon.service.QuestionService;
-import com.cultureroyale.quizdungeon.service.RaidService;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.thymeleaf.context.WebContext;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.web.IWebExchange;
 import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 
-import java.util.*;
+import com.cultureroyale.quizdungeon.model.Dungeon;
+import com.cultureroyale.quizdungeon.model.DungeonQuestion;
+import com.cultureroyale.quizdungeon.model.User;
+import com.cultureroyale.quizdungeon.model.dto.Choice;
+import com.cultureroyale.quizdungeon.model.dto.TurnResult;
+import com.cultureroyale.quizdungeon.model.enums.HelpLevel;
+import com.cultureroyale.quizdungeon.repository.DungeonRepository;
+import com.cultureroyale.quizdungeon.repository.UserRepository;
+import com.cultureroyale.quizdungeon.service.QuestionService;
+import com.cultureroyale.quizdungeon.service.RaidService;
+
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/raid")
@@ -201,51 +213,55 @@ public class RaidController {
         }
 
         // Check end conditions
-        if (result.status == CombatResult.VICTOIRE) {
-            raidService.handleRaidVictory(user, dungeon, session);
-            jsonResponse.put("status", "VICTORY");
-            jsonResponse.put("redirectUrl", "/raid/victory");
-        } else if (result.status == CombatResult.DEFAITE) {
-            raidService.handleRaidDefeat(user, dungeon, session);
-            jsonResponse.put("status", "DEFEAT");
-            jsonResponse.put("redirectUrl", "/raid/defeat");
-        } else {
-            // Next Question
-            int nextIndex = (int) session.getAttribute("raid_current_question_index") + 1;
-            @SuppressWarnings("unchecked")
-            List<DungeonQuestion> questions = (List<DungeonQuestion>) session.getAttribute("raid_questions");
+        switch (result.status) {
+            case VICTOIRE:
+                raidService.handleRaidVictory(user, dungeon, session);
+                jsonResponse.put("status", "VICTORY");
+                jsonResponse.put("redirectUrl", "/raid/victory");
+                break;
+            case DEFAITE:
+                raidService.handleRaidDefeat(user, dungeon, session);
+                jsonResponse.put("status", "DEFEAT");
+                jsonResponse.put("redirectUrl", "/raid/defeat");
+                break;
+            default:
+                // Next Question
+                int nextIndex = (int) session.getAttribute("raid_current_question_index") + 1;
+                @SuppressWarnings("unchecked")
+                List<DungeonQuestion> questions = (List<DungeonQuestion>) session.getAttribute("raid_questions");
 
-            if (nextIndex >= questions.size()) {
-                // Out of questions, but Dungeon still alive -> DRAW
-                raidService.handleRaidDraw(user, dungeon, session);
-                jsonResponse.put("status", "DRAW");
-                jsonResponse.put("redirectUrl", "/raid/draw");
-            } else {
-                session.setAttribute("raid_current_question_index", nextIndex);
-                DungeonQuestion nextDQ = questions.get(nextIndex);
+                if (nextIndex >= questions.size()) {
+                    // Out of questions, but Dungeon still alive -> DRAW
+                    raidService.handleRaidDraw(user, dungeon, session);
+                    jsonResponse.put("status", "DRAW");
+                    jsonResponse.put("redirectUrl", "/raid/draw");
+                } else {
+                    session.setAttribute("raid_current_question_index", nextIndex);
+                    DungeonQuestion nextDQ = questions.get(nextIndex);
 
-                // Prepare choices
-                List<Choice> nextChoices = new ArrayList<>();
-                nextChoices.add(new Choice(1L, nextDQ.getQuestion().getCorrectAnswer()));
-                nextChoices.add(new Choice(2L, nextDQ.getQuestion().getBadAnswer1()));
-                nextChoices.add(new Choice(3L, nextDQ.getQuestion().getBadAnswer2()));
-                nextChoices.add(new Choice(4L, nextDQ.getQuestion().getBadAnswer3()));
-                Collections.shuffle(nextChoices);
-                Collections.shuffle(nextChoices);
-                session.setAttribute("raid_current_choices", nextChoices);
-                session.removeAttribute("raid_help_level"); // Reset help level
+                    // Prepare choices
+                    List<Choice> nextChoices = new ArrayList<>();
+                    nextChoices.add(new Choice(1L, nextDQ.getQuestion().getCorrectAnswer()));
+                    nextChoices.add(new Choice(2L, nextDQ.getQuestion().getBadAnswer1()));
+                    nextChoices.add(new Choice(3L, nextDQ.getQuestion().getBadAnswer2()));
+                    nextChoices.add(new Choice(4L, nextDQ.getQuestion().getBadAnswer3()));
+                    Collections.shuffle(nextChoices);
+                    Collections.shuffle(nextChoices);
+                    session.setAttribute("raid_current_choices", nextChoices);
+                    session.removeAttribute("raid_help_level"); // Reset help level
 
-                context.setVariable("question", nextDQ.getQuestion().getQuestionText());
-                context.setVariable("choices", nextChoices);
-                context.setVariable("selectedChoiceId", null);
-                context.setVariable("currentQuestionNumber", nextIndex + 1);
-                context.setVariable("totalQuestions", questions.size());
+                    context.setVariable("question", nextDQ.getQuestion().getQuestionText());
+                    context.setVariable("choices", nextChoices);
+                    context.setVariable("selectedChoiceId", null);
+                    context.setVariable("currentQuestionNumber", nextIndex + 1);
+                    context.setVariable("totalQuestions", questions.size());
 
-                String nextQuestionHtml = templateEngine.process("fragments/quiz-interface-options", Set.of("choices"),
-                        context);
-                jsonResponse.put("nextQuestionHtml", nextQuestionHtml);
-                jsonResponse.put("status", "ONGOING");
-            }
+                    String nextQuestionHtml = templateEngine.process("fragments/quiz-interface-options",
+                            Set.of("choices"), context);
+                    jsonResponse.put("nextQuestionHtml", nextQuestionHtml);
+                    jsonResponse.put("status", "ONGOING");
+                }
+                break;
         }
 
         return ResponseEntity.ok(jsonResponse);
