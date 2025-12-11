@@ -8,6 +8,8 @@ import com.cultureroyale.quizdungeon.model.enums.Difficulty;
 import com.cultureroyale.quizdungeon.model.enums.HelpLevel;
 import com.cultureroyale.quizdungeon.repository.QuestionRepository;
 import com.cultureroyale.quizdungeon.repository.UserRepository;
+import com.cultureroyale.quizdungeon.model.dto.TurnResult;
+import com.cultureroyale.quizdungeon.model.enums.CombatResult;
 import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,12 +71,12 @@ class CombatServiceTest {
     void testProcessTurn_CorrectAnswer_NoHelp() {
         when(session.getAttribute("combat_boss_current_hp")).thenReturn(100);
 
-        CombatService.CombatResult result = combatService.processTurn(user, boss, true, HelpLevel.NO_HELP, session);
+        TurnResult result = combatService.processTurn(user, boss, true, HelpLevel.NO_HELP, session);
 
         // Damage = (100 / 20) * 2.0 (FACILE) * 3.0 (NO_HELP) = 30
         // Boss HP = 100 - 30 = 70
         assertEquals(70, result.bossHp);
-        assertEquals(CombatService.CombatStatus.ONGOING, result.status);
+        assertEquals(CombatResult.EN_COURS, result.status);
         verify(session).setAttribute("combat_boss_current_hp", 70);
         verify(questionService, atLeastOnce()).getQuestionForBoss(any(), anyList());
     }
@@ -83,7 +85,7 @@ class CombatServiceTest {
     void testProcessTurn_CorrectAnswer_FourChoices() {
         when(session.getAttribute("combat_boss_current_hp")).thenReturn(100);
 
-        CombatService.CombatResult result = combatService.processTurn(user, boss, true, HelpLevel.FOUR_CHOICES,
+        TurnResult result = combatService.processTurn(user, boss, true, HelpLevel.FOUR_CHOICES,
                 session);
 
         // Damage = (100 / 20) * 2.0 (FACILE) * 1.0 (FOUR_CHOICES) = 10
@@ -96,23 +98,21 @@ class CombatServiceTest {
     void testProcessTurn_WrongAnswer() {
         when(session.getAttribute("combat_boss_current_hp")).thenReturn(100);
 
-        CombatService.CombatResult result = combatService.processTurn(user, boss, false, HelpLevel.FOUR_CHOICES,
-                session);
+        TurnResult result = combatService.processTurn(user, boss, false, HelpLevel.FOUR_CHOICES, session);
 
         // User takes boss attack damage (10)
         // User HP = 100 - 10 = 90
         assertEquals(90, user.getCurrentHp());
-        assertEquals(CombatService.CombatStatus.ONGOING, result.status);
+        assertEquals(CombatResult.EN_COURS, result.status);
     }
 
     @Test
     void testVictory() {
         when(session.getAttribute("combat_boss_current_hp")).thenReturn(5); // 1 hit to kill
 
-        CombatService.CombatResult result = combatService.processTurn(user, boss, true, HelpLevel.FOUR_CHOICES,
-                session);
+        TurnResult result = combatService.processTurn(user, boss, true, HelpLevel.FOUR_CHOICES, session);
 
-        assertEquals(CombatService.CombatStatus.VICTORY, result.status);
+        assertEquals(CombatResult.VICTOIRE, result.status);
         assertEquals(-5, result.bossHp);
     }
 
@@ -121,10 +121,9 @@ class CombatServiceTest {
         user.setCurrentHp(5); // 1 hit to die
         when(session.getAttribute("combat_boss_current_hp")).thenReturn(100);
 
-        CombatService.CombatResult result = combatService.processTurn(user, boss, false, HelpLevel.FOUR_CHOICES,
-                session);
+        TurnResult result = combatService.processTurn(user, boss, false, HelpLevel.FOUR_CHOICES, session);
 
-        assertEquals(CombatService.CombatStatus.DEFEAT, result.status);
+        assertEquals(CombatResult.DEFAITE, result.status);
         assertEquals(-5, user.getCurrentHp());
     }
 }

@@ -8,6 +8,8 @@ import com.cultureroyale.quizdungeon.model.enums.HelpLevel;
 import com.cultureroyale.quizdungeon.repository.BossRepository;
 import com.cultureroyale.quizdungeon.repository.UserRepository;
 import com.cultureroyale.quizdungeon.service.CombatService;
+import com.cultureroyale.quizdungeon.model.dto.TurnResult;
+import com.cultureroyale.quizdungeon.model.enums.CombatResult;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -30,6 +32,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.thymeleaf.web.servlet.JakartaServletWebApplication;
 import org.thymeleaf.web.IWebExchange;
 import org.thymeleaf.context.WebContext;
+import com.cultureroyale.quizdungeon.service.QuestionService;
 
 @Controller
 @RequestMapping("/combat")
@@ -51,7 +54,7 @@ public class CombatController {
     private ServletContext servletContext;
 
     @Autowired
-    private QuestionController questionController;
+    private QuestionService questionService;
 
     @GetMapping("/start/{bossId}")
     public String startCombat(@PathVariable Long bossId, Authentication authentication, HttpSession session) {
@@ -108,10 +111,6 @@ public class CombatController {
 
         model.addAttribute("question", question.getQuestionText());
 
-        // Choices are loaded via AJAX now, so we don't need to pass them here
-        model.addAttribute("choices", new ArrayList<>());
-        model.addAttribute("selectedChoiceId", null);
-
         return "quiz-battle";
     }
 
@@ -158,7 +157,7 @@ public class CombatController {
         Question currentQuestion = combatService.getCurrentQuestion(session);
 
         if (currentQuestion != null) {
-            isCorrect = questionController.verifyAnswer(answer, choiceId, currentQuestion.getCorrectAnswer());
+            isCorrect = questionService.verifyAnswer(answer, choiceId, currentQuestion.getCorrectAnswer());
         } else {
             // Fallback if question is null
             isCorrect = false;
@@ -170,7 +169,7 @@ public class CombatController {
             helpLevel = HelpLevel.NO_HELP;
         }
 
-        CombatService.CombatResult result = combatService.processTurn(user, boss, isCorrect, helpLevel, session);
+        TurnResult result = combatService.processTurn(user, boss, isCorrect, helpLevel, session);
 
         // Prepare context for rendering fragments
         JakartaServletWebApplication application = JakartaServletWebApplication.buildApplication(servletContext);
@@ -213,12 +212,12 @@ public class CombatController {
             jsonResponse.put("resultHtml", resultHtml);
         }
 
-        if (result.status == CombatService.CombatStatus.VICTORY) {
+        if (result.status == CombatResult.VICTOIRE) {
             session.setAttribute("combat_status", "VICTORY");
             combatService.handleVictory(user, boss);
             jsonResponse.put("status", "VICTORY");
             jsonResponse.put("redirectUrl", "/combat/victory");
-        } else if (result.status == CombatService.CombatStatus.DEFEAT) {
+        } else if (result.status == CombatResult.DEFAITE) {
             session.setAttribute("combat_status", "DEFEAT");
             combatService.handleDefeat(user, boss);
             jsonResponse.put("status", "DEFEAT");

@@ -4,13 +4,13 @@ import com.cultureroyale.quizdungeon.model.Dungeon;
 import com.cultureroyale.quizdungeon.model.DungeonQuestion;
 import com.cultureroyale.quizdungeon.model.User;
 import com.cultureroyale.quizdungeon.model.dto.Choice;
+import com.cultureroyale.quizdungeon.model.dto.TurnResult;
+import com.cultureroyale.quizdungeon.model.enums.CombatResult;
 import com.cultureroyale.quizdungeon.model.enums.HelpLevel;
 import com.cultureroyale.quizdungeon.repository.DungeonRepository;
 import com.cultureroyale.quizdungeon.repository.UserRepository;
-import com.cultureroyale.quizdungeon.service.UserService;
-import com.cultureroyale.quizdungeon.service.AchievementService;
 import com.cultureroyale.quizdungeon.service.QuestionService;
-
+import com.cultureroyale.quizdungeon.service.RaidService;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,7 +36,7 @@ public class RaidController {
     private UserRepository userRepository;
 
     @Autowired
-    private UserService userService;
+    private RaidService raidService;
 
     @Autowired
     private DungeonRepository dungeonRepository;
@@ -48,12 +48,6 @@ public class RaidController {
     private ServletContext servletContext;
 
     @Autowired
-    private QuestionController questionController;
-
-    @Autowired
-    private AchievementService achievementService;
-
-    @Autowired
     private QuestionService questionService;
 
     @GetMapping("/start/{dungeonId}")
@@ -62,24 +56,8 @@ public class RaidController {
         User user = userRepository.findByUsername(username).orElseThrow();
         Dungeon dungeon = dungeonRepository.findById(dungeonId).orElseThrow();
 
-        // Initialize Raid Session
-        session.setAttribute("raid_dungeon", dungeon);
-        session.setAttribute("raid_status", "ONGOING");
-
-        // Dungeon HP = Number of Questions * 10
-        int dungeonMaxHp = dungeon.getDungeonQuestions().size() * 10;
-        session.setAttribute("raid_dungeon_max_hp", dungeonMaxHp);
-        session.setAttribute("raid_dungeon_current_hp", dungeonMaxHp);
-
-        // Player HP (use user's current HP)
-        session.setAttribute("raid_user_current_hp", user.getCurrentHp());
-
-        // Load Questions (ordered by position)
-        List<DungeonQuestion> questions = new ArrayList<>(dungeon.getDungeonQuestions());
-        questions.sort(Comparator.comparingInt(DungeonQuestion::getPosition));
-        session.setAttribute("raid_questions", questions);
-        session.setAttribute("raid_current_question_index", 0);
-        session.removeAttribute("raid_help_level");
+        // Initialize raid session
+        raidService.startRaid(user, dungeon, session);
 
         return "redirect:/raid/battle";
     }
@@ -109,20 +87,18 @@ public class RaidController {
         model.addAttribute("dungeonHp", session.getAttribute("raid_dungeon_current_hp"));
         model.addAttribute("dungeonMaxHp", session.getAttribute("raid_dungeon_max_hp"));
 
-        // Calculate Dungeon Attack for display
+        // Calculate Dungeon attack for display
         int dungeonAtk = (int) (25 * (1 + dungeon.getDamageBoost() / 100.0));
         model.addAttribute("dungeonAtk", dungeonAtk);
 
         // Get current question
-        DungeonQuestion currentDQ = getCurrentQuestion(session);
+        DungeonQuestion currentDQ = raidService.getCurrentRaidQuestion(session);
         if (currentDQ == null) {
             // Should not happen if logic is correct, but handle as draw/end
             return "redirect:/raid/draw";
         }
 
         model.addAttribute("question", currentDQ.getQuestion().getQuestionText());
-        model.addAttribute("choices", new ArrayList<>()); // Loaded via AJAX
-        model.addAttribute("selectedChoiceId", null);
 
         // Question count
         @SuppressWarnings("unchecked")
@@ -158,23 +134,14 @@ public class RaidController {
         @SuppressWarnings("unchecked")
         List<Choice> choices = (List<Choice>) session.getAttribute("raid_current_choices");
 
-        DungeonQuestion currentDQ = getCurrentQuestion(session);
+        DungeonQuestion currentDQ = raidService.getCurrentRaidQuestion(session);
 
         // Validate Answer
         if (currentDQ != null) {
-            isCorrect = questionController.verifyAnswer(answer, choiceId, currentDQ.getQuestion().getCorrectAnswer());
-            if (isCorrect) {
-                // Unlock question and check achievement
-                questionService.unlockQuestion(user, currentDQ.getQuestion());
-            }
+            isCorrect = questionService.verifyAnswer(answer, choiceId, currentDQ.getQuestion().getCorrectAnswer());
         } else {
             isCorrect = false;
         }
-
-        // Combat Logic
-        int dungeonHp = (int) session.getAttribute("raid_dungeon_current_hp");
-        int userHp = (int) session.getAttribute("raid_user_current_hp");
-        int dungeonMaxHp = (int) session.getAttribute("raid_dungeon_max_hp");
 
         // Check for backend abuse: if help was requested, enforce it
         HelpLevel helpLevel = (HelpLevel) session.getAttribute("raid_help_level");
@@ -182,24 +149,7 @@ public class RaidController {
             helpLevel = HelpLevel.NO_HELP;
         }
 
-        if (isCorrect) {
-            // Damage to Dungeon
-            double multiplier = 1.0;
-            if (helpLevel == HelpLevel.NO_HELP)
-                multiplier = 3.0; // Text input
-            else if (helpLevel == HelpLevel.TWO_CHOICES)
-                multiplier = 0.5;
-
-            int damage = (int) (user.getAttack() * multiplier);
-            dungeonHp = Math.max(0, dungeonHp - damage);
-        } else {
-            // Damage to Player
-            int dungeonAtk = (int) (25 * (1 + dungeon.getDamageBoost() / 100.0));
-            userHp = Math.max(0, userHp - dungeonAtk);
-        }
-
-        session.setAttribute("raid_dungeon_current_hp", dungeonHp);
-        session.setAttribute("raid_user_current_hp", userHp);
+        TurnResult result = raidService.processRaidTurn(user, isCorrect, helpLevel, session);
 
         // Prepare Context
         JakartaServletWebApplication application = JakartaServletWebApplication.buildApplication(servletContext);
@@ -207,13 +157,12 @@ public class RaidController {
         WebContext context = new WebContext(exchange, locale);
 
         // Update User Object for View (HP)
-        user.setCurrentHp(userHp);
-        userRepository.save(user);
         context.setVariable("user", user);
 
         // Update Dungeon HP Bar (reusing boss_hp_bar but with dungeon stats)
         context.setVariable("bossName", dungeon.getName());
-        context.setVariable("bossHp", dungeonHp);
+        context.setVariable("bossHp", result.bossHp); // bossHp in result holds dungeonHp
+        int dungeonMaxHp = (int) session.getAttribute("raid_dungeon_max_hp");
         context.setVariable("bossMaxHp", dungeonMaxHp);
         context.setVariable("bossAtk", (int) (25 * (1 + dungeon.getDamageBoost() / 100.0)));
         context.setVariable("bossImage", "/images/shop/theme_" + dungeon.getCosmeticTheme() + ".png"); // Construct path
@@ -251,13 +200,13 @@ public class RaidController {
             jsonResponse.put("resultHtml", resultHtml);
         }
 
-        // Check End Conditions
-        if (dungeonHp <= 0) {
-            handleVictory(user, dungeon, session);
+        // Check end conditions
+        if (result.status == CombatResult.VICTOIRE) {
+            raidService.handleRaidVictory(user, dungeon, session);
             jsonResponse.put("status", "VICTORY");
             jsonResponse.put("redirectUrl", "/raid/victory");
-        } else if (userHp <= 0) {
-            handleDefeat(user, dungeon, session);
+        } else if (result.status == CombatResult.DEFAITE) {
+            raidService.handleRaidDefeat(user, dungeon, session);
             jsonResponse.put("status", "DEFEAT");
             jsonResponse.put("redirectUrl", "/raid/defeat");
         } else {
@@ -268,7 +217,7 @@ public class RaidController {
 
             if (nextIndex >= questions.size()) {
                 // Out of questions, but Dungeon still alive -> DRAW
-                handleDraw(user, dungeon, session);
+                raidService.handleRaidDraw(user, dungeon, session);
                 jsonResponse.put("status", "DRAW");
                 jsonResponse.put("redirectUrl", "/raid/draw");
             } else {
@@ -305,7 +254,7 @@ public class RaidController {
     @GetMapping("/choices")
     public String getChoices(@RequestParam(defaultValue = "FOUR_CHOICES") HelpLevel helpLevel, HttpSession session,
             Model model) {
-        DungeonQuestion dq = getCurrentQuestion(session);
+        DungeonQuestion dq = raidService.getCurrentRaidQuestion(session);
         if (dq == null)
             return "";
 
@@ -358,87 +307,6 @@ public class RaidController {
         model.addAttribute("goldChange", 0);
         model.addAttribute("xpReward", session.getAttribute("raid_xp_reward"));
         return "raid-result";
-    }
-
-    private DungeonQuestion getCurrentQuestion(HttpSession session) {
-        @SuppressWarnings("unchecked")
-        List<DungeonQuestion> questions = (List<DungeonQuestion>) session.getAttribute("raid_questions");
-        int index = (int) session.getAttribute("raid_current_question_index");
-        if (questions != null && index < questions.size()) {
-            return questions.get(index);
-        }
-        return null;
-    }
-
-    private void handleVictory(User attacker, Dungeon dungeon, HttpSession session) {
-        session.setAttribute("raid_status", "VICTORY");
-        User owner = dungeon.getUser();
-
-        int ownerGold = owner.getGold();
-        int transferAmount = (int) (ownerGold * 0.20);
-
-        owner.setGold(ownerGold - transferAmount);
-        attacker.setGold(attacker.getGold() + transferAmount);
-
-        // Update Stats & Achievements
-        attacker.setDungeonsLooted(attacker.getDungeonsLooted() + 1);
-        attacker.setStolenGold(attacker.getStolenGold() + transferAmount);
-
-        achievementService.checkAndUnlock(attacker, "DUNGEONS_LOOTED", attacker.getDungeonsLooted());
-        achievementService.checkAndUnlock(attacker, "GOLD_COLLECTED", attacker.getStolenGold());
-
-        userRepository.save(owner);
-
-        session.setAttribute("raid_gold_change", transferAmount);
-
-        // Clear opponent
-        attacker.setCurrentOpponentDungeon(null);
-        attacker.setCurrentOpponentDungeonAssignedAt(null);
-
-        // XP Reward (25 XP per question)
-        int xpReward = dungeon.getDungeonQuestions().size() * 25;
-        session.setAttribute("raid_xp_reward", xpReward);
-        userService.addXp(attacker, xpReward);
-    }
-
-    private void handleDefeat(User attacker, Dungeon dungeon, HttpSession session) {
-        session.setAttribute("raid_status", "DEFEAT");
-        User owner = dungeon.getUser();
-
-        int attackerGold = attacker.getGold();
-        int lostAmount = (int) (attackerGold * 0.50);
-        int gainAmount = (int) (attackerGold * 0.10); // Owner gets 10% of original, not 10% of lost
-
-        attacker.setGold(attackerGold - lostAmount);
-        owner.setGold(owner.getGold() + gainAmount);
-
-        userRepository.save(attacker);
-        userRepository.save(owner);
-
-        session.setAttribute("raid_gold_change", -lostAmount);
-
-        // Restore HP to max
-        attacker.setCurrentHp(attacker.getMaxHp());
-
-        // Clear opponent
-        attacker.setCurrentOpponentDungeon(null);
-        attacker.setCurrentOpponentDungeonAssignedAt(null);
-
-        userRepository.save(attacker);
-        userRepository.save(owner);
-    }
-
-    private void handleDraw(User attacker, Dungeon dungeon, HttpSession session) {
-        session.setAttribute("raid_status", "DRAW");
-
-        // Clear opponent
-        attacker.setCurrentOpponentDungeon(null);
-        attacker.setCurrentOpponentDungeonAssignedAt(null);
-
-        // XP Reward (10 XP per question)
-        int xpReward = dungeon.getDungeonQuestions().size() * 10;
-        session.setAttribute("raid_xp_reward", xpReward);
-        userService.addXp(attacker, xpReward);
     }
 
 }
