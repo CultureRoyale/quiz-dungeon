@@ -1,37 +1,44 @@
 package com.cultureroyale.quizdungeon.controller;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.thymeleaf.context.WebContext;
+import org.thymeleaf.spring6.SpringTemplateEngine;
+import org.thymeleaf.web.IWebExchange;
+import org.thymeleaf.web.servlet.JakartaServletWebApplication;
+
 import com.cultureroyale.quizdungeon.model.Boss;
-import com.cultureroyale.quizdungeon.model.User;
 import com.cultureroyale.quizdungeon.model.Question;
+import com.cultureroyale.quizdungeon.model.User;
 import com.cultureroyale.quizdungeon.model.dto.Choice;
+import com.cultureroyale.quizdungeon.model.dto.TurnResult;
 import com.cultureroyale.quizdungeon.model.enums.HelpLevel;
 import com.cultureroyale.quizdungeon.repository.BossRepository;
 import com.cultureroyale.quizdungeon.repository.UserRepository;
 import com.cultureroyale.quizdungeon.service.CombatService;
-import com.cultureroyale.quizdungeon.model.dto.TurnResult;
-import jakarta.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.Collections;
+import com.cultureroyale.quizdungeon.service.QuestionService;
 
-import org.springframework.http.ResponseEntity;
-import org.thymeleaf.spring6.SpringTemplateEngine;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.thymeleaf.web.servlet.JakartaServletWebApplication;
-import org.thymeleaf.web.IWebExchange;
-import org.thymeleaf.context.WebContext;
-import com.cultureroyale.quizdungeon.service.QuestionService;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/combat")
@@ -131,7 +138,7 @@ public class CombatController {
         String username = authentication.getName();
         User user = userRepository.findByUsername(username).orElseThrow();
 
-        boolean isCorrect = false;
+        boolean isCorrect;
         Long submittedId = choiceId;
 
         // Retrieve choices from session to display result
@@ -193,7 +200,7 @@ public class CombatController {
         jsonResponse.put("userHpBarHtml", userHpBarHtml);
 
         // Render Result Feedback
-        if (answer != null && !answer.trim().isEmpty()) {
+        if (answer != null && !answer.trim().isEmpty() && currentQuestion != null) {
             context.setVariable("userAnswer", answer);
             context.setVariable("correctAnswer", currentQuestion.getCorrectAnswer());
             context.setVariable("correct", isCorrect);
@@ -212,19 +219,19 @@ public class CombatController {
         }
 
         switch (result.status) {
-            case VICTOIRE:
+            case VICTOIRE -> {
                 session.setAttribute("combat_status", "VICTORY");
                 combatService.handleVictory(user, boss);
                 jsonResponse.put("status", "VICTORY");
                 jsonResponse.put("redirectUrl", "/combat/victory");
-                break;
-            case DEFAITE:
+            }
+            case DEFAITE -> {
                 session.setAttribute("combat_status", "DEFEAT");
                 combatService.handleDefeat(user, boss);
                 jsonResponse.put("status", "DEFEAT");
                 jsonResponse.put("redirectUrl", "/combat/defeat");
-                break;
-            default:
+            }
+            default -> {
                 jsonResponse.put("status", "ONGOING");
                 // Render Next Question
                 Question nextQuestion = combatService.getCurrentQuestion(session);
@@ -249,7 +256,7 @@ public class CombatController {
                             Set.of("choices"), context);
                     jsonResponse.put("nextQuestionHtml", nextQuestionHtml);
                 }
-                break;
+            }
         }
 
         return ResponseEntity.ok(jsonResponse);

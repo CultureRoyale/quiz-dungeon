@@ -139,7 +139,7 @@ public class RaidController {
         User user = userRepository.findByUsername(username).orElseThrow();
         user.setAttack(10); // Base attack to 10
 
-        boolean isCorrect = false;
+        boolean isCorrect;
         Long submittedId = choiceId;
 
         // Retrieve choices for feedback
@@ -188,7 +188,7 @@ public class RaidController {
         jsonResponse.put("userHpBarHtml", userHpBarHtml);
 
         // Result Feedback
-        if (answer != null && !answer.trim().isEmpty()) {
+        if (answer != null && !answer.trim().isEmpty() && currentDQ != null) {
             context.setVariable("userAnswer", answer);
             context.setVariable("correctAnswer", currentDQ.getQuestion().getCorrectAnswer());
             context.setVariable("correct", isCorrect);
@@ -214,22 +214,22 @@ public class RaidController {
 
         // Check end conditions
         switch (result.status) {
-            case VICTOIRE:
+            case VICTOIRE -> {
                 raidService.handleRaidVictory(user, dungeon, session);
                 jsonResponse.put("status", "VICTORY");
                 jsonResponse.put("redirectUrl", "/raid/victory");
-                break;
-            case DEFAITE:
+            }
+            case DEFAITE -> {
                 raidService.handleRaidDefeat(user, dungeon, session);
                 jsonResponse.put("status", "DEFEAT");
                 jsonResponse.put("redirectUrl", "/raid/defeat");
-                break;
-            default:
+            }
+            default -> {
                 // Next Question
                 int nextIndex = (int) session.getAttribute("raid_current_question_index") + 1;
                 @SuppressWarnings("unchecked")
-                List<DungeonQuestion> questions = (List<DungeonQuestion>) session.getAttribute("raid_questions");
-
+                        List<DungeonQuestion> questions = (List<DungeonQuestion>) session.getAttribute("raid_questions");
+                
                 if (nextIndex >= questions.size()) {
                     // Out of questions, but Dungeon still alive -> DRAW
                     raidService.handleRaidDraw(user, dungeon, session);
@@ -261,7 +261,7 @@ public class RaidController {
                     jsonResponse.put("nextQuestionHtml", nextQuestionHtml);
                     jsonResponse.put("status", "ONGOING");
                 }
-                break;
+            }
         }
 
         return ResponseEntity.ok(jsonResponse);

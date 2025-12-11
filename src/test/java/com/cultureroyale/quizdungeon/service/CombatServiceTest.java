@@ -1,30 +1,33 @@
 package com.cultureroyale.quizdungeon.service;
 
-import com.cultureroyale.quizdungeon.model.Boss;
-import com.cultureroyale.quizdungeon.model.Question;
-import com.cultureroyale.quizdungeon.model.User;
-import com.cultureroyale.quizdungeon.model.enums.Category;
-import com.cultureroyale.quizdungeon.model.enums.Difficulty;
-import com.cultureroyale.quizdungeon.model.enums.HelpLevel;
-import com.cultureroyale.quizdungeon.repository.QuestionRepository;
-import com.cultureroyale.quizdungeon.repository.UserRepository;
-import com.cultureroyale.quizdungeon.model.dto.TurnResult;
-import com.cultureroyale.quizdungeon.model.enums.CombatResult;
-import jakarta.servlet.http.HttpSession;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.MockitoAnnotations;
+
+import com.cultureroyale.quizdungeon.model.Boss;
+import com.cultureroyale.quizdungeon.model.Question;
+import com.cultureroyale.quizdungeon.model.User;
+import com.cultureroyale.quizdungeon.model.dto.TurnResult;
+import com.cultureroyale.quizdungeon.model.enums.Category;
+import com.cultureroyale.quizdungeon.model.enums.CombatResult;
+import com.cultureroyale.quizdungeon.model.enums.Difficulty;
+import com.cultureroyale.quizdungeon.model.enums.HelpLevel;
+import com.cultureroyale.quizdungeon.repository.QuestionRepository;
+import com.cultureroyale.quizdungeon.repository.UserRepository;
+
+import jakarta.servlet.http.HttpSession;
 
 class CombatServiceTest {
 

@@ -1,23 +1,23 @@
 package com.cultureroyale.quizdungeon.service;
 
-import com.cultureroyale.quizdungeon.model.Boss;
-import com.cultureroyale.quizdungeon.model.User;
-import com.cultureroyale.quizdungeon.model.enums.HelpLevel;
-import com.cultureroyale.quizdungeon.repository.UserRepository;
-import jakarta.servlet.http.HttpSession;
-import com.cultureroyale.quizdungeon.model.Combat;
-import com.cultureroyale.quizdungeon.model.Question;
-import com.cultureroyale.quizdungeon.repository.CombatRepository;
-import com.cultureroyale.quizdungeon.model.dto.TurnResult;
-import com.cultureroyale.quizdungeon.model.enums.CombatResult;
-
 import java.util.ArrayList;
-
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.cultureroyale.quizdungeon.model.Boss;
+import com.cultureroyale.quizdungeon.model.Combat;
+import com.cultureroyale.quizdungeon.model.Question;
+import com.cultureroyale.quizdungeon.model.User;
+import com.cultureroyale.quizdungeon.model.dto.TurnResult;
+import com.cultureroyale.quizdungeon.model.enums.CombatResult;
+import com.cultureroyale.quizdungeon.model.enums.HelpLevel;
+import com.cultureroyale.quizdungeon.repository.CombatRepository;
+import com.cultureroyale.quizdungeon.repository.UserRepository;
+
+import jakarta.servlet.http.HttpSession;
 
 @Service
 public class CombatService {
@@ -79,18 +79,11 @@ public class CombatService {
     }
 
     public int calculateUserBaseAttack(Boss boss) {
-        double difficultyMultiplier = 1.0;
-        switch (boss.getDifficulty()) {
-            case FACILE:
-                difficultyMultiplier = 2.0;
-                break;
-            case MOYEN:
-                difficultyMultiplier = 1.0;
-                break;
-            case DIFFICILE:
-                difficultyMultiplier = 0.5;
-                break;
-        }
+        double difficultyMultiplier = switch (boss.getDifficulty()) {
+            case FACILE -> 2.0;
+            case MOYEN -> 1.0;
+            case DIFFICILE -> 0.5;
+        };
         return (int) ((boss.getMaxHp() / 20.0) * difficultyMultiplier);
     }
 
